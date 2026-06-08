@@ -1,0 +1,52 @@
+name: Publish
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Build & Publish to npm
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write   # push release commit + git tag
+      issues: write     # comment on related issues
+      pull-requests: write  # comment on related PRs
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # semantic-release needs full git history
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # Node is needed only so npm's auth config works for publishing
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Test
+        run: bun run test
+
+      - name: Build
+        run: bun run build
+
+      - name: Release
+        run: bun run release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

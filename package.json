@@ -1,0 +1,114 @@
+{
+  "name": "mui-schema-form-builder",
+  "version": "1.0.0",
+  "description": "Schema-driven, type-safe form builder for MUI + React Hook Form + Zod",
+  "author": "Arjun Prakash <apkarjundeveloper@gmail.com>",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "react",
+    "form",
+    "form-builder",
+    "schema",
+    "schema-driven",
+    "mui",
+    "material-ui",
+    "react-hook-form",
+    "zod",
+    "typescript",
+    "validation",
+    "autocomplete",
+    "conditional-fields"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/APK-Arjun-Developer/MUISchemaFormBuilder"
+  },
+  "bugs": {
+    "url": "https://github.com/APK-Arjun-Developer/MUISchemaFormBuilder/issues"
+  },
+  "homepage": "https://github.com/APK-Arjun-Developer/MUISchemaFormBuilder#readme",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "vite --port=3000 --host=0.0.0.0",
+    "build": "tsup",
+    "build:example": "vite build",
+    "watch": "tsup --watch",
+    "clean": "rimraf dist",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "preview": "vite preview",
+    "release": "semantic-release"
+  },
+  "peerDependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@hookform/resolvers": "^3.0.0 || ^5.0.0",
+    "@mui/material": "^5.14.0 || ^6.0.0 || ^9.0.0",
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0",
+    "react-hook-form": "^7.0.0",
+    "react-window": "^1.8.0",
+    "zod": "^3.0.0 || ^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react-window": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@hookform/resolvers": "^5.2.2",
+    "@mui/material": "^9.0.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.1",
+    "@types/react-window": "^1.8.8",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "@vitejs/plugin-react": "^5.0.4",
+    "@vitest/coverage-v8": "^4.1.8",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "jsdom": "^26.1.0",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1",
+    "react-hook-form": "^7.75.0",
+    "react-window": "^1.8.10",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "rimraf": "^6.0.1",
+    "semantic-release": "^24.2.0",
+    "tsup": "^8.4.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.3",
+    "vitest": "^4.1.8",
+    "zod": "^4.4.3"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  }
+}

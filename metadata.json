@@ -1,0 +1,6 @@
+{
+  "name": "MUI Schema Form Builder",
+  "description": "A production-ready, schema-driven form system built with React, Material UI, React Hook Form, and Zod validation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
