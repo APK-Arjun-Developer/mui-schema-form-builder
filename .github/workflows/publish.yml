@@ -14,17 +14,16 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write   # push release commit + git tag
-      issues: write     # comment on related issues
-      pull-requests: write  # comment on related PRs
+      contents: write
+      issues: write
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # semantic-release needs full git history
-
-      - name: Fetch all remote branches
-        run: git fetch --all --tags
+          fetch-depth: 0
+          # Let semantic-release manage its own git auth via GITHUB_TOKEN
+          persist-credentials: false
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -49,7 +48,13 @@ jobs:
         run: bun run build
 
       - name: Release
-        run: bun run release
+        # Pass repository-url explicitly so semantic-release uses the correct
+        # repo regardless of what package.json says
+        run: bun run release -- --repository-url ${{ github.server_url }}/${{ github.repository }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GIT_AUTHOR_NAME: "github-actions[bot]"
+          GIT_AUTHOR_EMAIL: "github-actions[bot]@users.noreply.github.com"
+          GIT_COMMITTER_NAME: "github-actions[bot]"
+          GIT_COMMITTER_EMAIL: "github-actions[bot]@users.noreply.github.com"

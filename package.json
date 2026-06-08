@@ -35,12 +35,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/APK-Arjun-Developer/MUISchemaFormBuilder"
+    "url": "https://github.com/APK-Arjun-Developer/mui-schema-form-builder"
   },
   "bugs": {
-    "url": "https://github.com/APK-Arjun-Developer/MUISchemaFormBuilder/issues"
+    "url": "https://github.com/APK-Arjun-Developer/mui-schema-form-builder/issues"
   },
-  "homepage": "https://github.com/APK-Arjun-Developer/MUISchemaFormBuilder#readme",
+  "homepage": "https://github.com/APK-Arjun-Developer/mui-schema-form-builder#readme",
   "engines": {
     "node": ">=20.0.0"
   },
