@@ -23,6 +23,9 @@ jobs:
         with:
           fetch-depth: 0  # semantic-release needs full git history
 
+      - name: Fetch all remote branches
+        run: git fetch --all --tags
+
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
