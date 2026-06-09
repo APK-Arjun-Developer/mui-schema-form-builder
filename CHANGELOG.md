@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.0.0...v1.0.1) (2026-06-09)
+
+
+### Bug Fixes
+
+* add prettier formatting config and enforce format checks in CI ([59ddb57](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/commit/59ddb5715bec9b9640c594e26727edeae9af5740))
+
 # 1.0.0 (2026-06-09)
 
 
