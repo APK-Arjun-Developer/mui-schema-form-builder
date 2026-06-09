@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { z } from 'zod';
-import { Container, Typography, Box, Card, CardContent, Paper } from '@mui/material';
+import { Typography, Box, Card, CardContent, Paper } from '@mui/material';
 import { FormBuilder } from '../components/form-builder/FormBuilder';
 import {
   FIELD_TYPE,
@@ -65,7 +65,7 @@ export const ExampleForm = () => {
         label: 'Full Name',
         type: FIELD_TYPE.TEXT,
         required: true,
-        grid: { xs: 12, sm: 8 },
+        grid: { xs: 12, sm: 6 },
         placeholder: 'Enter your full name',
       },
       {
@@ -73,7 +73,7 @@ export const ExampleForm = () => {
         label: 'Age',
         type: FIELD_TYPE.NUMBER,
         required: true,
-        grid: { xs: 12, sm: 4 },
+        grid: { xs: 12, sm: 6 },
         defaultValue: 25,
         min: 18,
         max: 100,
@@ -197,25 +197,7 @@ export const ExampleForm = () => {
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 8 }}>
-      <Box sx={{ mb: 4, textAlign: 'center' }}>
-        <Typography
-          variant="h3"
-          gutterBottom
-          sx={{
-            fontWeight: 800,
-            background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}
-        >
-          User Profile Setup
-        </Typography>
-        <Typography variant="h6" color="text.secondary">
-          Configure your professional identity with ease
-        </Typography>
-      </Box>
-
+    <Box>
       <Card sx={{ borderRadius: 4, boxShadow: '0 8px 32px rgba(0,0,0,0.08)', overflow: 'visible' }}>
         <CardContent sx={{ p: 4 }}>
           <FormBuilder
@@ -243,6 +225,6 @@ export const ExampleForm = () => {
           </Paper>
         </Box>
       )}
-    </Container>
+    </Box>
   );
 };
