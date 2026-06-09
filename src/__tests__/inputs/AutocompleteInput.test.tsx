@@ -61,7 +61,12 @@ describe('AutocompleteInput — async fetchOptions', () => {
       const { control } = useForm<any>({ defaultValues: { skill: null } });
       return (
         <AutocompleteInput
-          fieldConfig={{ name: 'skill', label: 'Skill', type: FIELD_TYPE.AUTOCOMPLETE, fetchOptions }}
+          fieldConfig={{
+            name: 'skill',
+            label: 'Skill',
+            type: FIELD_TYPE.AUTOCOMPLETE,
+            fetchOptions,
+          }}
           control={control}
         />
       );
@@ -73,9 +78,12 @@ describe('AutocompleteInput — async fetchOptions', () => {
     await user.type(screen.getByRole('combobox'), 'React');
 
     // Debounce fires after 300ms — waitFor polls until fetchOptions is called.
-    await waitFor(() => {
-      expect(fetchOptions).toHaveBeenCalled();
-    }, { timeout: 2000 });
+    await waitFor(
+      () => {
+        expect(fetchOptions).toHaveBeenCalled();
+      },
+      { timeout: 2000 },
+    );
 
     // Called with the typed value
     expect(fetchOptions).toHaveBeenCalledWith(expect.any(String));
@@ -89,7 +97,12 @@ describe('AutocompleteInput — async fetchOptions', () => {
       const { control } = useForm<any>({ defaultValues: { skill: null } });
       return (
         <AutocompleteInput
-          fieldConfig={{ name: 'skill', label: 'Skill', type: FIELD_TYPE.AUTOCOMPLETE, fetchOptions }}
+          fieldConfig={{
+            name: 'skill',
+            label: 'Skill',
+            type: FIELD_TYPE.AUTOCOMPLETE,
+            fetchOptions,
+          }}
           control={control}
         />
       );

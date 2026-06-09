@@ -16,7 +16,10 @@ interface FormFieldProps {
 
 // Registry maps field type strings to their render components.
 // Defined outside the component — a stable module-level constant.
-const fieldRegistry: Record<string, React.ComponentType<{ fieldConfig: FieldConfig; control: Control }>> = {
+const fieldRegistry: Record<
+  string,
+  React.ComponentType<{ fieldConfig: FieldConfig; control: Control }>
+> = {
   [FIELD_TYPE.TEXT]: TextInput,
   [FIELD_TYPE.NUMBER]: NumberInput,
   [FIELD_TYPE.SELECT]: SelectInput,

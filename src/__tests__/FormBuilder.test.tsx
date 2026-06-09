@@ -30,14 +30,7 @@ const fields: FieldConfig[] = [
 ];
 
 function Builder(props: Partial<React.ComponentProps<typeof FormBuilder>>) {
-  return (
-    <FormBuilder
-      fields={fields}
-      schema={schema}
-      onSubmit={vi.fn()}
-      {...props}
-    />
-  );
+  return <FormBuilder fields={fields} schema={schema} onSubmit={vi.fn()} {...props} />;
 }
 
 describe('FormBuilder — rendering', () => {
@@ -125,9 +118,7 @@ describe('FormBuilder — submission', () => {
   it('shows Zod field validation error on blur', async () => {
     const user = userEvent.setup();
 
-    renderWithTheme(
-      <FormBuilder fields={simpleFields} schema={simpleSchema} onSubmit={vi.fn()} />,
-    );
+    renderWithTheme(<FormBuilder fields={simpleFields} schema={simpleSchema} onSubmit={vi.fn()} />);
 
     await user.type(screen.getByRole('textbox'), 'A');
     await user.tab();
@@ -181,7 +172,10 @@ describe('FormBuilder — virtualize', () => {
     // Spy on the dynamic import and make it reject to simulate react-window not installed.
     // Using import.meta is not available in CJS test env, so we patch via spyOn on the
     // module's internal import mechanism via a rejected dynamic import simulation.
-    const importSpy = vi.spyOn(await import('../components/form-builder/FormBuilder'), 'FormBuilder');
+    const importSpy = vi.spyOn(
+      await import('../components/form-builder/FormBuilder'),
+      'FormBuilder',
+    );
 
     // Since FormBuilder loads react-window via dynamic import inside useEffect,
     // render it without react-window available — it should fall back gracefully.

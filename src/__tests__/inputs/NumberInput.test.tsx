@@ -15,7 +15,13 @@ describe('NumberInput', () => {
       const { control } = useForm<any>({ defaultValues: { qty: '' } });
       return (
         <NumberInput
-          fieldConfig={{ name: 'qty', label: 'Quantity', type: FIELD_TYPE.NUMBER, min: 1, max: 100 }}
+          fieldConfig={{
+            name: 'qty',
+            label: 'Quantity',
+            type: FIELD_TYPE.NUMBER,
+            min: 1,
+            max: 100,
+          }}
           control={control}
         />
       );

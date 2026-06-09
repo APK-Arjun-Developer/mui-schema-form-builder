@@ -29,7 +29,12 @@ describe('TextInput', () => {
       const { control } = useForm<any>({ defaultValues: { email: '' } });
       return (
         <TextInput
-          fieldConfig={{ name: 'email', label: 'Email', type: FIELD_TYPE.TEXT, placeholder: 'you@example.com' }}
+          fieldConfig={{
+            name: 'email',
+            label: 'Email',
+            type: FIELD_TYPE.TEXT,
+            placeholder: 'you@example.com',
+          }}
           control={control}
         />
       );
