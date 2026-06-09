@@ -40,7 +40,7 @@
   "bugs": {
     "url": "https://github.com/APK-Arjun-Developer/mui-schema-form-builder/issues"
   },
-  "homepage": "https://github.com/APK-Arjun-Developer/mui-schema-form-builder#readme",
+  "homepage": "https://apk-arjun-developer.github.io/mui-schema-form-builder",
   "engines": {
     "node": ">=20.0.0"
   },
