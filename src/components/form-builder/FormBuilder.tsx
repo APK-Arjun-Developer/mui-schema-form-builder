@@ -35,15 +35,7 @@ interface VirtualRowData {
 }
 
 const VirtualRow = React.memo(
-  ({
-    index,
-    style,
-    data,
-  }: {
-    index: number;
-    style: React.CSSProperties;
-    data: VirtualRowData;
-  }) => (
+  ({ index, style, data }: { index: number; style: React.CSSProperties; data: VirtualRowData }) => (
     <div style={style}>
       <FormField fieldConfig={data.fields[index]} control={data.control} />
     </div>
@@ -114,7 +106,7 @@ export const FormBuilder = <TSchema extends import('zod').ZodType>({
     <FormProvider {...(methods as any)}>
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       <form onSubmit={handleSubmit(onSubmit as any)} noValidate>
-        <Paper elevation={0} sx={{ p: 0, bgcolor: 'transparent' }}>
+        <Paper elevation={0} sx={{ p: 0, bgcolor: 'transparent', boxShadow: 'none' }}>
           {virtualize && FixedSizeList ? (
             <FixedSizeList
               height={virtualizeHeight}
@@ -133,7 +125,20 @@ export const FormBuilder = <TSchema extends import('zod').ZodType>({
             </Grid>
           )}
 
-          <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+          <Box
+            sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'flex-end', flexWrap: 'wrap' }}
+          >
+            {onReset && (
+              <Button
+                variant="text"
+                color="secondary"
+                onClick={handleFormReset}
+                disabled={isSubmitting}
+                sx={{ textTransform: 'none', fontWeight: 500 }}
+              >
+                {resetText}
+              </Button>
+            )}
             {onCancel && (
               <Button
                 variant="outlined"
@@ -146,18 +151,6 @@ export const FormBuilder = <TSchema extends import('zod').ZodType>({
               </Button>
             )}
 
-            {onReset && (
-              <Button
-                variant="text"
-                color="secondary"
-                onClick={handleFormReset}
-                disabled={isSubmitting}
-                sx={{ textTransform: 'none', fontWeight: 500 }}
-              >
-                {resetText}
-              </Button>
-            )}
-
             <Button
               type="submit"
               variant="contained"
@@ -166,8 +159,6 @@ export const FormBuilder = <TSchema extends import('zod').ZodType>({
               sx={{
                 px: 4,
                 py: 1,
-                borderRadius: 2,
-                textTransform: 'none',
                 fontWeight: 600,
               }}
             >

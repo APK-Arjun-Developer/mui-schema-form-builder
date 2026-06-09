@@ -2,7 +2,11 @@ import { useCallback, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
-import { FIELD_TYPE, type FieldConfig, type FormBuilderProps } from '../components/form-builder/types/field.types';
+import {
+  FIELD_TYPE,
+  type FieldConfig,
+  type FormBuilderProps,
+} from '../components/form-builder/types/field.types';
 
 /** Public options type for useFormBuilder — deliberately named for the public API. */
 export type UseFormBuilderOptions<TSchema extends z.ZodType> = Pick<

@@ -64,12 +64,10 @@ describe('FormField — render count performance', () => {
     const user = userEvent.setup();
     let renderCount = 0;
 
-    const TrackedField = React.memo(
-      (props: { fieldConfig: FieldConfig; control: Control }) => {
-        renderCount++;
-        return <FormField {...props} />;
-      },
-    );
+    const TrackedField = React.memo((props: { fieldConfig: FieldConfig; control: Control }) => {
+      renderCount++;
+      return <FormField {...props} />;
+    });
 
     function TwoFieldForm() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

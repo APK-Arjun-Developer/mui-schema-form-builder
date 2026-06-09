@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import {
-  Autocomplete,
-  TextField,
-  CircularProgress,
-  Checkbox,
-  Box,
-} from '@mui/material';
+import { Autocomplete, TextField, CircularProgress, Checkbox, Box } from '@mui/material';
 import { useController, type Control } from 'react-hook-form';
 import type { FieldConfig, Option } from '../types/field.types';
 import { debounce } from '../utils/debounce';
@@ -47,11 +41,7 @@ export const AutocompleteInput = React.memo(({ fieldConfig, control }: InputProp
   const debouncedFetch = useMemo(
     () =>
       debounce(
-        async (
-          searchValue: string,
-          onResults: (results: Option[]) => void,
-          onDone: () => void,
-        ) => {
+        async (searchValue: string, onResults: (results: Option[]) => void, onDone: () => void) => {
           if (!fetchOptions) return;
           try {
             const results = await fetchOptions(searchValue);
@@ -77,8 +67,12 @@ export const AutocompleteInput = React.memo(({ fieldConfig, control }: InputProp
     setLoading(true);
     debouncedFetch(
       inputValue,
-      (results) => { if (!cancelled) setOptions(results); },
-      () => { if (!cancelled) setLoading(false); },
+      (results) => {
+        if (!cancelled) setOptions(results);
+      },
+      () => {
+        if (!cancelled) setLoading(false);
+      },
     );
     return () => {
       cancelled = true;
@@ -122,9 +116,7 @@ export const AutocompleteInput = React.memo(({ fieldConfig, control }: InputProp
         getOptionLabel={(option: Option | string) =>
           typeof option === 'string' ? option : (option.label ?? '')
         }
-        isOptionEqualToValue={(option: Option, value: Option) =>
-          option.value === value.value
-        }
+        isOptionEqualToValue={(option: Option, value: Option) => option.value === value.value}
         onChange={(_event, newValue) => field.onChange(newValue)}
         onInputChange={(_event, newInputValue) => setInputValue(newInputValue)}
         renderOption={(props, option: Option, { selected }) => {

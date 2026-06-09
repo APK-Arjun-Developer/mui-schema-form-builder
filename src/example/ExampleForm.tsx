@@ -1,15 +1,12 @@
 import { useMemo, useState } from 'react';
 import { z } from 'zod';
-import {
-  Container,
-  Typography,
-  Box,
-  Card,
-  CardContent,
-  Paper,
-} from '@mui/material';
+import { Container, Typography, Box, Card, CardContent, Paper } from '@mui/material';
 import { FormBuilder } from '../components/form-builder/FormBuilder';
-import { FIELD_TYPE, type FieldConfig, type Option } from '../components/form-builder/types/field.types';
+import {
+  FIELD_TYPE,
+  type FieldConfig,
+  type Option,
+} from '../components/form-builder/types/field.types';
 
 const formSchema = z.object({
   fullName: z
@@ -54,9 +51,7 @@ const STATIC_ASYNC_SKILLS: Option[] = [
 
 async function fetchSkills(query: string): Promise<Option[]> {
   await new Promise((resolve) => setTimeout(resolve, 600));
-  return STATIC_ASYNC_SKILLS.filter((s) =>
-    s.label.toLowerCase().includes(query.toLowerCase()),
-  );
+  return STATIC_ASYNC_SKILLS.filter((s) => s.label.toLowerCase().includes(query.toLowerCase()));
 }
 
 export const ExampleForm = () => {

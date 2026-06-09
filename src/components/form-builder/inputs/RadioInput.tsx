@@ -51,11 +51,7 @@ export const RadioInput = React.memo(({ fieldConfig, control }: InputProps) => {
             fontWeight: 600,
             fontSize: '0.875rem',
             mb: 1,
-            color: error
-              ? 'error.main'
-              : fieldConfig.disabled
-                ? 'text.disabled'
-                : 'text.primary',
+            color: error ? 'error.main' : fieldConfig.disabled ? 'text.disabled' : 'text.primary',
             '&.Mui-focused': { color: 'inherit' },
           }}
         >

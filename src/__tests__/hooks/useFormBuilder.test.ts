@@ -87,7 +87,9 @@ describe('useFormBuilder — defaultValues', () => {
       useFormBuilder({
         schema,
         fields: [{ name: 'name', label: 'Name', type: FIELD_TYPE.TEXT }],
-        onReset: () => { called = true; },
+        onReset: () => {
+          called = true;
+        },
       }),
     );
     result.current.handleFormReset();
