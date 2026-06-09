@@ -116,17 +116,17 @@ function FadeInSection({ children, delay = 0 }: { children: ReactNode; delay?: n
 // ─── Syntax tokenizer (VS Code Dark+ palette) ─────────────────────────────────
 
 const TC = {
-  keyword: '#c586c0',  // import, export, from, return, default, async, await
-  decl: '#569cd6',     // const, let, var, function, new, type
-  string: '#ce9178',   // string literals
-  type: '#4ec9b0',     // PascalCase identifiers
-  fn: '#dcdcaa',       // function calls
-  prop: '#9cdcfe',     // property keys (before :)
-  number: '#b5cea8',   // numeric literals
-  bool: '#569cd6',     // true, false, null, undefined
-  comment: '#6a9955',  // // comments
-  plain: '#d4d4d4',    // default text
-  dim: '#6b7280',      // very dim ($ prompt, line numbers)
+  keyword: '#c586c0', // import, export, from, return, default, async, await
+  decl: '#569cd6', // const, let, var, function, new, type
+  string: '#ce9178', // string literals
+  type: '#4ec9b0', // PascalCase identifiers
+  fn: '#dcdcaa', // function calls
+  prop: '#9cdcfe', // property keys (before :)
+  number: '#b5cea8', // numeric literals
+  bool: '#569cd6', // true, false, null, undefined
+  comment: '#6a9955', // // comments
+  plain: '#d4d4d4', // default text
+  dim: '#6b7280', // very dim ($ prompt, line numbers)
 };
 
 type SToken = { text: string; color: string };
@@ -412,7 +412,9 @@ export default function App() {
           {/* Package name */}
           <Typography
             sx={{
-              fontWeight: 800, fontSize: 15, letterSpacing: -0.4,
+              fontWeight: 800,
+              fontSize: 15,
+              letterSpacing: -0.4,
               background: 'linear-gradient(90deg, #60a5fa, #a78bfa)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
@@ -426,7 +428,9 @@ export default function App() {
             label="v1.0.1"
             size="small"
             sx={{
-              height: 18, fontSize: 10, fontWeight: 700,
+              height: 18,
+              fontSize: 10,
+              fontWeight: 700,
               bgcolor: 'rgba(96,165,250,0.15)',
               color: '#93c5fd',
               border: '1px solid rgba(96,165,250,0.25)',
@@ -450,7 +454,12 @@ export default function App() {
             variant="contained"
             size="small"
             disableElevation
-            sx={{ bgcolor: '#2563eb', '&:hover': { bgcolor: '#1d4ed8' }, borderRadius: 2, fontWeight: 700 }}
+            sx={{
+              bgcolor: '#2563eb',
+              '&:hover': { bgcolor: '#1d4ed8' },
+              borderRadius: 2,
+              fontWeight: 700,
+            }}
           >
             npm
           </Button>
@@ -471,9 +480,30 @@ export default function App() {
         }}
       >
         {[
-          { w: { xs: 300, md: 550 }, h: { xs: 300, md: 550 }, bg: 'rgba(37,99,235,0.28)', top: '-15%', left: '-8%', anim: 'float1 11s ease-in-out infinite' },
-          { w: { xs: 250, md: 450 }, h: { xs: 250, md: 450 }, bg: 'rgba(124,58,237,0.22)', bottom: '-12%', right: '-5%', anim: 'float2 14s ease-in-out infinite' },
-          { w: 200, h: 200, bg: 'rgba(6,182,212,0.15)', top: '40%', left: '60%', anim: 'float1 9s ease-in-out infinite reverse' },
+          {
+            w: { xs: 300, md: 550 },
+            h: { xs: 300, md: 550 },
+            bg: 'rgba(37,99,235,0.28)',
+            top: '-15%',
+            left: '-8%',
+            anim: 'float1 11s ease-in-out infinite',
+          },
+          {
+            w: { xs: 250, md: 450 },
+            h: { xs: 250, md: 450 },
+            bg: 'rgba(124,58,237,0.22)',
+            bottom: '-12%',
+            right: '-5%',
+            anim: 'float2 14s ease-in-out infinite',
+          },
+          {
+            w: 200,
+            h: 200,
+            bg: 'rgba(6,182,212,0.15)',
+            top: '40%',
+            left: '60%',
+            anim: 'float1 9s ease-in-out infinite reverse',
+          },
         ].map((orb, i) => (
           <Box
             key={i}
@@ -495,11 +525,31 @@ export default function App() {
         ))}
 
         <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
-          <Stack direction="row" spacing={1} sx={{ justifyContent: 'center', flexWrap: 'wrap', gap: 1, mb: 4 }}>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ justifyContent: 'center', flexWrap: 'wrap', gap: 1, mb: 4 }}
+          >
             {[
-              { label: 'MIT License', bg: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.9)', border: 'rgba(255,255,255,0.12)' },
-              { label: 'v1.0.1', bg: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.9)', border: 'rgba(255,255,255,0.12)', anim: true },
-              { label: 'TypeScript', bg: 'rgba(49,120,198,0.3)', color: '#93c5fd', border: 'rgba(49,120,198,0.4)' },
+              {
+                label: 'MIT License',
+                bg: 'rgba(255,255,255,0.08)',
+                color: 'rgba(255,255,255,0.9)',
+                border: 'rgba(255,255,255,0.12)',
+              },
+              {
+                label: 'v1.0.1',
+                bg: 'rgba(255,255,255,0.08)',
+                color: 'rgba(255,255,255,0.9)',
+                border: 'rgba(255,255,255,0.12)',
+                anim: true,
+              },
+              {
+                label: 'TypeScript',
+                bg: 'rgba(49,120,198,0.3)',
+                color: '#93c5fd',
+                border: 'rgba(49,120,198,0.4)',
+              },
             ].map((chip) => (
               <Chip
                 key={chip.label}
@@ -510,7 +560,7 @@ export default function App() {
                   color: chip.color,
                   fontWeight: 700,
                   border: `1px solid ${chip.border}`,
-                  
+
                   ...(chip.anim ? { animation: 'pulse 3s ease infinite' } : {}),
                   '& span': {
                     height: 24,
@@ -552,11 +602,17 @@ export default function App() {
             }}
           >
             Schema-driven, type-safe form builder for{' '}
-            <Box component="span" sx={{ color: '#60a5fa', fontWeight: 700 }}>MUI</Box>
+            <Box component="span" sx={{ color: '#60a5fa', fontWeight: 700 }}>
+              MUI
+            </Box>
             {' + '}
-            <Box component="span" sx={{ color: '#f472b6', fontWeight: 700 }}>React Hook Form</Box>
+            <Box component="span" sx={{ color: '#f472b6', fontWeight: 700 }}>
+              React Hook Form
+            </Box>
             {' + '}
-            <Box component="span" sx={{ color: '#34d399', fontWeight: 700 }}>Zod</Box>
+            <Box component="span" sx={{ color: '#34d399', fontWeight: 700 }}>
+              Zod
+            </Box>
           </Typography>
 
           <Box
@@ -604,7 +660,11 @@ export default function App() {
             </Button>
           </Box>
 
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ justifyContent: 'center', alignItems: 'center' }}>
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={2}
+            sx={{ justifyContent: 'center', alignItems: 'center' }}
+          >
             <Button
               href="https://github.com/APK-Arjun-Developer/mui-schema-form-builder"
               target="_blank"
@@ -640,7 +700,8 @@ export default function App() {
                   left: '-100%',
                   width: '60%',
                   height: '100%',
-                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)',
+                  background:
+                    'linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)',
                   animation: 'shimmer 3.5s ease infinite',
                 },
                 '&:hover': { bgcolor: '#1d4ed8' },
@@ -657,7 +718,12 @@ export default function App() {
         <Container>
           <Stack
             direction="row"
-            sx={{ justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: { xs: 1.5, md: 3 } }}
+            sx={{
+              justifyContent: 'center',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: { xs: 1.5, md: 3 },
+            }}
           >
             <Typography
               sx={{
@@ -700,17 +766,22 @@ export default function App() {
         sx={{
           py: { xs: 10, md: 14 },
           bgcolor: '#f0f4ff',
-          backgroundImage:
-            'radial-gradient(circle, rgba(37,99,235,0.08) 1.5px, transparent 1.5px)',
+          backgroundImage: 'radial-gradient(circle, rgba(37,99,235,0.08) 1.5px, transparent 1.5px)',
           backgroundSize: '28px 28px',
         }}
       >
         <Container>
           <FadeInSection>
-            <Typography variant="h3" sx={{ textAlign: 'center', fontWeight: 800, mb: 1.5, letterSpacing: -1 }}>
+            <Typography
+              variant="h3"
+              sx={{ textAlign: 'center', fontWeight: 800, mb: 1.5, letterSpacing: -1 }}
+            >
               Everything you need
             </Typography>
-            <Typography color="text.secondary" sx={{ textAlign: 'center', mb: 8, maxWidth: 480, mx: 'auto', lineHeight: 1.8 }}>
+            <Typography
+              color="text.secondary"
+              sx={{ textAlign: 'center', mb: 8, maxWidth: 480, mx: 'auto', lineHeight: 1.8 }}
+            >
               Build complex, production-ready forms with a single config array and a Zod schema.
             </Typography>
           </FadeInSection>
@@ -729,7 +800,8 @@ export default function App() {
                       border: '1px solid rgba(0,0,0,0.07)',
                       borderRadius: 3,
                       bgcolor: 'white',
-                      transition: 'transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease',
+                      transition:
+                        'transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease',
                       '&:hover': {
                         transform: 'translateY(-6px)',
                         boxShadow: `0 20px 48px ${f.color}1a`,
@@ -773,7 +845,14 @@ export default function App() {
                         mb: 2.5,
                       }}
                     >
-                      <Typography sx={{ color: f.color, fontWeight: 800, fontSize: 13, fontFamily: 'monospace' }}>
+                      <Typography
+                        sx={{
+                          color: f.color,
+                          fontWeight: 800,
+                          fontSize: 13,
+                          fontFamily: 'monospace',
+                        }}
+                      >
                         {f.num}
                       </Typography>
                     </Box>
@@ -828,15 +907,45 @@ export default function App() {
         </Typography>
 
         {/* Gradient orbs */}
-        <Box sx={{ position: 'absolute', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(37,99,235,0.07) 0%, transparent 70%)', filter: 'blur(60px)', top: '-20%', right: '-5%', pointerEvents: 'none' }} />
-        <Box sx={{ position: 'absolute', width: 350, height: 350, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,0.06) 0%, transparent 70%)', filter: 'blur(50px)', bottom: '-10%', left: '0%', pointerEvents: 'none' }} />
+        <Box
+          sx={{
+            position: 'absolute',
+            width: 500,
+            height: 500,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(37,99,235,0.07) 0%, transparent 70%)',
+            filter: 'blur(60px)',
+            top: '-20%',
+            right: '-5%',
+            pointerEvents: 'none',
+          }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            width: 350,
+            height: 350,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(124,58,237,0.06) 0%, transparent 70%)',
+            filter: 'blur(50px)',
+            bottom: '-10%',
+            left: '0%',
+            pointerEvents: 'none',
+          }}
+        />
 
         <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
           <FadeInSection>
-            <Typography variant="h3" sx={{ textAlign: 'center', fontWeight: 800, mb: 1.5, letterSpacing: -1 }}>
+            <Typography
+              variant="h3"
+              sx={{ textAlign: 'center', fontWeight: 800, mb: 1.5, letterSpacing: -1 }}
+            >
               Quick Start
             </Typography>
-            <Typography color="text.secondary" sx={{ textAlign: 'center', mb: 7, maxWidth: 420, mx: 'auto' }}>
+            <Typography
+              color="text.secondary"
+              sx={{ textAlign: 'center', mb: 7, maxWidth: 420, mx: 'auto' }}
+            >
               Up and running in under a minute.
             </Typography>
           </FadeInSection>
@@ -894,7 +1003,10 @@ export default function App() {
         />
         <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
           <FadeInSection>
-            <Typography variant="h3" sx={{ textAlign: 'center', fontWeight: 800, mb: 1.5, letterSpacing: -1 }}>
+            <Typography
+              variant="h3"
+              sx={{ textAlign: 'center', fontWeight: 800, mb: 1.5, letterSpacing: -1 }}
+            >
               Live Demo
             </Typography>
             <Typography color="text.secondary" sx={{ textAlign: 'center', mb: 6 }}>
@@ -925,7 +1037,11 @@ export default function App() {
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             spacing={3}
-            sx={{ justifyContent: 'space-between', alignItems: { xs: 'center', sm: 'flex-start' }, mb: 5 }}
+            sx={{
+              justifyContent: 'space-between',
+              alignItems: { xs: 'center', sm: 'flex-start' },
+              mb: 5,
+            }}
           >
             <Box sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
               <Typography
@@ -947,7 +1063,11 @@ export default function App() {
                   href="https://github.com/APK-Arjun-Developer"
                   target="_blank"
                   rel="noopener noreferrer"
-                  sx={{ color: '#60a5fa', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+                  sx={{
+                    color: '#60a5fa',
+                    textDecoration: 'none',
+                    '&:hover': { textDecoration: 'underline' },
+                  }}
                 >
                   Arjun Prakash
                 </Box>
@@ -956,10 +1076,19 @@ export default function App() {
 
             <Stack direction="row" spacing={4} sx={{ alignItems: 'center' }}>
               {[
-                { label: 'GitHub', href: 'https://github.com/APK-Arjun-Developer/mui-schema-form-builder' },
+                {
+                  label: 'GitHub',
+                  href: 'https://github.com/APK-Arjun-Developer/mui-schema-form-builder',
+                },
                 { label: 'npm', href: 'https://www.npmjs.com/package/mui-schema-form-builder' },
-                { label: 'Issues', href: 'https://github.com/APK-Arjun-Developer/mui-schema-form-builder/issues' },
-                { label: 'Changelog', href: 'https://github.com/APK-Arjun-Developer/mui-schema-form-builder/blob/main/CHANGELOG.md' },
+                {
+                  label: 'Issues',
+                  href: 'https://github.com/APK-Arjun-Developer/mui-schema-form-builder/issues',
+                },
+                {
+                  label: 'Changelog',
+                  href: 'https://github.com/APK-Arjun-Developer/mui-schema-form-builder/blob/main/CHANGELOG.md',
+                },
               ].map((link) => (
                 <Box
                   key={link.label}
@@ -982,8 +1111,12 @@ export default function App() {
           </Stack>
 
           <Box sx={{ borderTop: '1px solid rgba(255,255,255,0.06)', pt: 4 }}>
-            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.2)', textAlign: 'center' }}>
-              © {new Date().getFullYear()} mui-schema-form-builder · Schema-driven forms for the modern React stack
+            <Typography
+              variant="body2"
+              sx={{ color: 'rgba(255,255,255,0.2)', textAlign: 'center' }}
+            >
+              © {new Date().getFullYear()} mui-schema-form-builder · Schema-driven forms for the
+              modern React stack
             </Typography>
           </Box>
         </Container>
