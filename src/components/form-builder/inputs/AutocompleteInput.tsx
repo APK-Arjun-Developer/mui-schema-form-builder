@@ -139,6 +139,13 @@ export const AutocompleteInput = React.memo(({ fieldConfig, control }: InputProp
             placeholder={fieldConfig.placeholder}
             size={fieldConfig.size ?? 'medium'}
             error={!!error}
+            slotProps={{
+              ...params.slotProps,
+              htmlInput: {
+                ...(params.slotProps?.htmlInput as object),
+                'aria-describedby': errorId,
+              },
+            }}
             helperText={
               error ? (
                 <span id={errorId} role="alert">

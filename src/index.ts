@@ -1,6 +1,8 @@
 // Core components
 export { FormBuilder } from './components/form-builder/FormBuilder';
-export { FormField } from './components/form-builder/FormField';
+export type { FormBuilderHandle } from './components/form-builder/FormBuilder';
+export { FormField, registerFieldType } from './components/form-builder/FormField';
+export type { CustomFieldProps } from './components/form-builder/FormField';
 
 // Individual input components — exported for consumers who compose their own layouts
 export { TextInput } from './components/form-builder/inputs/TextInput';

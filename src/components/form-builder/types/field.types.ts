@@ -1,5 +1,5 @@
 import type { z } from 'zod';
-import type { FieldValues, ValidationMode } from 'react-hook-form';
+import type { FieldValues, ValidationMode, Resolver } from 'react-hook-form';
 
 /**
  * Use FIELD_TYPE (const object) instead of an enum for tree-shaking compatibility
@@ -74,18 +74,28 @@ export interface FieldConfig {
    * Values are typed loosely because MUI component prop shapes vary per field type.
    * Prefer explicit FieldConfig properties where possible.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  muiProps?: Record<string, any>;
+  muiProps?: Record<string, unknown>;
 }
 
 export interface FormBuilderProps<TSchema extends z.ZodType = z.ZodType> {
   fields: FieldConfig[];
-  schema: TSchema;
+  /** Zod schema for validation and type inference. Required unless `resolver` is provided. */
+  schema?: TSchema;
+  /**
+   * A react-hook-form `Resolver` (e.g. yupResolver, valibotResolver) used instead of `schema`.
+   * When provided, `onSubmit` receives plain `FieldValues` — wrap with your own types as needed.
+   * Exactly one of `schema` or `resolver` must be supplied.
+   */
+  resolver?: Resolver;
   /** Receives the fully validated, Zod-inferred data. Type is inferred from schema. */
   onSubmit: (data: z.infer<TSchema>) => void | Promise<void>;
   onCancel?: () => void;
   /** Called after the form is reset to its default values. */
   onReset?: () => void;
+  /** Called on every form value change with the current form values. */
+  onChange?: (values: FieldValues) => void;
+  /** Called when a single field changes, with its name and new value. */
+  onFieldChange?: (name: string, value: unknown) => void;
   submitText?: string;
   cancelText?: string;
   resetText?: string;

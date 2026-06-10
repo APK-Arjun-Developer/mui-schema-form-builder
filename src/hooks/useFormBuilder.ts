@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
@@ -9,9 +9,9 @@ import {
 } from '../components/form-builder/types/field.types';
 
 /** Public options type for useFormBuilder — deliberately named for the public API. */
-export type UseFormBuilderOptions<TSchema extends z.ZodType> = Pick<
+export type UseFormBuilderOptions<TSchema extends z.ZodType = z.ZodType> = Pick<
   FormBuilderProps<TSchema>,
-  'fields' | 'schema' | 'onReset' | 'validationMode'
+  'fields' | 'schema' | 'resolver' | 'onReset' | 'validationMode' | 'onChange' | 'onFieldChange'
 >;
 
 // Set a value at a dot-notation path (e.g. "address.city") inside a nested object.
@@ -48,33 +48,51 @@ function buildDefaultValues(fields: FieldConfig[]): Record<string, unknown> {
   return acc;
 }
 
-export const useFormBuilder = <TSchema extends z.ZodType>({
+export const useFormBuilder = <TSchema extends z.ZodType = z.ZodType>({
   fields,
   schema,
+  resolver,
   onReset,
   validationMode,
+  onChange,
+  onFieldChange,
 }: UseFormBuilderOptions<TSchema>) => {
   const defaultValues = useMemo(() => buildDefaultValues(fields), [fields]);
 
-  // We use zodResolver without the generic form-values type because z.infer<TSchema>
-  // cannot be proved to extend FieldValues at the constraint level. The public onSubmit
-  // callback on FormBuilderProps<TSchema> carries the correct inferred type — the
-  // internal machinery intentionally uses the untyped form to bridge the gap.
+  // Derive the resolver: use the caller-provided resolver if given, otherwise
+  // fall back to zodResolver. Neither being provided is a consumer mistake —
+  // we warn once rather than throw so the form still renders.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const resolvedResolver = resolver ?? (schema ? zodResolver(schema as any) : undefined);
+  if (!resolvedResolver) {
+    console.warn('[mui-schema-form-builder] Either schema or resolver must be provided.');
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const methods = useForm<any>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(schema as any),
+    resolver: resolvedResolver,
     defaultValues: defaultValues as Record<string, unknown>,
     mode: validationMode ?? 'onTouched',
     shouldFocusError: true,
   });
 
-  const { reset } = methods;
+  const { reset, watch } = methods;
 
   const handleFormReset = useCallback(() => {
     reset(defaultValues as Record<string, unknown>);
     onReset?.();
   }, [reset, defaultValues, onReset]);
+
+  useEffect(() => {
+    if (!onChange && !onFieldChange) return;
+    const subscription = watch((values, { name }) => {
+      onChange?.(values);
+      if (name !== undefined) {
+        onFieldChange?.(name, (values as Record<string, unknown>)[name]);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, onChange, onFieldChange]);
 
   return {
     methods,

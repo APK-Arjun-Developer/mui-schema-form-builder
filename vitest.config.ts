@@ -20,6 +20,9 @@ export default defineConfig({
         'src/index.css',
         'src/example/**',
       ],
+      thresholds: {
+        branches: 85,
+      },
     },
   },
   resolve: {

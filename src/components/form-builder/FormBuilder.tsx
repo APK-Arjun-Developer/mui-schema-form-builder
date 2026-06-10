@@ -1,10 +1,22 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import type { Control } from 'react-hook-form';
+import React, { useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import type { Control, FieldValues } from 'react-hook-form';
 import { FormProvider } from 'react-hook-form';
 import { Box, Button, Grid, Paper } from '@mui/material';
 import type { FieldConfig, FormBuilderProps } from './types/field.types';
 import { FormField } from './FormField';
 import { useFormBuilder } from '../../hooks/useFormBuilder';
+
+/** Imperative handle exposed via a ref on FormBuilder. */
+export interface FormBuilderHandle {
+  /** Reset the form to its default values. */
+  reset: () => void;
+  /** Programmatically submit the form, triggering validation and onSubmit. */
+  submit: () => void;
+  /** Manually set a field error. */
+  setError: (name: string, error: { type: string; message: string }) => void;
+  /** Return current form values without triggering validation. */
+  getValues: () => FieldValues;
+}
 
 // ---------------------------------------------------------------------------
 // FixedSizeListType — module-level type alias for the lazily-imported
@@ -46,27 +58,46 @@ VirtualRow.displayName = 'VirtualRow';
 // ---------------------------------------------------------------------------
 // FormBuilder
 // ---------------------------------------------------------------------------
-export const FormBuilder = <TSchema extends import('zod').ZodType>({
-  fields,
-  schema,
-  onSubmit,
-  onCancel,
-  onReset,
-  submitText = 'Submit',
-  cancelText = 'Cancel',
-  resetText = 'Reset',
-  spacing = 2,
-  virtualize = false,
-  virtualizeHeight = 500,
-  virtualizeItemSize = 80,
-  validationMode,
-}: FormBuilderProps<TSchema>) => {
+// forwardRef on a generic component requires a small cast workaround — the inner
+// function preserves the full generic signature while forwardRef erases it.
+const FormBuilderInner = <TSchema extends import('zod').ZodType>(
+  {
+    fields,
+    schema,
+    resolver,
+    onSubmit,
+    onCancel,
+    onReset,
+    onChange,
+    onFieldChange,
+    submitText = 'Submit',
+    cancelText = 'Cancel',
+    resetText = 'Reset',
+    spacing = 2,
+    virtualize = false,
+    virtualizeHeight = 500,
+    virtualizeItemSize = 80,
+    validationMode,
+  }: FormBuilderProps<TSchema>,
+  ref: React.Ref<FormBuilderHandle>,
+) => {
   const { methods, handleFormReset } = useFormBuilder({
     fields,
     schema,
+    resolver,
     onReset,
     validationMode,
+    onChange,
+    onFieldChange,
   });
+
+  useImperativeHandle(ref, () => ({
+    reset: handleFormReset,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    submit: () => void methods.handleSubmit(onSubmit as any)(),
+    setError: (name, error) => methods.setError(name, error),
+    getValues: () => methods.getValues(),
+  }));
 
   const {
     handleSubmit,
@@ -170,3 +201,10 @@ export const FormBuilder = <TSchema extends import('zod').ZodType>({
     </FormProvider>
   );
 };
+
+// Cast preserves the generic type parameter through forwardRef.
+export const FormBuilder = React.forwardRef(FormBuilderInner) as <
+  TSchema extends import('zod').ZodType,
+>(
+  props: FormBuilderProps<TSchema> & { ref?: React.Ref<FormBuilderHandle> },
+) => React.ReactElement | null;

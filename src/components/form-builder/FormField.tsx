@@ -14,12 +14,15 @@ interface FormFieldProps {
   control: Control;
 }
 
+/** Props shape every custom field component must accept. */
+export interface CustomFieldProps {
+  fieldConfig: FieldConfig;
+  control: Control;
+}
+
 // Registry maps field type strings to their render components.
 // Defined outside the component — a stable module-level constant.
-const fieldRegistry: Record<
-  string,
-  React.ComponentType<{ fieldConfig: FieldConfig; control: Control }>
-> = {
+const fieldRegistry: Record<string, React.ComponentType<CustomFieldProps>> = {
   [FIELD_TYPE.TEXT]: TextInput,
   [FIELD_TYPE.NUMBER]: NumberInput,
   [FIELD_TYPE.SELECT]: SelectInput,
@@ -30,6 +33,17 @@ const fieldRegistry: Record<
   [FIELD_TYPE.TEXTAREA]: TextInput,
   [FIELD_TYPE.DATE]: TextInput,
 };
+
+/**
+ * Register a custom field type that FormBuilder will render for the given type string.
+ * Call this once at app startup before rendering any FormBuilder that uses the type.
+ */
+export function registerFieldType(
+  type: string,
+  Component: React.ComponentType<CustomFieldProps>,
+): void {
+  fieldRegistry[type] = Component;
+}
 
 export const FormField = React.memo(({ fieldConfig, control }: FormFieldProps) => {
   // CRITICAL: Only subscribe to form state when this field has a visibility condition.
