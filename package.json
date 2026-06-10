@@ -110,7 +110,7 @@
     "react-hook-form": "^7.75.0",
     "react-window": "^1.8.10",
     "rimraf": "^6.0.1",
-    "semantic-release": "^24.2.0",
+    "semantic-release": "^25.0.5",
     "storybook": "8",
     "tsup": "^8.4.0",
     "typescript": "~5.8.2",
