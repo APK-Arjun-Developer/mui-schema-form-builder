@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.1.0...v1.1.1) (2026-06-10)
+
+
+### Bug Fixes
+
+* apply phase 1 audit fixes — correctness, CI gates, and test coverage ([4fd36dd](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/commit/4fd36dd14c28effbff9c5b4ec8a38a453e49fbba))
+
 # [1.1.0](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.0.1...v1.1.0) (2026-06-09)
 
 
