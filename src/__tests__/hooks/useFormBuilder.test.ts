@@ -96,3 +96,32 @@ describe('useFormBuilder — defaultValues', () => {
     expect(called).toBe(true);
   });
 });
+
+describe('useFormBuilder — dot-notation names', () => {
+  const nestedSchema = z.object({ address: z.object({ city: z.string() }) });
+
+  it('produces a nested object for a dot-notation field name', () => {
+    const { result } = renderHook(() =>
+      useFormBuilder({
+        schema: nestedSchema,
+        fields: [{ name: 'address.city', label: 'City', type: FIELD_TYPE.TEXT }],
+      }),
+    );
+    const defaults = result.current.defaultValues;
+    expect(defaults).toEqual({ address: { city: '' } });
+  });
+
+  it('merges sibling dot-notation fields under the same parent', () => {
+    const schema2 = z.object({ address: z.object({ city: z.string(), zip: z.string() }) });
+    const { result } = renderHook(() =>
+      useFormBuilder({
+        schema: schema2,
+        fields: [
+          { name: 'address.city', label: 'City', type: FIELD_TYPE.TEXT },
+          { name: 'address.zip', label: 'Zip', type: FIELD_TYPE.TEXT },
+        ],
+      }),
+    );
+    expect(result.current.defaultValues).toEqual({ address: { city: '', zip: '' } });
+  });
+});

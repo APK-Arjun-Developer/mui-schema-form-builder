@@ -31,18 +31,19 @@ export const CheckboxInput = React.memo(({ fieldConfig, control }: InputProps) =
 
   const errorId = `${fieldConfig.name}-error`;
 
-  // Stable handler — useCallback prevents new function reference on every render,
-  // which would otherwise break memoization of individual Checkbox children.
+  // Depend on field.onChange (stable RHF reference) not the whole field object
+  // (which is a new reference every render), so child Checkbox memos actually hold.
+  const { onChange: fieldOnChange, value: fieldValue } = field;
   const handleGroupChange = useCallback(
     (value: string | number) => {
-      const currentValues = (field.value as (string | number)[]) ?? [];
-      field.onChange(
+      const currentValues = (fieldValue as (string | number)[]) ?? [];
+      fieldOnChange(
         currentValues.includes(value)
           ? currentValues.filter((v) => v !== value)
           : [...currentValues, value],
       );
     },
-    [field],
+    [fieldOnChange, fieldValue],
   );
 
   if (isGroup) {

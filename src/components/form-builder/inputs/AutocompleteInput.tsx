@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Autocomplete, TextField, CircularProgress, Checkbox, Box } from '@mui/material';
+import { Autocomplete, TextField, Checkbox, Box } from '@mui/material';
 import { useController, type Control } from 'react-hook-form';
 import type { FieldConfig, Option } from '../types/field.types';
 import { debounce } from '../utils/debounce';
@@ -27,13 +27,15 @@ export const AutocompleteInput = React.memo(({ fieldConfig, control }: InputProp
   const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState('');
 
-  // containerRef is passed to field.ref so RHF's shouldFocusError can scroll to
-  // and focus this field when Zod validation fails on it.
-  // tabIndex={-1} makes the div programmatically focusable without appearing in tab order.
+  // Register containerRef with RHF once on mount so shouldFocusError can scroll
+  // to and focus this field when Zod validation fails.
+  // field.ref is stable across renders — no need to re-run when field changes.
   const containerRef = useRef<HTMLDivElement>(null);
+  const fieldRef = field.ref;
   useEffect(() => {
-    field.ref(containerRef.current);
-  }, [field]);
+    fieldRef(containerRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Depend only on fetchOptions function reference, not the full fieldConfig object.
   const { fetchOptions } = fieldConfig;
@@ -148,11 +150,6 @@ export const AutocompleteInput = React.memo(({ fieldConfig, control }: InputProp
         )}
         {...fieldConfig.muiProps}
       />
-      {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 0.5 }}>
-          <CircularProgress size={16} />
-        </Box>
-      )}
     </Box>
   );
 });
