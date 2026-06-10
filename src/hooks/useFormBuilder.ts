@@ -14,23 +14,38 @@ export type UseFormBuilderOptions<TSchema extends z.ZodType> = Pick<
   'fields' | 'schema' | 'onReset' | 'validationMode'
 >;
 
+// Set a value at a dot-notation path (e.g. "address.city") inside a nested object.
+function setPath(obj: Record<string, unknown>, path: string, value: unknown): void {
+  const parts = path.split('.');
+  let cursor = obj;
+  for (let i = 0; i < parts.length - 1; i++) {
+    const key = parts[i];
+    if (cursor[key] === undefined || typeof cursor[key] !== 'object' || cursor[key] === null) {
+      cursor[key] = {};
+    }
+    cursor = cursor[key] as Record<string, unknown>;
+  }
+  cursor[parts[parts.length - 1]] = value;
+}
+
 function buildDefaultValues(fields: FieldConfig[]): Record<string, unknown> {
-  return fields.reduce<Record<string, unknown>>((acc, field) => {
+  const acc: Record<string, unknown> = {};
+
+  for (const field of fields) {
+    let value: unknown;
     if (field.defaultValue !== undefined) {
-      acc[field.name] = field.defaultValue;
-      return acc;
-    }
-
-    if (field.multiple || (field.type === FIELD_TYPE.CHECKBOX && field.options)) {
-      acc[field.name] = [];
+      value = field.defaultValue;
+    } else if (field.multiple || (field.type === FIELD_TYPE.CHECKBOX && field.options)) {
+      value = [];
     } else if (field.type === FIELD_TYPE.CHECKBOX) {
-      acc[field.name] = false;
+      value = false;
     } else {
-      acc[field.name] = '';
+      value = '';
     }
+    setPath(acc, field.name, value);
+  }
 
-    return acc;
-  }, {});
+  return acc;
 }
 
 export const useFormBuilder = <TSchema extends z.ZodType>({

@@ -55,13 +55,12 @@ describe('SelectInput — single', () => {
 });
 
 describe('SelectInput — multiple', () => {
-  it('renders checkboxes inside options for multi-select', async () => {
-    const user = userEvent.setup();
-
-    function MultiSelectFixture() {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { control } = useForm<any>({ defaultValues: { tags: [] } });
-      return (
+  function MultiSelectFixture() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { control, watch } = useForm<any>({ defaultValues: { tags: [] } });
+    const value = watch('tags');
+    return (
+      <>
         <SelectInput
           fieldConfig={{
             name: 'tags',
@@ -71,16 +70,50 @@ describe('SelectInput — multiple', () => {
             options: [
               { label: 'React', value: 'react' },
               { label: 'Vue', value: 'vue' },
+              { label: 'Angular', value: 'angular' },
             ],
+            placeholder: 'Select frameworks',
           }}
           control={control}
         />
-      );
-    }
+        <div data-testid="value">{JSON.stringify(value)}</div>
+      </>
+    );
+  }
 
+  it('renders checkboxes inside options for multi-select', async () => {
+    const user = userEvent.setup();
     renderWithTheme(<MultiSelectFixture />);
     await user.click(screen.getByRole('combobox'));
     const listbox = screen.getByRole('listbox');
     expect(within(listbox).getAllByRole('checkbox').length).toBeGreaterThan(0);
+  });
+
+  it('shows placeholder when nothing is selected', () => {
+    renderWithTheme(<MultiSelectFixture />);
+    expect(screen.getByText('Select frameworks')).toBeInTheDocument();
+  });
+
+  it('renderValue joins selected option labels with comma', async () => {
+    const user = userEvent.setup();
+    renderWithTheme(<MultiSelectFixture />);
+    await user.click(screen.getByRole('combobox'));
+    const listbox = screen.getByRole('listbox');
+    await user.click(within(listbox).getByText('React'));
+    await user.click(within(listbox).getByText('Vue'));
+    // Close the listbox
+    await user.keyboard('{Escape}');
+    expect(screen.getByRole('combobox')).toHaveTextContent('React, Vue');
+  });
+
+  it('accumulates selected values correctly', async () => {
+    const user = userEvent.setup();
+    renderWithTheme(<MultiSelectFixture />);
+    await user.click(screen.getByRole('combobox'));
+    const listbox = screen.getByRole('listbox');
+    await user.click(within(listbox).getByText('Angular'));
+    await user.keyboard('{Escape}');
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    expect(JSON.parse(screen.getByTestId('value').textContent!)).toEqual(['angular']);
   });
 });

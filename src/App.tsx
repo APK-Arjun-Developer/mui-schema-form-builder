@@ -16,6 +16,7 @@ import {
   Stack,
 } from '@mui/material';
 import { ExampleForm } from './example/ExampleForm';
+import pkg from '../package.json';
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
 
@@ -36,6 +37,13 @@ const theme = createTheme({
           textTransform: 'none',
           boxShadow: 'none',
           '&:hover': { boxShadow: 'none' },
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
         },
       },
     },
@@ -131,30 +139,30 @@ const TC = {
 
 type SToken = { text: string; color: string };
 
+const TOKEN_PATTERNS: Array<[RegExp, string]> = [
+  [/^(['"`])(?:(?!\1)[^\\]|\\.)*\1/, TC.string],
+  [/^\b(import|export|from|return|default|async|await|of|in|typeof|instanceof)\b/, TC.keyword],
+  [/^\b(const|let|var|function|class|type|interface|enum|new|extends|implements)\b/, TC.decl],
+  [/^\b(true|false|null|undefined|void)\b/, TC.bool],
+  [/^\b\d+(\.\d+)?\b/, TC.number],
+  [/^[A-Z][A-Za-z0-9_]*/, TC.type],
+  [/^[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\()/, TC.fn],
+  [/^[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*:)/, TC.prop],
+  [/^[a-zA-Z_$][a-zA-Z0-9_$]*/, TC.plain],
+  [/^[<>=!&|+\-*/%^~?:;.,{}[\]()\\]/, TC.plain],
+  [/^\s+/, TC.plain],
+  [/^./, TC.dim],
+];
+
 function tokenizeLine(line: string): SToken[] {
   if (line.trimStart().startsWith('//')) return [{ text: line, color: TC.comment }];
-
-  const patterns: Array<[RegExp, string]> = [
-    [/^(['"`])(?:(?!\1)[^\\]|\\.)*\1/, TC.string],
-    [/^\b(import|export|from|return|default|async|await|of|in|typeof|instanceof)\b/, TC.keyword],
-    [/^\b(const|let|var|function|class|type|interface|enum|new|extends|implements)\b/, TC.decl],
-    [/^\b(true|false|null|undefined|void)\b/, TC.bool],
-    [/^\b\d+(\.\d+)?\b/, TC.number],
-    [/^[A-Z][A-Za-z0-9_]*/, TC.type],
-    [/^[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\()/, TC.fn],
-    [/^[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*:)/, TC.prop],
-    [/^[a-zA-Z_$][a-zA-Z0-9_$]*/, TC.plain],
-    [/^[<>=!&|+\-*/%^~?:;.,{}[\]()\\]/, TC.plain],
-    [/^\s+/, TC.plain],
-    [/^./, TC.dim],
-  ];
 
   const tokens: SToken[] = [];
   let rem = line;
 
   while (rem.length > 0) {
     let matched = false;
-    for (const [re, color] of patterns) {
+    for (const [re, color] of TOKEN_PATTERNS) {
       const m = rem.match(re);
       if (m) {
         tokens.push({ text: m[0], color });
@@ -184,11 +192,24 @@ function CodeBlock({
   showLineNumbers?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  useEffect(
+    () => () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    },
+    [],
+  );
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard unavailable (non-HTTPS or permission denied)
+    }
   };
 
   const lines = code.split('\n');
@@ -377,6 +398,7 @@ const techStack = [
 export default function App() {
   const [copied, setCopied] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -384,10 +406,22 @@ export default function App() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(INSTALL_CMD);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  useEffect(
+    () => () => {
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    },
+    [],
+  );
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(INSTALL_CMD);
+      setCopied(true);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard unavailable (non-HTTPS or permission denied)
+    }
   };
 
   return (
@@ -425,7 +459,7 @@ export default function App() {
 
           {/* Version badge */}
           <Chip
-            label="v1.0.1"
+            label={`v${pkg.version}`}
             size="small"
             sx={{
               height: 18,
@@ -538,7 +572,7 @@ export default function App() {
                 border: 'rgba(255,255,255,0.12)',
               },
               {
-                label: 'v1.0.1',
+                label: `v${pkg.version}`,
                 bg: 'rgba(255,255,255,0.08)',
                 color: 'rgba(255,255,255,0.9)',
                 border: 'rgba(255,255,255,0.12)',
