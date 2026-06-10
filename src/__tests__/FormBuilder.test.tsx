@@ -278,6 +278,94 @@ describe('FormBuilder — accessibility (axe)', () => {
   });
 });
 
+describe('FormBuilder — section grouping', () => {
+  it('renders a section header when fields carry a section property', () => {
+    const sectionedFields = [
+      { name: 'name', label: 'Name', type: FIELD_TYPE.TEXT, section: 'Personal' },
+      { name: 'age', label: 'Age', type: FIELD_TYPE.NUMBER, section: 'Details' },
+    ];
+    renderWithTheme(
+      <FormBuilder
+        fields={sectionedFields}
+        schema={z.object({ name: z.string(), age: z.number() })}
+        onSubmit={vi.fn()}
+      />,
+    );
+    expect(screen.getByText('Personal')).toBeInTheDocument();
+    expect(screen.getByText('Details')).toBeInTheDocument();
+  });
+
+  it('groups consecutive same-section fields under one header', () => {
+    const sectionedFields = [
+      { name: 'first', label: 'First', type: FIELD_TYPE.TEXT, section: 'Name' },
+      { name: 'last', label: 'Last', type: FIELD_TYPE.TEXT, section: 'Name' },
+    ];
+    renderWithTheme(
+      <FormBuilder
+        fields={sectionedFields}
+        schema={z.object({ first: z.string(), last: z.string() })}
+        onSubmit={vi.fn()}
+      />,
+    );
+    expect(screen.getAllByText('Name').length).toBe(1);
+  });
+
+  it('renders fields without a section without any header', () => {
+    renderWithTheme(<Builder />);
+    // None of the test fields carry a section — no section header rendered
+    expect(screen.queryByRole('heading')).not.toBeInTheDocument();
+  });
+});
+
+describe('FormBuilder — sx prop', () => {
+  it('accepts an sx prop without errors', () => {
+    renderWithTheme(<Builder sx={{ border: '1px solid red' }} />);
+    expect(screen.getByRole('button', { name: 'Submit' })).toBeInTheDocument();
+  });
+
+  it('accepts sx as an array without errors', () => {
+    renderWithTheme(<Builder sx={[{ p: 2 }, { m: 1 }]} />);
+    expect(screen.getByRole('button', { name: 'Submit' })).toBeInTheDocument();
+  });
+});
+
+describe('FormBuilder — nested objects (dot-notation)', () => {
+  const nestedSchema = z.object({
+    address: z.object({
+      street: z.string().min(1, 'Street required'),
+      city: z.string().min(1, 'City required'),
+    }),
+  });
+  const nestedFields: FieldConfig[] = [
+    { name: 'address.street', label: 'Street', type: FIELD_TYPE.TEXT },
+    { name: 'address.city', label: 'City', type: FIELD_TYPE.TEXT },
+  ];
+
+  it('submits deeply nested data with correct shape', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    renderWithTheme(
+      <FormBuilder fields={nestedFields} schema={nestedSchema} onSubmit={onSubmit} />,
+    );
+    const inputs = screen.getAllByRole('textbox');
+    await user.type(inputs[0], '123 Main St');
+    await user.type(inputs[1], 'Springfield');
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+    expect(onSubmit.mock.calls[0][0]).toMatchObject({
+      address: { street: '123 Main St', city: 'Springfield' },
+    });
+  });
+
+  it('shows validation errors for nested fields', async () => {
+    const user = userEvent.setup();
+    renderWithTheme(<FormBuilder fields={nestedFields} schema={nestedSchema} onSubmit={vi.fn()} />);
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+    await waitFor(() => expect(screen.getByText('Street required')).toBeInTheDocument());
+    expect(screen.getByText('City required')).toBeInTheDocument();
+  });
+});
+
 describe('FormBuilder — virtualize', () => {
   it('falls back to normal list when react-window is unavailable', async () => {
     // FormBuilder loads react-window via a dynamic import inside useEffect. In the

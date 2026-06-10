@@ -1,4 +1,5 @@
 import type { z } from 'zod';
+import type { SxProps } from '@mui/material';
 import type { FieldValues, ValidationMode, Resolver } from 'react-hook-form';
 
 /**
@@ -17,6 +18,10 @@ export const FIELD_TYPE = {
   CHECKBOX: 'checkbox',
   TEXTAREA: 'textarea',
   DATE: 'date',
+  /** Dynamic list of sub-form items managed by react-hook-form's useFieldArray. */
+  ARRAY: 'array',
+  /** MUI DatePicker — requires @mui/x-date-pickers peer dep + LocalizationProvider. */
+  DATE_PICKER: 'datepicker',
 } as const;
 
 export type FieldType = (typeof FIELD_TYPE)[keyof typeof FIELD_TYPE];
@@ -43,7 +48,8 @@ export interface FieldConfig {
   /** Must match a key in the Zod schema object. Dot-notation supported (e.g. "address.city"). */
   name: string;
   label: string;
-  type: FieldType;
+  /** Use FIELD_TYPE constants or any custom type string registered via registerFieldType(). */
+  type: FieldType | string;
   defaultValue?: unknown;
   placeholder?: string;
   options?: Option[];
@@ -75,6 +81,22 @@ export interface FieldConfig {
    * Prefer explicit FieldConfig properties where possible.
    */
   muiProps?: Record<string, unknown>;
+  /**
+   * Optional section label. Fields with the same consecutive section string are grouped
+   * under a shared section header in FormBuilder. Sections are rendered in the order
+   * they first appear in the fields array.
+   */
+  section?: string;
+  /** Sub-fields for each array item — ARRAY fields only. */
+  itemFields?: FieldConfig[];
+  /** Label for the "add item" button — ARRAY fields only. Default: "Add item". */
+  addLabel?: string;
+  /** Label for the per-item "remove" button — ARRAY fields only. Default: "Remove". */
+  removeLabel?: string;
+  /** Minimum number of array items — ARRAY fields only. */
+  minItems?: number;
+  /** Maximum number of array items — ARRAY fields only. */
+  maxItems?: number;
 }
 
 export interface FormBuilderProps<TSchema extends z.ZodType = z.ZodType> {
@@ -108,4 +130,6 @@ export interface FormBuilderProps<TSchema extends z.ZodType = z.ZodType> {
   virtualizeItemSize?: number;
   /** When validation runs. Defaults to 'onTouched'. */
   validationMode?: keyof ValidationMode;
+  /** MUI sx prop forwarded to the outermost Paper container of the form. */
+  sx?: SxProps;
 }

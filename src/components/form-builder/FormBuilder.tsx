@@ -1,7 +1,7 @@
 import React, { useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import type { Control, FieldValues } from 'react-hook-form';
 import { FormProvider } from 'react-hook-form';
-import { Box, Button, Grid, Paper } from '@mui/material';
+import { Box, Button, Divider, Grid, Paper, Typography } from '@mui/material';
 import type { FieldConfig, FormBuilderProps } from './types/field.types';
 import { FormField } from './FormField';
 import { useFormBuilder } from '../../hooks/useFormBuilder';
@@ -60,6 +60,23 @@ VirtualRow.displayName = 'VirtualRow';
 // ---------------------------------------------------------------------------
 // forwardRef on a generic component requires a small cast workaround — the inner
 // function preserves the full generic signature while forwardRef erases it.
+// Group consecutive fields that share the same section label into segments.
+// Fields without a section are collected under `undefined`.
+function groupBySection(
+  fields: FieldConfig[],
+): { section: string | undefined; fields: FieldConfig[] }[] {
+  const segments: { section: string | undefined; fields: FieldConfig[] }[] = [];
+  for (const field of fields) {
+    const last = segments[segments.length - 1];
+    if (last && last.section === field.section) {
+      last.fields.push(field);
+    } else {
+      segments.push({ section: field.section, fields: [field] });
+    }
+  }
+  return segments;
+}
+
 const FormBuilderInner = <TSchema extends import('zod').ZodType>(
   {
     fields,
@@ -78,6 +95,7 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
     virtualizeHeight = 500,
     virtualizeItemSize = 80,
     validationMode,
+    sx,
   }: FormBuilderProps<TSchema>,
   ref: React.Ref<FormBuilderHandle>,
 ) => {
@@ -130,6 +148,8 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
   // Stable data object for react-window — only recreates when fields or control changes.
   const rowData = useMemo<VirtualRowData>(() => ({ fields, control }), [fields, control]);
 
+  const fieldSegments = useMemo(() => groupBySection(fields), [fields]);
+
   return (
     // methods is typed as UseFormReturn<any> internally; the public onSubmit on
     // FormBuilderProps<TSchema> carries the correct typed signature for consumers.
@@ -137,8 +157,15 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
     <FormProvider {...(methods as any)}>
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       <form onSubmit={handleSubmit(onSubmit as any)} noValidate>
-        <Paper elevation={0} sx={{ p: 0, bgcolor: 'transparent', boxShadow: 'none' }}>
+        <Paper
+          elevation={0}
+          sx={[
+            { p: 0, bgcolor: 'transparent', boxShadow: 'none' },
+            ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+          ]}
+        >
           {virtualize && FixedSizeList ? (
+            // Sections are not supported in virtual mode — all fields render flat.
             <FixedSizeList
               height={virtualizeHeight}
               itemCount={fields.length}
@@ -149,11 +176,25 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
               {VirtualRow}
             </FixedSizeList>
           ) : (
-            <Grid container spacing={spacing}>
-              {fields.map((field) => (
-                <FormField key={field.name} fieldConfig={field} control={control} />
+            <>
+              {fieldSegments.map((segment, segIdx) => (
+                <Box key={segIdx}>
+                  {segment.section && (
+                    <Box sx={{ mt: segIdx === 0 ? 0 : 3, mb: 2 }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 700 }} gutterBottom>
+                        {segment.section}
+                      </Typography>
+                      <Divider />
+                    </Box>
+                  )}
+                  <Grid container spacing={spacing}>
+                    {segment.fields.map((field) => (
+                      <FormField key={field.name} fieldConfig={field} control={control} />
+                    ))}
+                  </Grid>
+                </Box>
               ))}
-            </Grid>
+            </>
           )}
 
           <Box

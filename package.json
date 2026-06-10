@@ -58,7 +58,9 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "preview": "vite preview",
-    "release": "semantic-release"
+    "release": "semantic-release",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "peerDependencies": {
     "@emotion/react": "^11.14.0",
@@ -83,6 +85,9 @@
     "@mui/material": "^9.0.1",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
+    "@storybook/addon-essentials": "8",
+    "@storybook/blocks": "8",
+    "@storybook/react-vite": "8",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -106,6 +111,7 @@
     "react-window": "^1.8.10",
     "rimraf": "^6.0.1",
     "semantic-release": "^24.2.0",
+    "storybook": "8",
     "tsup": "^8.4.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.3",
