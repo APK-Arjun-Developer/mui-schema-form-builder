@@ -2,6 +2,8 @@ import React from 'react';
 import { type Control, useWatch } from 'react-hook-form';
 import { Grid } from '@mui/material';
 import { type FieldConfig, FIELD_TYPE } from './types/field.types';
+import { useFormBuilderContext } from './FormBuilderContext';
+import { ReadOnlyField } from './inputs/ReadOnlyField';
 import { TextInput } from './inputs/TextInput';
 import { NumberInput } from './inputs/NumberInput';
 import { SelectInput } from './inputs/SelectInput';
@@ -49,6 +51,8 @@ export function registerFieldType(
 }
 
 export const FormField = React.memo(({ fieldConfig, control }: FormFieldProps) => {
+  const { readOnly } = useFormBuilderContext();
+
   // CRITICAL: Only subscribe to form state when this field has a visibility condition.
   // Passing `disabled: true` tells react-hook-form NOT to run the subscription,
   // so sibling fields typing do NOT cause this component to re-render.
@@ -60,6 +64,14 @@ export const FormField = React.memo(({ fieldConfig, control }: FormFieldProps) =
 
   if (fieldConfig.visibleIf && !fieldConfig.visibleIf(watchedValues)) {
     return null;
+  }
+
+  if (readOnly) {
+    return (
+      <Grid size={fieldConfig.grid ?? { xs: 12 }}>
+        <ReadOnlyField fieldConfig={fieldConfig} control={control} />
+      </Grid>
+    );
   }
 
   const InputComponent = fieldRegistry[fieldConfig.type] ?? TextInput;

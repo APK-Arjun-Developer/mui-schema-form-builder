@@ -1,6 +1,8 @@
 // Core components
 export { FormBuilder } from './components/form-builder/FormBuilder';
 export type { FormBuilderHandle } from './components/form-builder/FormBuilder';
+export { FormWizard } from './components/form-builder/FormWizard';
+export type { FormWizardProps, WizardStep } from './components/form-builder/FormWizard';
 export { FormField, registerFieldType } from './components/form-builder/FormField';
 export type { CustomFieldProps } from './components/form-builder/FormField';
 
@@ -28,6 +30,7 @@ export { FIELD_TYPE, FieldType } from './components/form-builder/types/field.typ
 export type {
   FieldConfig,
   FormBuilderProps,
+  FormBuilderLabels,
   Option,
   GridConfig,
 } from './components/form-builder/types/field.types';

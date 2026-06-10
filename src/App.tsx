@@ -92,7 +92,15 @@ const globalStyles = (
 
 // ─── FadeInSection ────────────────────────────────────────────────────────────
 
-function FadeInSection({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
+function FadeInSection({
+  children,
+  delay = 0,
+  sx,
+}: {
+  children: ReactNode;
+  delay?: number;
+  sx?: React.ComponentProps<typeof Box>['sx'];
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -110,11 +118,14 @@ function FadeInSection({ children, delay = 0 }: { children: ReactNode; delay?: n
   return (
     <Box
       ref={ref}
-      sx={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(28px)',
-        transition: `opacity 0.65s ease ${delay}ms, transform 0.65s ease ${delay}ms`,
-      }}
+      sx={[
+        {
+          opacity: visible ? 1 : 0,
+          transform: visible ? 'translateY(0)' : 'translateY(28px)',
+          transition: `opacity 0.65s ease ${delay}ms, transform 0.65s ease ${delay}ms`,
+        },
+        ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+      ]}
     >
       {children}
     </Box>
@@ -327,13 +338,24 @@ const CODE_EXAMPLE = `import { FormBuilder, FIELD_TYPE } from 'mui-schema-form-b
 import { z } from 'zod';
 
 const schema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
+  name:    z.string().min(2),
+  country: z.string().min(1),
+  skills:  z.array(z.string()).min(1),
+  agree:   z.boolean().refine(v => v, 'Must agree'),
 });
 
 const fields = [
-  { name: 'name', label: 'Full Name', type: FIELD_TYPE.TEXT, required: true },
-  { name: 'email', label: 'Email',    type: FIELD_TYPE.TEXT, required: true },
+  { name: 'name',    label: 'Full Name', type: FIELD_TYPE.TEXT,
+    required: true, section: 'Profile' },
+  { name: 'country', label: 'Country',   type: FIELD_TYPE.SELECT,
+    section: 'Profile',
+    options: [{ label: 'US', value: 'us' }, { label: 'CA', value: 'ca' }] },
+  { name: 'skills',  label: 'Skills',    type: FIELD_TYPE.CHECKBOX,
+    section: 'Skills',
+    options: [{ label: 'React', value: 'react' },
+              { label: 'TypeScript', value: 'ts' }] },
+  { name: 'agree',   label: 'I accept the terms', type: FIELD_TYPE.CHECKBOX,
+    section: 'Terms' },
 ];
 
 export default function MyForm() {
@@ -342,6 +364,7 @@ export default function MyForm() {
       fields={fields}
       schema={schema}
       onSubmit={(data) => console.log(data)}
+      onReset={() => {}}
     />
   );
 }`;
@@ -356,32 +379,50 @@ const features = [
   {
     num: '02',
     title: 'Type-Safe with Zod',
-    desc: 'Pass any Zod schema — validation, inference, and error messages are all automatic.',
+    desc: 'Pass any Zod schema — validation, inference, and error messages are all automatic. Yup and Valibot resolvers also supported.',
     color: '#7c3aed',
   },
   {
     num: '03',
-    title: 'MUI Native Components',
-    desc: 'Every field is a real MUI component. Theming, density, and variants all work out of the box.',
+    title: 'Multi-step Wizard',
+    desc: 'FormWizard adds a MUI Stepper with per-step validation, Back/Next navigation, and shared form state.',
     color: '#0891b2',
   },
   {
     num: '04',
-    title: 'Conditional Fields',
-    desc: 'Show or hide fields at runtime with a simple visibleIf predicate function.',
+    title: 'Read-only Display',
+    desc: 'Pass readOnly to switch any form into a formatted display view — perfect for review and confirmation screens.',
     color: '#059669',
   },
   {
     num: '05',
-    title: 'Async Autocomplete',
-    desc: 'Pass a fetchOptions function — debounced search with loading state built in.',
+    title: 'Array & Nested Fields',
+    desc: 'FIELD_TYPE.ARRAY renders dynamic lists via useFieldArray. Dot-notation names (address.city) handle nested objects automatically.',
     color: '#d97706',
   },
   {
     num: '06',
-    title: 'Virtualization Ready',
-    desc: 'Enable react-window for forms with 50+ fields — smooth scrolling at any scale.',
+    title: 'Extensible Registry',
+    desc: 'registerFieldType() plugs in any custom component. createDatePickerInput() wires up MUI DatePicker as an optional peer dep.',
     color: '#dc2626',
+  },
+  {
+    num: '07',
+    title: 'Conditional Fields',
+    desc: 'Show or hide fields at runtime with a simple visibleIf predicate. Only fields with conditions subscribe to form-wide state.',
+    color: '#7e22ce',
+  },
+  {
+    num: '08',
+    title: 'Async Autocomplete',
+    desc: 'Pass a fetchOptions function — debounced search with loading state built in.',
+    color: '#0e7490',
+  },
+  {
+    num: '09',
+    title: 'i18n Labels',
+    desc: 'Override built-in UI strings via the labels prop — no extra i18n library required.',
+    color: '#15803d',
   },
 ];
 
@@ -446,6 +487,7 @@ export default function App() {
           {/* Package name */}
           <Typography
             sx={{
+              display: { xs: 'none', sm: 'block' },
               fontWeight: 800,
               fontSize: 15,
               letterSpacing: -0.4,
@@ -820,10 +862,10 @@ export default function App() {
             </Typography>
           </FadeInSection>
 
-          <Grid container spacing={3}>
+          <Grid container spacing={3} sx={{ alignItems: 'stretch' }}>
             {features.map((f, i) => (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={f.title}>
-                <FadeInSection delay={i * 80}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={f.title} sx={{ display: 'flex' }}>
+                <FadeInSection delay={i * 80} sx={{ height: '100%', width: '100%' }}>
                   <Paper
                     elevation={0}
                     sx={{
@@ -834,10 +876,7 @@ export default function App() {
                       border: '1px solid rgba(0,0,0,0.07)',
                       borderRadius: 3,
                       bgcolor: 'white',
-                      transition:
-                        'transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease',
                       '&:hover': {
-                        transform: 'translateY(-6px)',
                         boxShadow: `0 20px 48px ${f.color}1a`,
                         borderColor: `${f.color}55`,
                       },

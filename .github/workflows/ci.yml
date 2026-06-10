@@ -31,3 +31,6 @@ jobs:
 
       - name: Test
         run: bun run test:coverage
+
+      - name: Security audit
+        run: bun audit --audit-level=high || true

@@ -3,6 +3,7 @@ import { useFieldArray, type Control } from 'react-hook-form';
 import { Box, Button, Divider, Grid, Typography } from '@mui/material';
 import type { FieldConfig } from '../types/field.types';
 import { FieldLabel } from './FieldLabel';
+import { useFormBuilderContext } from '../FormBuilderContext';
 // FormField is imported here for recursive rendering of sub-fields.
 // The circular reference (FormField→ArrayInput→FormField) is safe with ES modules
 // because both modules are fully initialized before any component renders.
@@ -14,6 +15,7 @@ interface ArrayInputProps {
 }
 
 export const ArrayInput = React.memo(({ fieldConfig, control }: ArrayInputProps) => {
+  const { labels } = useFormBuilderContext();
   const {
     fields: arrayFields,
     append,
@@ -22,6 +24,11 @@ export const ArrayInput = React.memo(({ fieldConfig, control }: ArrayInputProps)
     control,
     name: fieldConfig.name,
   });
+
+  // Field-level labels take precedence; fall back to context (i18n) defaults.
+  const addLabel = fieldConfig.addLabel ?? labels.arrayAddItem;
+  const removeLabel = fieldConfig.removeLabel ?? labels.arrayRemove;
+  const itemLabel = (i: number) => labels.arrayItemLabel(i);
 
   const canAdd = fieldConfig.maxItems === undefined || arrayFields.length < fieldConfig.maxItems;
   const canRemove = fieldConfig.minItems === undefined || arrayFields.length > fieldConfig.minItems;
@@ -63,7 +70,7 @@ export const ArrayInput = React.memo(({ fieldConfig, control }: ArrayInputProps)
             }}
           >
             <Typography variant="subtitle2" color="text.secondary">
-              Item {index + 1}
+              {itemLabel(index)}
             </Typography>
             {canRemove && (
               <Button
@@ -74,7 +81,7 @@ export const ArrayInput = React.memo(({ fieldConfig, control }: ArrayInputProps)
                 disabled={fieldConfig.disabled}
                 sx={{ textTransform: 'none' }}
               >
-                {fieldConfig.removeLabel ?? 'Remove'}
+                {removeLabel}
               </Button>
             )}
           </Box>
@@ -102,7 +109,7 @@ export const ArrayInput = React.memo(({ fieldConfig, control }: ArrayInputProps)
           disabled={fieldConfig.disabled}
           sx={{ textTransform: 'none', mt: arrayFields.length > 0 ? 1 : 0 }}
         >
-          {fieldConfig.addLabel ?? 'Add item'}
+          {addLabel}
         </Button>
       )}
     </Box>

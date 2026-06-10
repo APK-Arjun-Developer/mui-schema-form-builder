@@ -132,4 +132,25 @@ export interface FormBuilderProps<TSchema extends z.ZodType = z.ZodType> {
   validationMode?: keyof ValidationMode;
   /** MUI sx prop forwarded to the outermost Paper container of the form. */
   sx?: SxProps;
+  /**
+   * Render all fields as read-only display text instead of interactive inputs.
+   * Useful for review/preview screens that reuse the same field configuration.
+   */
+  readOnly?: boolean;
+  /**
+   * Override the default built-in UI strings. Useful for i18n and custom copy.
+   * Button label props (submitText, cancelText, resetText) take precedence over
+   * the equivalent keys in this object.
+   */
+  labels?: FormBuilderLabels;
+}
+
+/** Overridable built-in UI strings for i18n or custom copy. */
+export interface FormBuilderLabels {
+  /** Default text for array field "add" button. Default: "Add item". */
+  arrayAddItem?: string;
+  /** Default text for array item "remove" button. Default: "Remove". */
+  arrayRemove?: string;
+  /** Label shown above each array item. Receives the 1-based index. Default: "Item {n}". */
+  arrayItemLabel?: (index: number) => string;
 }

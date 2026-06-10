@@ -5,6 +5,7 @@ import { Box, Button, Divider, Grid, Paper, Typography } from '@mui/material';
 import type { FieldConfig, FormBuilderProps } from './types/field.types';
 import { FormField } from './FormField';
 import { useFormBuilder } from '../../hooks/useFormBuilder';
+import { FormBuilderContext, DEFAULT_LABELS, type ResolvedLabels } from './FormBuilderContext';
 
 /** Imperative handle exposed via a ref on FormBuilder. */
 export interface FormBuilderHandle {
@@ -96,6 +97,8 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
     virtualizeItemSize = 80,
     validationMode,
     sx,
+    readOnly = false,
+    labels,
   }: FormBuilderProps<TSchema>,
   ref: React.Ref<FormBuilderHandle>,
 ) => {
@@ -150,96 +153,112 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
 
   const fieldSegments = useMemo(() => groupBySection(fields), [fields]);
 
+  const resolvedLabels = useMemo<ResolvedLabels>(
+    () => ({
+      arrayAddItem: labels?.arrayAddItem ?? DEFAULT_LABELS.arrayAddItem,
+      arrayRemove: labels?.arrayRemove ?? DEFAULT_LABELS.arrayRemove,
+      arrayItemLabel: labels?.arrayItemLabel ?? DEFAULT_LABELS.arrayItemLabel,
+    }),
+    [labels],
+  );
+
+  const ctxValue = useMemo(
+    () => ({ readOnly, labels: resolvedLabels }),
+    [readOnly, resolvedLabels],
+  );
+
   return (
-    // methods is typed as UseFormReturn<any> internally; the public onSubmit on
-    // FormBuilderProps<TSchema> carries the correct typed signature for consumers.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    <FormProvider {...(methods as any)}>
+    <FormBuilderContext.Provider value={ctxValue}>
+      {/* methods is typed as UseFormReturn<any> internally; the public onSubmit on
+        FormBuilderProps<TSchema> carries the correct typed signature for consumers. */}
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      <form onSubmit={handleSubmit(onSubmit as any)} noValidate>
-        <Paper
-          elevation={0}
-          sx={[
-            { p: 0, bgcolor: 'transparent', boxShadow: 'none' },
-            ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
-          ]}
-        >
-          {virtualize && FixedSizeList ? (
-            // Sections are not supported in virtual mode — all fields render flat.
-            <FixedSizeList
-              height={virtualizeHeight}
-              itemCount={fields.length}
-              itemSize={virtualizeItemSize}
-              width="100%"
-              itemData={rowData}
-            >
-              {VirtualRow}
-            </FixedSizeList>
-          ) : (
-            <>
-              {fieldSegments.map((segment, segIdx) => (
-                <Box key={segIdx}>
-                  {segment.section && (
-                    <Box sx={{ mt: segIdx === 0 ? 0 : 3, mb: 2 }}>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 700 }} gutterBottom>
-                        {segment.section}
-                      </Typography>
-                      <Divider />
-                    </Box>
-                  )}
-                  <Grid container spacing={spacing}>
-                    {segment.fields.map((field) => (
-                      <FormField key={field.name} fieldConfig={field} control={control} />
-                    ))}
-                  </Grid>
-                </Box>
-              ))}
-            </>
-          )}
-
-          <Box
-            sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'flex-end', flexWrap: 'wrap' }}
+      <FormProvider {...(methods as any)}>
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        <form onSubmit={handleSubmit(onSubmit as any)} noValidate>
+          <Paper
+            elevation={0}
+            sx={[
+              { p: 0, bgcolor: 'transparent', boxShadow: 'none' },
+              ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+            ]}
           >
-            {onReset && (
-              <Button
-                variant="text"
-                color="secondary"
-                onClick={handleFormReset}
-                disabled={isSubmitting}
-                sx={{ textTransform: 'none', fontWeight: 500 }}
+            {virtualize && FixedSizeList ? (
+              // Sections are not supported in virtual mode — all fields render flat.
+              <FixedSizeList
+                height={virtualizeHeight}
+                itemCount={fields.length}
+                itemSize={virtualizeItemSize}
+                width="100%"
+                itemData={rowData}
               >
-                {resetText}
-              </Button>
-            )}
-            {onCancel && (
-              <Button
-                variant="outlined"
-                color="inherit"
-                onClick={onCancel}
-                disabled={isSubmitting}
-                sx={{ textTransform: 'none', fontWeight: 500 }}
-              >
-                {cancelText}
-              </Button>
+                {VirtualRow}
+              </FixedSizeList>
+            ) : (
+              <>
+                {fieldSegments.map((segment, segIdx) => (
+                  <Box key={segIdx}>
+                    {segment.section && (
+                      <Box sx={{ mt: segIdx === 0 ? 0 : 3, mb: 2 }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 700 }} gutterBottom>
+                          {segment.section}
+                        </Typography>
+                        <Divider />
+                      </Box>
+                    )}
+                    <Grid container spacing={spacing}>
+                      {segment.fields.map((field) => (
+                        <FormField key={field.name} fieldConfig={field} control={control} />
+                      ))}
+                    </Grid>
+                  </Box>
+                ))}
+              </>
             )}
 
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              loading={isSubmitting}
-              sx={{
-                px: 4,
-                py: 1,
-                fontWeight: 600,
-              }}
+            <Box
+              sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'flex-end', flexWrap: 'wrap' }}
             >
-              {submitText}
-            </Button>
-          </Box>
-        </Paper>
-      </form>
-    </FormProvider>
+              {onReset && (
+                <Button
+                  variant="text"
+                  color="secondary"
+                  onClick={handleFormReset}
+                  disabled={isSubmitting}
+                  sx={{ textTransform: 'none', fontWeight: 500 }}
+                >
+                  {resetText}
+                </Button>
+              )}
+              {onCancel && (
+                <Button
+                  variant="outlined"
+                  color="inherit"
+                  onClick={onCancel}
+                  disabled={isSubmitting}
+                  sx={{ textTransform: 'none', fontWeight: 500 }}
+                >
+                  {cancelText}
+                </Button>
+              )}
+
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                loading={isSubmitting}
+                sx={{
+                  px: 4,
+                  py: 1,
+                  fontWeight: 600,
+                }}
+              >
+                {submitText}
+              </Button>
+            </Box>
+          </Paper>
+        </form>
+      </FormProvider>
+    </FormBuilderContext.Provider>
   );
 };
 
