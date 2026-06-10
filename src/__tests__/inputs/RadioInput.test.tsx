@@ -1,5 +1,6 @@
+import { useEffect } from 'react';
 import { describe, it, expect } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useForm } from 'react-hook-form';
 import { renderWithTheme } from '../helpers';
@@ -56,5 +57,70 @@ describe('RadioInput', () => {
     await user.click(screen.getByLabelText('Male'));
     await user.click(screen.getByLabelText('Other'));
     expect(screen.getByTestId('value').textContent).toBe('other');
+  });
+
+  it('renders required asterisk when required=true', () => {
+    function RequiredFixture() {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { control } = useForm<any>({ defaultValues: { gender: '' } });
+      return (
+        <RadioInput
+          fieldConfig={{
+            name: 'gender',
+            label: 'Gender',
+            type: FIELD_TYPE.RADIO,
+            required: true,
+            options: [{ label: 'Male', value: 'male' }],
+          }}
+          control={control}
+        />
+      );
+    }
+    renderWithTheme(<RequiredFixture />);
+    expect(screen.getByText('*')).toBeInTheDocument();
+  });
+
+  it('renders in disabled state', () => {
+    function DisabledFixture() {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { control } = useForm<any>({ defaultValues: { gender: '' } });
+      return (
+        <RadioInput
+          fieldConfig={{
+            name: 'gender',
+            label: 'Gender',
+            type: FIELD_TYPE.RADIO,
+            disabled: true,
+            options: [{ label: 'Male', value: 'male' }],
+          }}
+          control={control}
+        />
+      );
+    }
+    renderWithTheme(<DisabledFixture />);
+    expect(screen.getByLabelText('Male')).toBeDisabled();
+  });
+
+  it('shows error helper text when field has a validation error', async () => {
+    function ErrorFixture() {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { control, setError } = useForm<any>({ defaultValues: { gender: '' } });
+      useEffect(() => {
+        setError('gender', { type: 'required', message: 'Please pick a gender' });
+      }, [setError]);
+      return (
+        <RadioInput
+          fieldConfig={{
+            name: 'gender',
+            label: 'Gender',
+            type: FIELD_TYPE.RADIO,
+            options: [{ label: 'Male', value: 'male' }],
+          }}
+          control={control}
+        />
+      );
+    }
+    renderWithTheme(<ErrorFixture />);
+    await waitFor(() => expect(screen.getByText('Please pick a gender')).toBeInTheDocument());
   });
 });

@@ -1,12 +1,12 @@
 import React from 'react';
 import {
+  Box,
   FormControl,
   Select,
   MenuItem,
   FormHelperText,
   Checkbox,
   ListItemText,
-  Box,
 } from '@mui/material';
 import { useController, type Control } from 'react-hook-form';
 import type { FieldConfig } from '../types/field.types';
@@ -30,11 +30,14 @@ export const SelectInput = React.memo(({ fieldConfig, control }: InputProps) => 
   });
 
   const { ref: fieldRef, ...fieldProps } = field;
+  // labelId points to the FieldLabel wrapper — MUI Select uses it for aria-labelledby.
+  const labelId = `${fieldConfig.name}-label`;
   const errorId = error ? `${fieldConfig.name}-error` : undefined;
 
   return (
     <Box>
       <FieldLabel
+        id={labelId}
         htmlFor={fieldConfig.name}
         label={fieldConfig.label}
         required={fieldConfig.required}
@@ -50,6 +53,7 @@ export const SelectInput = React.memo(({ fieldConfig, control }: InputProps) => 
         <Select
           {...fieldProps}
           inputRef={fieldRef}
+          labelId={labelId}
           inputProps={{
             id: fieldConfig.name,
             'aria-required': fieldConfig.required,

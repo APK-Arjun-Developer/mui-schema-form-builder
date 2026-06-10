@@ -20,7 +20,9 @@ export default defineConfig({
     '@hookform/resolvers',
     '@hookform/resolvers/zod',
     'zod',
-    // optional peer dependency — not always installed
+    // optional peer dependencies — not always installed
     'react-window',
+    '@mui/x-date-pickers',
+    '@mui/x-date-pickers/DatePicker',
   ],
 });

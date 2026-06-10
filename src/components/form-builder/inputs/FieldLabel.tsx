@@ -8,6 +8,8 @@ interface FieldLabelProps {
   required?: boolean;
   disabled?: boolean;
   error?: boolean;
+  /** id placed on the wrapper Box — used by Select's labelId for aria-labelledby. */
+  id?: string;
   /**
    * Use 'legend' inside a <fieldset> (radio groups, checkbox groups).
    * Use 'label' for all single-input fields.
@@ -16,9 +18,9 @@ interface FieldLabelProps {
 }
 
 export const FieldLabel = React.memo(
-  ({ htmlFor, label, required, disabled, error, component = 'label' }: FieldLabelProps) => {
+  ({ htmlFor, label, required, disabled, error, id, component = 'label' }: FieldLabelProps) => {
     return (
-      <Box sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
+      <Box id={id} sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
         <Typography
           component={component}
           // htmlFor associates the label with its input — clicking it focuses the field.

@@ -1,5 +1,6 @@
+import { useEffect } from 'react';
 import { describe, it, expect } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useForm } from 'react-hook-form';
 import { renderWithTheme } from '../helpers';
@@ -70,6 +71,24 @@ describe('NumberInput', () => {
     await user.type(screen.getByRole('spinbutton'), '42');
     expect(typeof captured).toBe('number');
     expect(captured).toBe(42);
+  });
+
+  it('shows error helper text when field has a validation error', async () => {
+    function ErrorFixture() {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { control, setError } = useForm<any>({ defaultValues: { qty: '' } });
+      useEffect(() => {
+        setError('qty', { type: 'min', message: 'Must be at least 1' });
+      }, [setError]);
+      return (
+        <NumberInput
+          fieldConfig={{ name: 'qty', label: 'Qty', type: FIELD_TYPE.NUMBER }}
+          control={control}
+        />
+      );
+    }
+    renderWithTheme(<ErrorFixture />);
+    await waitFor(() => expect(screen.getByText('Must be at least 1')).toBeInTheDocument());
   });
 
   it('stores empty string when field is cleared', async () => {

@@ -19,7 +19,11 @@ export default defineConfig({
         'src/App.tsx',
         'src/index.css',
         'src/example/**',
+        'src/stories/**',
       ],
+      thresholds: {
+        branches: 85,
+      },
     },
   },
   resolve: {
