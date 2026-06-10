@@ -1,3 +1,12 @@
+# [1.2.0](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.1.1...v1.2.0) (2026-06-10)
+
+
+### Features
+
+* apply phase 2 audit improvements — API extensibility, a11y, and CI coverage gate ([c70ffb4](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/commit/c70ffb410d8f4ee6b51ffd4d7441750daf372058))
+* apply phase 3 — array fields, sections, DatePicker factory, Storybook, and API docs ([a0765f1](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/commit/a0765f1d12739da1978a5b39866d10965a90d4e8))
+* apply phase 4 — wizard, read-only mode, i18n labels, Dependabot, and doc refresh ([435d25a](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/commit/435d25a8d6ef0c5e88de149c6a2b6b891e3d957d))
+
 ## [1.1.1](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.1.0...v1.1.1) (2026-06-10)
 
 
