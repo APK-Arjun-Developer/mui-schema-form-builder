@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.2.0...v1.3.0) (2026-06-11)
+
+
+### Features
+
+* deploy Storybook to GitHub Pages at /storybook/ subpath ([1d56449](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/commit/1d56449b0451f239280245f4437416cb3d308456))
+
 # [1.2.0](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.1.1...v1.2.0) (2026-06-10)
 
 
