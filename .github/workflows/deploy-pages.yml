@@ -31,8 +31,13 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Build
+      - name: Build example app
         run: bun run build:example
+
+      - name: Build Storybook
+        run: bun run build-storybook --output-dir dist/storybook
+        env:
+          STORYBOOK_BASE_URL: /${{ github.event.repository.name }}/storybook/
 
       - uses: actions/upload-pages-artifact@v3
         with:
