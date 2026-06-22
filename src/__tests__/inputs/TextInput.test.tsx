@@ -80,4 +80,46 @@ describe('TextInput', () => {
     renderWithTheme(<TextareaFixture />);
     expect(screen.getByRole('textbox').tagName).toBe('TEXTAREA');
   });
+
+  it('renders start and end adornments for text fields', () => {
+    function AdornmentFixture() {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { control } = useForm<any>({ defaultValues: { amount: '' } });
+      return (
+        <TextInput
+          fieldConfig={{
+            name: 'amount',
+            label: 'Amount',
+            type: FIELD_TYPE.TEXT,
+            startAdornment: '$',
+            endAdornment: 'USD',
+          }}
+          control={control}
+        />
+      );
+    }
+    renderWithTheme(<AdornmentFixture />);
+    expect(screen.getByText('$')).toBeInTheDocument();
+    expect(screen.getByText('USD')).toBeInTheDocument();
+  });
+
+  it('toggles password visibility when configured as a password field', async () => {
+    const user = userEvent.setup();
+    function PasswordFixture() {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { control } = useForm<any>({ defaultValues: { password: '' } });
+      return (
+        <TextInput
+          fieldConfig={{ name: 'password', label: 'Password', type: FIELD_TYPE.PASSWORD }}
+          control={control}
+        />
+      );
+    }
+    renderWithTheme(<PasswordFixture />);
+    const input = screen.getByLabelText('Password');
+    expect(input).toHaveAttribute('type', 'password');
+    await user.click(screen.getByRole('button', { name: 'Show password' }));
+    expect(input).toHaveAttribute('type', 'text');
+    expect(screen.getByRole('button', { name: 'Hide password' })).toBeInTheDocument();
+  });
 });

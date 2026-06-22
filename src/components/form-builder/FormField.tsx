@@ -27,6 +27,7 @@ export interface CustomFieldProps {
 // Defined outside the component — a stable module-level constant.
 const fieldRegistry: Record<string, React.ComponentType<CustomFieldProps>> = {
   [FIELD_TYPE.TEXT]: TextInput,
+  [FIELD_TYPE.PASSWORD]: TextInput,
   [FIELD_TYPE.NUMBER]: NumberInput,
   [FIELD_TYPE.SELECT]: SelectInput,
   [FIELD_TYPE.AUTOCOMPLETE]: AutocompleteInput,

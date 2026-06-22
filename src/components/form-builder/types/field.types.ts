@@ -1,5 +1,6 @@
+import type { ReactNode } from 'react';
 import type { z } from 'zod';
-import type { SxProps } from '@mui/material';
+import type { SxProps, TypographyProps } from '@mui/material';
 import type { FieldValues, ValidationMode, Resolver } from 'react-hook-form';
 
 /**
@@ -18,6 +19,7 @@ export const FIELD_TYPE = {
   CHECKBOX: 'checkbox',
   TEXTAREA: 'textarea',
   DATE: 'date',
+  PASSWORD: 'password',
   /** Dynamic list of sub-form items managed by react-hook-form's useFieldArray. */
   ARRAY: 'array',
   /** MUI DatePicker — requires @mui/x-date-pickers peer dep + LocalizationProvider. */
@@ -67,6 +69,12 @@ export interface FieldConfig {
   step?: number;
   /** Number of visible text rows — TEXTAREA fields only. Defaults to 4. */
   rows?: number;
+  /** Leading adornment for TextField-based fields. Rendered via MUI InputAdornment. */
+  startAdornment?: ReactNode;
+  /** Trailing adornment for TextField-based fields. Rendered via MUI InputAdornment. */
+  endAdornment?: ReactNode;
+  /** Show the visibility toggle for PASSWORD fields. Defaults to true. */
+  showPasswordToggle?: boolean;
   /** Async option fetching for AUTOCOMPLETE fields. Return empty array on error. */
   fetchOptions?: (input: string) => Promise<Option[]>;
   /**
@@ -99,6 +107,25 @@ export interface FieldConfig {
   maxItems?: number;
 }
 
+export interface FormBuilderActionsContext {
+  /** Submit the form using react-hook-form validation. Safe to pass to custom submit buttons. */
+  submit: () => void;
+  /** Reset the form to its default values. */
+  reset: () => void;
+  /** Cancel handler, when provided. */
+  cancel?: () => void;
+  /** Whether the form is currently submitting. */
+  loading: boolean;
+  /** Current zero-based wizard step. Always 0 for FormBuilder. */
+  currentStep: number;
+  /** Total wizard steps. Always 1 for FormBuilder. */
+  totalSteps: number;
+  /** Move to the previous wizard step, when available. */
+  previousStep?: () => void;
+  /** Move to the next wizard step after validating current step fields, when available. */
+  nextStep?: () => void | Promise<void>;
+}
+
 export interface FormBuilderProps<TSchema extends z.ZodType = z.ZodType> {
   fields: FieldConfig[];
   /** Zod schema for validation and type inference. Required unless `resolver` is provided. */
@@ -118,6 +145,10 @@ export interface FormBuilderProps<TSchema extends z.ZodType = z.ZodType> {
   onChange?: (values: FieldValues) => void;
   /** Called when a single field changes, with its name and new value. */
   onFieldChange?: (name: string, value: unknown) => void;
+  /** Optional title rendered above the fields. For complex headers, compose externally. */
+  title?: ReactNode;
+  /** Props forwarded to the MUI Typography used for title. */
+  titleProps?: TypographyProps;
   submitText?: string;
   cancelText?: string;
   resetText?: string;
@@ -143,6 +174,8 @@ export interface FormBuilderProps<TSchema extends z.ZodType = z.ZodType> {
    * the equivalent keys in this object.
    */
   labels?: FormBuilderLabels;
+  /** Optional render prop to replace built-in action buttons. */
+  renderActions?: (context: FormBuilderActionsContext) => ReactNode;
 }
 
 /** Overridable built-in UI strings for i18n or custom copy. */

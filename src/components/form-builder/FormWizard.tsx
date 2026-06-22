@@ -1,10 +1,24 @@
 import React, { useImperativeHandle, useMemo, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
-import { Box, Button, Divider, Grid, Paper, Step, StepLabel, Stepper } from '@mui/material';
-import type { SxProps } from '@mui/material';
+import {
+  Box,
+  Button,
+  Divider,
+  Grid,
+  Paper,
+  Step,
+  StepLabel,
+  Stepper,
+  Typography,
+} from '@mui/material';
+import type { SxProps, TypographyProps } from '@mui/material';
 import type { z } from 'zod';
 import type { Resolver, ValidationMode } from 'react-hook-form';
-import type { FieldConfig, FormBuilderLabels } from './types/field.types';
+import type {
+  FieldConfig,
+  FormBuilderActionsContext,
+  FormBuilderLabels,
+} from './types/field.types';
 import { FormField } from './FormField';
 import { FormBuilderContext, DEFAULT_LABELS, type ResolvedLabels } from './FormBuilderContext';
 import { useFormBuilder } from '../../hooks/useFormBuilder';
@@ -27,6 +41,8 @@ export interface FormWizardProps<TSchema extends z.ZodType = z.ZodType> {
   resolver?: Resolver;
   onSubmit: (data: z.infer<TSchema>) => void | Promise<void>;
   onCancel?: () => void;
+  title?: React.ReactNode;
+  titleProps?: TypographyProps;
   nextText?: string;
   backText?: string;
   submitText?: string;
@@ -36,6 +52,7 @@ export interface FormWizardProps<TSchema extends z.ZodType = z.ZodType> {
   sx?: SxProps;
   readOnly?: boolean;
   labels?: FormBuilderLabels;
+  renderActions?: (context: FormBuilderActionsContext) => React.ReactNode;
 }
 
 const FormWizardInner = <TSchema extends z.ZodType>(
@@ -45,6 +62,8 @@ const FormWizardInner = <TSchema extends z.ZodType>(
     resolver,
     onSubmit,
     onCancel,
+    title,
+    titleProps,
     nextText = 'Next',
     backText = 'Back',
     submitText = 'Submit',
@@ -54,6 +73,7 @@ const FormWizardInner = <TSchema extends z.ZodType>(
     sx,
     readOnly = false,
     labels,
+    renderActions,
   }: FormWizardProps<TSchema>,
   ref: React.Ref<FormBuilderHandle>,
 ) => {
@@ -124,6 +144,12 @@ const FormWizardInner = <TSchema extends z.ZodType>(
               ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
             ]}
           >
+            {title && (
+              <Typography variant="h5" gutterBottom {...titleProps}>
+                {title}
+              </Typography>
+            )}
+
             <Stepper activeStep={activeStep} sx={{ mb: 3 }}>
               {steps.map((step, idx) => (
                 <Step key={idx}>
@@ -140,55 +166,77 @@ const FormWizardInner = <TSchema extends z.ZodType>(
               ))}
             </Grid>
 
-            <Box
-              sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'flex-end', flexWrap: 'wrap' }}
-            >
-              {onCancel && activeStep === 0 && (
-                <Button
-                  variant="outlined"
-                  color="inherit"
-                  onClick={onCancel}
-                  disabled={isSubmitting}
-                  sx={{ textTransform: 'none', fontWeight: 500 }}
-                >
-                  {cancelText}
-                </Button>
-              )}
+            {renderActions ? (
+              renderActions({
+                submit: () => {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  void handleSubmit(onSubmit as any)();
+                },
+                reset: handleFormReset,
+                cancel: onCancel,
+                loading: isSubmitting,
+                currentStep: activeStep,
+                totalSteps: steps.length,
+                previousStep: activeStep > 0 ? handleBack : undefined,
+                nextStep: !isLastStep ? handleNext : undefined,
+              })
+            ) : (
+              <Box
+                sx={{
+                  mt: 4,
+                  display: 'flex',
+                  gap: 2,
+                  justifyContent: 'flex-end',
+                  flexWrap: 'wrap',
+                }}
+              >
+                {onCancel && activeStep === 0 && (
+                  <Button
+                    variant="outlined"
+                    color="inherit"
+                    onClick={onCancel}
+                    disabled={isSubmitting}
+                    sx={{ textTransform: 'none', fontWeight: 500 }}
+                  >
+                    {cancelText}
+                  </Button>
+                )}
 
-              {activeStep > 0 && (
-                <Button
-                  variant="outlined"
-                  color="inherit"
-                  onClick={handleBack}
-                  disabled={isSubmitting}
-                  sx={{ textTransform: 'none', fontWeight: 500 }}
-                >
-                  {backText}
-                </Button>
-              )}
+                {activeStep > 0 && (
+                  <Button
+                    variant="outlined"
+                    color="inherit"
+                    onClick={handleBack}
+                    disabled={isSubmitting}
+                    sx={{ textTransform: 'none', fontWeight: 500 }}
+                  >
+                    {backText}
+                  </Button>
+                )}
 
-              {isLastStep ? (
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  loading={isSubmitting}
-                  sx={{ px: 4, py: 1, fontWeight: 600 }}
-                >
-                  {submitText}
-                </Button>
-              ) : (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleNext}
-                  disabled={isSubmitting}
-                  sx={{ px: 4, py: 1, fontWeight: 600, textTransform: 'none' }}
-                >
-                  {nextText}
-                </Button>
-              )}
-            </Box>
+                {isLastStep ? (
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    loading={isSubmitting}
+                    sx={{ px: 4, py: 1, fontWeight: 600 }}
+                  >
+                    {submitText}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleNext}
+                    disabled={isSubmitting}
+                    sx={{ px: 4, py: 1, fontWeight: 600, textTransform: 'none' }}
+                  >
+                    {nextText}
+                  </Button>
+                )}
+              </Box>
+            )}
           </Paper>
         </form>
       </FormProvider>

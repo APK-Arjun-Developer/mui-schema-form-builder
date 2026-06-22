@@ -245,6 +245,42 @@ const fields = useMemo<FieldConfig[]>(
 - Error messages have `role="alert"` for screen reader announcement
 - Radio groups and checkbox groups use `<fieldset>` + `<legend>` (WCAG 1.3.1)
 
+### Customizing Text Inputs and Actions
+
+The builder intentionally keeps customization aligned with MUI primitives:
+
+```tsx
+const fields = [
+  {
+    type: FIELD_TYPE.TEXT,
+    name: 'amount',
+    label: 'Amount',
+    startAdornment: '$',
+    endAdornment: 'USD',
+  },
+  {
+    type: FIELD_TYPE.PASSWORD,
+    name: 'password',
+    label: 'Password',
+  },
+];
+
+<FormBuilder
+  title="User Registration"
+  titleProps={{ align: 'center', variant: 'h4' }}
+  fields={fields}
+  schema={schema}
+  onSubmit={onSubmit}
+  renderActions={({ submit, loading }) => (
+    <Button variant="contained" onClick={submit} loading={loading}>
+      Create account
+    </Button>
+  )}
+/>;
+```
+
+Adornments are rendered with MUI `InputAdornment`, password fields reuse the TextField implementation with an accessible visibility toggle, and `renderActions` is optional so existing built-in buttons remain backward compatible.
+
 ---
 
 ## License

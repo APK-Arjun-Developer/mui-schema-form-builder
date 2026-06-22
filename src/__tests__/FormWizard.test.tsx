@@ -135,3 +135,35 @@ describe('FormWizard — submission', () => {
     expect(screen.getByRole('button', { name: 'Volver' })).toBeInTheDocument();
   });
 });
+
+describe('FormWizard — custom actions', () => {
+  it('provides step context to renderActions', async () => {
+    const user = userEvent.setup();
+    renderWithTheme(
+      <FormWizard
+        steps={steps}
+        schema={schema}
+        onSubmit={vi.fn()}
+        renderActions={({ currentStep, totalSteps, nextStep, previousStep, submit }) => (
+          <div>
+            <span>{`Step ${currentStep + 1} of ${totalSteps}`}</span>
+            {previousStep && <button onClick={previousStep}>Previous custom</button>}
+            {nextStep ? (
+              <button onClick={nextStep}>Next custom</button>
+            ) : (
+              <button onClick={submit}>Submit custom</button>
+            )}
+          </div>
+        )}
+      />,
+    );
+
+    expect(screen.getByText('Step 1 of 2')).toBeInTheDocument();
+    await user.type(screen.getByLabelText('First Name'), 'Alice');
+    await user.type(screen.getByLabelText('Last Name'), 'Smith');
+    await user.click(screen.getByRole('button', { name: 'Next custom' }));
+    await waitFor(() => expect(screen.getByText('Step 2 of 2')).toBeInTheDocument());
+    expect(screen.getByRole('button', { name: 'Previous custom' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Submit custom' })).toBeInTheDocument();
+  });
+});

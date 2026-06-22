@@ -384,3 +384,34 @@ describe('FormBuilder — virtualize', () => {
     expect(screen.getByRole('button', { name: 'Submit' })).toBeInTheDocument();
   });
 });
+
+describe('FormBuilder — title and custom actions', () => {
+  it('renders a configurable title', () => {
+    renderWithTheme(
+      <Builder title="User Registration" titleProps={{ align: 'center', variant: 'h4' }} />,
+    );
+    expect(screen.getByRole('heading', { name: 'User Registration' })).toBeInTheDocument();
+  });
+
+  it('uses renderActions when provided', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    renderWithTheme(
+      <FormBuilder
+        fields={[{ name: 'name', label: 'Name', type: FIELD_TYPE.TEXT }]}
+        schema={z.object({ name: z.string().min(1) })}
+        onSubmit={onSubmit}
+        renderActions={({ submit, loading, currentStep, totalSteps }) => (
+          <button type="button" disabled={loading} onClick={submit}>
+            Save {currentStep + 1}/{totalSteps}
+          </button>
+        )}
+      />,
+    );
+
+    expect(screen.queryByRole('button', { name: 'Submit' })).not.toBeInTheDocument();
+    await user.type(screen.getByRole('textbox'), 'Alice');
+    await user.click(screen.getByRole('button', { name: 'Save 1/1' }));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+  });
+});

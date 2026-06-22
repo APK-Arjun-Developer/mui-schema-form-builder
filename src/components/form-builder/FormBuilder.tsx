@@ -88,6 +88,8 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
     onReset,
     onChange,
     onFieldChange,
+    title,
+    titleProps,
     submitText = 'Submit',
     cancelText = 'Cancel',
     resetText = 'Reset',
@@ -99,6 +101,7 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
     sx,
     readOnly = false,
     labels,
+    renderActions,
   }: FormBuilderProps<TSchema>,
   ref: React.Ref<FormBuilderHandle>,
 ) => {
@@ -153,6 +156,11 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
 
   const fieldSegments = useMemo(() => groupBySection(fields), [fields]);
 
+  const submit = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    void handleSubmit(onSubmit as any)();
+  };
+
   const resolvedLabels = useMemo<ResolvedLabels>(
     () => ({
       arrayAddItem: labels?.arrayAddItem ?? DEFAULT_LABELS.arrayAddItem,
@@ -182,6 +190,12 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
               ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
             ]}
           >
+            {title && (
+              <Typography variant="h5" gutterBottom {...titleProps}>
+                {title}
+              </Typography>
+            )}
+
             {virtualize && FixedSizeList ? (
               // Sections are not supported in virtual mode — all fields render flat.
               <FixedSizeList
@@ -215,46 +229,63 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
               </>
             )}
 
-            <Box
-              sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'flex-end', flexWrap: 'wrap' }}
-            >
-              {onReset && (
-                <Button
-                  variant="text"
-                  color="secondary"
-                  onClick={handleFormReset}
-                  disabled={isSubmitting}
-                  sx={{ textTransform: 'none', fontWeight: 500 }}
-                >
-                  {resetText}
-                </Button>
-              )}
-              {onCancel && (
-                <Button
-                  variant="outlined"
-                  color="inherit"
-                  onClick={onCancel}
-                  disabled={isSubmitting}
-                  sx={{ textTransform: 'none', fontWeight: 500 }}
-                >
-                  {cancelText}
-                </Button>
-              )}
-
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                loading={isSubmitting}
+            {renderActions ? (
+              renderActions({
+                submit,
+                reset: handleFormReset,
+                cancel: onCancel,
+                loading: isSubmitting,
+                currentStep: 0,
+                totalSteps: 1,
+              })
+            ) : (
+              <Box
                 sx={{
-                  px: 4,
-                  py: 1,
-                  fontWeight: 600,
+                  mt: 4,
+                  display: 'flex',
+                  gap: 2,
+                  justifyContent: 'flex-end',
+                  flexWrap: 'wrap',
                 }}
               >
-                {submitText}
-              </Button>
-            </Box>
+                {onReset && (
+                  <Button
+                    variant="text"
+                    color="secondary"
+                    onClick={handleFormReset}
+                    disabled={isSubmitting}
+                    sx={{ textTransform: 'none', fontWeight: 500 }}
+                  >
+                    {resetText}
+                  </Button>
+                )}
+                {onCancel && (
+                  <Button
+                    variant="outlined"
+                    color="inherit"
+                    onClick={onCancel}
+                    disabled={isSubmitting}
+                    sx={{ textTransform: 'none', fontWeight: 500 }}
+                  >
+                    {cancelText}
+                  </Button>
+                )}
+
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  loading={isSubmitting}
+                  sx={{
+                    px: 4,
+                    py: 1,
+                    fontWeight: 600,
+                  }}
+                >
+                  {submitText}
+                </Button>
+              </Box>
+            )}
           </Paper>
         </form>
       </FormProvider>
