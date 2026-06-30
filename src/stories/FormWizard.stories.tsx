@@ -236,7 +236,11 @@ export const CustomActions: Story = {
           back,
           submit,
         }: FormWizardActionsParams) => (
-          <Stack direction="row" spacing={2} sx={{ justifyContent: 'space-between', width: '100%' }}>
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{ justifyContent: 'space-between', width: '100%' }}
+          >
             <Button variant="outlined" onClick={back} disabled={isFirstStep || isSubmitting}>
               ← Back
             </Button>
