@@ -22,8 +22,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          # Let semantic-release manage its own git auth via GITHUB_TOKEN
           persist-credentials: false
+          token: ${{ secrets.GH_TOKEN }}
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -52,7 +52,7 @@ jobs:
         # repo regardless of what package.json says
         run: bun run release -- --repository-url ${{ github.server_url }}/${{ github.repository }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           GIT_AUTHOR_NAME: "github-actions[bot]"
           GIT_AUTHOR_EMAIL: "github-actions[bot]@users.noreply.github.com"
