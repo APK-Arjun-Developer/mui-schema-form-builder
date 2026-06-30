@@ -60,7 +60,8 @@
     "preview": "vite preview",
     "release": "semantic-release",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "ci": "bun run format:check && bun run lint && bun run typecheck && bun run test:coverage && bun run build"
   },
   "peerDependencies": {
     "@emotion/react": "^11.14.0",
@@ -96,8 +97,8 @@
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.1",
     "@types/react-window": "^1.8.8",
-    "@typescript-eslint/eslint-plugin": "^5.62.0",
-    "@typescript-eslint/parser": "^5.62.0",
+    "@typescript-eslint/eslint-plugin": "^8.62.1",
+    "@typescript-eslint/parser": "^8.62.1",
     "@vitejs/plugin-react": "^5.0.4",
     "@vitest/coverage-v8": "^4.1.8",
     "eslint": "^8.57.1",

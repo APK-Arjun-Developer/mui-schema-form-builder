@@ -1,3 +1,4 @@
+import type React from 'react';
 import type { z } from 'zod';
 import type { SxProps } from '@mui/material';
 import type { FieldValues, ValidationMode, Resolver } from 'react-hook-form';
@@ -18,6 +19,8 @@ export const FIELD_TYPE = {
   CHECKBOX: 'checkbox',
   TEXTAREA: 'textarea',
   DATE: 'date',
+  /** Password text input with a show/hide visibility toggle. */
+  PASSWORD: 'password',
   /** Dynamic list of sub-form items managed by react-hook-form's useFieldArray. */
   ARRAY: 'array',
   /** MUI DatePicker — requires @mui/x-date-pickers peer dep + LocalizationProvider. */
@@ -87,6 +90,18 @@ export interface FieldConfig {
    * they first appear in the fields array.
    */
   section?: string;
+  /**
+   * Node rendered inside an InputAdornment at the start of the input (e.g. "$", an icon).
+   * Supported by TEXT, TEXTAREA, NUMBER, and PASSWORD field types.
+   */
+  startAdornment?: React.ReactNode;
+  /**
+   * Node rendered inside an InputAdornment at the end of the input (e.g. "kg", a button).
+   * Supported by TEXT, TEXTAREA, NUMBER, and PASSWORD field types.
+   * Note: PASSWORD fields render their own visibility toggle as the trailing adornment;
+   * setting endAdornment on a PASSWORD field has no effect.
+   */
+  endAdornment?: React.ReactNode;
   /** Sub-fields for each array item — ARRAY fields only. */
   itemFields?: FieldConfig[];
   /** Label for the "add item" button — ARRAY fields only. Default: "Add item". */
@@ -143,6 +158,53 @@ export interface FormBuilderProps<TSchema extends z.ZodType = z.ZodType> {
    * the equivalent keys in this object.
    */
   labels?: FormBuilderLabels;
+  /** Optional heading displayed for the form. */
+  title?: string;
+  /** Horizontal alignment of the form title. Defaults to 'left'. */
+  titleAlign?: 'left' | 'center' | 'right';
+  /**
+   * Where the title is placed relative to the form body.
+   * - 'inside' (default): title renders inside the Paper, above the fields.
+   * - 'above': title renders above the Paper container.
+   */
+  titlePosition?: 'above' | 'inside';
+  /**
+   * Replace the default Submit / Cancel / Reset buttons with your own rendering.
+   * When provided, the built-in action buttons are not rendered.
+   */
+  renderActions?: (params: FormBuilderActionsParams) => React.ReactNode;
+}
+
+/** Parameters passed to the FormBuilder renderActions render-prop. */
+export interface FormBuilderActionsParams {
+  /** Whether the form is currently submitting. */
+  isSubmitting: boolean;
+  /** Programmatically trigger form submission (runs validation + onSubmit). */
+  submit: () => void;
+  /** Calls the onCancel callback if provided. Undefined when onCancel is not set. */
+  cancel?: () => void;
+  /** Calls the onReset callback and resets the form if provided. Undefined when onReset is not set. */
+  reset?: () => void;
+}
+
+/** Parameters passed to the FormWizard renderActions render-prop. */
+export interface FormWizardActionsParams {
+  /** Whether the form is currently submitting. */
+  isSubmitting: boolean;
+  /** True when the wizard is on the first step. */
+  isFirstStep: boolean;
+  /** True when the wizard is on the last step. */
+  isLastStep: boolean;
+  /** Zero-based index of the currently visible step. */
+  activeStep: number;
+  /** Validate the current step and advance to the next one. */
+  next: () => void;
+  /** Navigate to the previous step without validation. */
+  back: () => void;
+  /** Programmatically trigger full-form submission (runs validation + onSubmit). */
+  submit: () => void;
+  /** Calls the onCancel callback if provided. Undefined when onCancel is not set. */
+  cancel?: () => void;
 }
 
 /** Overridable built-in UI strings for i18n or custom copy. */

@@ -67,6 +67,116 @@ export const NumberField: StoryObj = {
   ),
 };
 
+export const Password: StoryObj = {
+  name: 'Password',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A text input that hides the value by default. Click the eye icon to toggle visibility. The toggle icon is an inline SVG — no icon library needed.',
+      },
+    },
+  },
+  render: () => (
+    <SingleFieldForm
+      fieldConfig={{
+        name: 'password',
+        label: 'Password',
+        type: FIELD_TYPE.PASSWORD,
+        required: true,
+      }}
+      schema={z.object({ password: z.string().min(8, 'At least 8 characters') })}
+    />
+  ),
+};
+
+export const TextWithStartAdornment: StoryObj = {
+  name: 'Text — start adornment',
+  parameters: {
+    docs: {
+      description: {
+        story: 'Use `startAdornment` on a TEXT field to render a prefix inside the input.',
+      },
+    },
+  },
+  render: () => (
+    <SingleFieldForm
+      fieldConfig={{
+        name: 'username',
+        label: 'Username',
+        type: FIELD_TYPE.TEXT,
+        startAdornment: '@',
+        required: true,
+      }}
+      schema={z.object({ username: z.string().min(3, 'At least 3 characters') })}
+    />
+  ),
+};
+
+export const TextWithEndAdornment: StoryObj = {
+  name: 'Text — end adornment',
+  parameters: {
+    docs: {
+      description: {
+        story: 'Use `endAdornment` on a TEXT field to render a suffix inside the input.',
+      },
+    },
+  },
+  render: () => (
+    <SingleFieldForm
+      fieldConfig={{
+        name: 'domain',
+        label: 'Subdomain',
+        type: FIELD_TYPE.TEXT,
+        endAdornment: '.example.com',
+        placeholder: 'myapp',
+        required: true,
+      }}
+      schema={z.object({ domain: z.string().min(1, 'Required') })}
+    />
+  ),
+};
+
+export const NumberWithAdornments: StoryObj = {
+  name: 'Number — start + end adornments',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'NUMBER fields also support `startAdornment` and `endAdornment` for currency symbols, units, etc.',
+      },
+    },
+  },
+  render: () => (
+    <FormBuilder
+      fields={[
+        {
+          name: 'price',
+          label: 'Price',
+          type: FIELD_TYPE.NUMBER,
+          startAdornment: '$',
+          endAdornment: 'USD',
+          min: 0,
+          grid: { xs: 12, sm: 6 },
+        },
+        {
+          name: 'weight',
+          label: 'Weight',
+          type: FIELD_TYPE.NUMBER,
+          endAdornment: 'kg',
+          min: 0,
+          grid: { xs: 12, sm: 6 },
+        },
+      ]}
+      schema={z.object({
+        price: z.number().min(0, 'Must be non-negative'),
+        weight: z.number().min(0, 'Must be non-negative'),
+      })}
+      onSubmit={(d) => alert(JSON.stringify(d, null, 2))}
+    />
+  ),
+};
+
 export const SelectSingle: StoryObj = {
   name: 'Select (single)',
   render: () => (
