@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.3.0...v1.4.0) (2026-06-30)
+
+
+### Features
+
+* enhance FormBuilder with title and custom action buttons ([f2bbe5f](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/commit/f2bbe5fc0588f594a1e24dcf983c15f8d64665ab))
+
 # [1.3.0](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.2.0...v1.3.0) (2026-06-11)
 
 
