@@ -1,4 +1,3 @@
-import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { z } from 'zod';
 import { FormBuilder } from '../components/form-builder/FormBuilder';

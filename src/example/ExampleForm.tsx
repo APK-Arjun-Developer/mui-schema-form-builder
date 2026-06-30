@@ -281,7 +281,7 @@ function FormBuilderDemo() {
         }}
         readOnly={readOnly}
         renderActions={({ isSubmitting, submit, cancel, reset }: FormBuilderActionsParams) => (
-          <Stack direction="row" spacing={1} justifyContent="flex-end" flexWrap="wrap">
+          <Stack direction="row" spacing={1} sx={{ justifyContent: 'flex-end', flexWrap: 'wrap' }}>
             {reset && (
               <Button
                 size="small"
@@ -462,7 +462,7 @@ function WizardDemo() {
           submit,
           cancel,
         }: FormWizardActionsParams) => (
-          <Stack direction="row" spacing={1} justifyContent="flex-end" flexWrap="wrap">
+          <Stack direction="row" spacing={1} sx={{ justifyContent: 'flex-end', flexWrap: 'wrap' }}>
             {isFirstStep && cancel && (
               <Button
                 variant="outlined"

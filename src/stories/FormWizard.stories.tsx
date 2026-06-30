@@ -1,4 +1,3 @@
-import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { z } from 'zod';
 import { Box, Button, Stack } from '@mui/material';
@@ -237,7 +236,7 @@ export const CustomActions: Story = {
           back,
           submit,
         }: FormWizardActionsParams) => (
-          <Stack direction="row" spacing={2} justifyContent="space-between" width="100%">
+          <Stack direction="row" spacing={2} sx={{ justifyContent: 'space-between', width: '100%' }}>
             <Button variant="outlined" onClick={back} disabled={isFirstStep || isSubmitting}>
               ← Back
             </Button>

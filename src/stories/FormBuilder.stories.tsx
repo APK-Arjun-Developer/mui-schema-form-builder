@@ -1,4 +1,3 @@
-import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { z } from 'zod';
 import { Button, CircularProgress, Stack } from '@mui/material';
@@ -273,7 +272,7 @@ export const CustomActions: Story = {
         onCancel={() => alert('Cancelled')}
         onReset={() => alert('Reset')}
         renderActions={({ isSubmitting, submit, cancel, reset }: FormBuilderActionsParams) => (
-          <Stack direction="row" spacing={1} justifyContent="flex-end">
+          <Stack direction="row" spacing={1} sx={{ justifyContent: 'flex-end' }}>
             {reset && (
               <Button size="small" color="inherit" onClick={reset} disabled={isSubmitting}>
                 Clear
