@@ -14,6 +14,7 @@ export { AutocompleteInput } from './components/form-builder/inputs/Autocomplete
 export { CheckboxInput } from './components/form-builder/inputs/CheckboxInput';
 export { RadioInput } from './components/form-builder/inputs/RadioInput';
 export { ArrayInput } from './components/form-builder/inputs/ArrayInput';
+export { PasswordInput } from './components/form-builder/inputs/PasswordInput';
 /**
  * createDatePickerInput produces a FormBuilder field component that wraps
  * @mui/x-date-pickers DatePicker. Pass the imported DatePicker component as the
@@ -31,6 +32,8 @@ export type {
   FieldConfig,
   FormBuilderProps,
   FormBuilderLabels,
+  FormBuilderActionsParams,
+  FormWizardActionsParams,
   Option,
   GridConfig,
 } from './components/form-builder/types/field.types';

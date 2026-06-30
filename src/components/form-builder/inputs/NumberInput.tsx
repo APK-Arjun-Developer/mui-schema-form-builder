@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextField, Box } from '@mui/material';
+import { Box, InputAdornment, TextField } from '@mui/material';
 import { useController, type Control } from 'react-hook-form';
 import type { FieldConfig } from '../types/field.types';
 import { FieldLabel } from './FieldLabel';
@@ -21,6 +21,13 @@ export const NumberInput = React.memo(({ fieldConfig, control }: InputProps) => 
 
   const { ref: fieldRef, ...fieldProps } = field;
   const errorId = error ? `${fieldConfig.name}-error` : undefined;
+
+  const startAdornment = fieldConfig.startAdornment ? (
+    <InputAdornment position="start">{fieldConfig.startAdornment}</InputAdornment>
+  ) : undefined;
+  const endAdornment = fieldConfig.endAdornment ? (
+    <InputAdornment position="end">{fieldConfig.endAdornment}</InputAdornment>
+  ) : undefined;
 
   return (
     <Box>
@@ -46,6 +53,7 @@ export const NumberInput = React.memo(({ fieldConfig, control }: InputProps) => 
             max: fieldConfig.max,
             step: fieldConfig.step,
           },
+          input: { startAdornment, endAdornment },
         }}
         type="number"
         placeholder={fieldConfig.placeholder}

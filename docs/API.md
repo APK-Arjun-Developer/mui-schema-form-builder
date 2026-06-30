@@ -39,9 +39,13 @@ import { FormBuilder } from 'mui-schema-form-builder';
 | `onFieldChange` | `(name: string, value: unknown) => void` | — | Called when a single field changes with its name and new value. |
 | `readOnly` | `boolean` | `false` | Render all fields as formatted display text instead of interactive inputs. |
 | `labels` | `FormBuilderLabels` | — | Override built-in UI strings (array add/remove labels, item label). See [i18n labels](#i18n-labels). |
-| `submitText` | `string` | `"Submit"` | Label for the submit button. |
-| `cancelText` | `string` | `"Cancel"` | Label for the cancel button. |
-| `resetText` | `string` | `"Reset"` | Label for the reset button. |
+| `title` | `string` | — | Optional heading displayed for the form. |
+| `titleAlign` | `'left' \| 'center' \| 'right'` | `'left'` | Horizontal alignment of the title. |
+| `titlePosition` | `'inside' \| 'above'` | `'inside'` | Where the title is placed. `'inside'` renders it inside the Paper above the fields; `'above'` renders it outside the Paper. |
+| `renderActions` | `(params: FormBuilderActionsParams) => ReactNode` | — | Replace the default Submit / Cancel / Reset buttons with a custom render. When provided, default buttons are not rendered. |
+| `submitText` | `string` | `"Submit"` | Label for the submit button. Ignored when `renderActions` is provided. |
+| `cancelText` | `string` | `"Cancel"` | Label for the cancel button. Ignored when `renderActions` is provided. |
+| `resetText` | `string` | `"Reset"` | Label for the reset button. Ignored when `renderActions` is provided. |
 | `spacing` | `number` | `2` | MUI Grid spacing between fields. |
 | `validationMode` | `keyof ValidationMode` | `"onTouched"` | When react-hook-form triggers validation. |
 | `virtualize` | `boolean` | `false` | Enable react-window virtualization. Requires `react-window` peer dep. |
@@ -68,6 +72,44 @@ const schema = z.object({
     { name: 'email', label: 'Email', type: FIELD_TYPE.TEXT },
   ]}
   onSubmit={(data) => console.log(data)}
+/>
+```
+
+### Form title
+
+```tsx
+<FormBuilder
+  title="Edit Profile"
+  titleAlign="center"       // 'left' | 'center' | 'right'
+  titlePosition="above"     // 'inside' | 'above'
+  schema={schema}
+  fields={fields}
+  onSubmit={fn}
+/>
+```
+
+### Custom action buttons (renderActions)
+
+`renderActions` receives a [`FormBuilderActionsParams`](#formbuilderactionsparams) object and must return a React node. When provided, the default Submit / Cancel / Reset buttons are suppressed entirely.
+
+```tsx
+import type { FormBuilderActionsParams } from 'mui-schema-form-builder';
+
+<FormBuilder
+  schema={schema}
+  fields={fields}
+  onSubmit={fn}
+  onCancel={cancelFn}
+  onReset={resetFn}
+  renderActions={({ isSubmitting, submit, cancel, reset }: FormBuilderActionsParams) => (
+    <Stack direction="row" spacing={1} justifyContent="flex-end">
+      {reset && <Button onClick={reset}>Clear</Button>}
+      {cancel && <Button variant="outlined" onClick={cancel}>Discard</Button>}
+      <Button variant="contained" onClick={submit} disabled={isSubmitting}>
+        Save Changes
+      </Button>
+    </Stack>
+  )}
 />
 ```
 
@@ -134,15 +176,27 @@ import type { WizardStep } from 'mui-schema-form-builder';
 
 ### Props
 
-All `FormBuilder` props apply (except `onReset`, `virtualize`), plus:
-
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `steps` | `WizardStep[]` | **required** | Ordered list of wizard steps. |
-| `nextText` | `string` | `"Next"` | Label for the Next button. |
-| `backText` | `string` | `"Back"` | Label for the Back button. |
-| `submitText` | `string` | `"Submit"` | Label for the Submit button on the last step. |
-| `cancelText` | `string` | `"Cancel"` | Cancel button label (first step, when `onCancel` provided). |
+| `schema` | `z.ZodType` | — | Zod schema covering all steps. Required unless `resolver` is provided. |
+| `resolver` | `Resolver` | — | A react-hook-form resolver. Alternative to `schema`. |
+| `onSubmit` | `(data: z.infer<TSchema>) => void \| Promise<void>` | **required** | Called with validated data after the final step submits successfully. |
+| `onCancel` | `() => void` | — | Renders a Cancel button on the first step when provided. |
+| `readOnly` | `boolean` | `false` | Render all fields as formatted display text. |
+| `labels` | `FormBuilderLabels` | — | Override built-in UI strings. |
+| `title` | `string` | — | Optional heading displayed for the wizard. |
+| `titleAlign` | `'left' \| 'center' \| 'right'` | `'left'` | Horizontal alignment of the title. |
+| `titlePosition` | `'inside' \| 'above'` | `'inside'` | Where the title is placed. `'inside'` renders above the Stepper; `'above'` renders outside the Paper. |
+| `renderActions` | `(params: FormWizardActionsParams) => ReactNode` | — | Replace the default Next / Back / Submit / Cancel buttons with a custom render. |
+| `nextText` | `string` | `"Next"` | Label for the Next button. Ignored when `renderActions` is provided. |
+| `backText` | `string` | `"Back"` | Label for the Back button. Ignored when `renderActions` is provided. |
+| `submitText` | `string` | `"Submit"` | Label for the Submit button on the last step. Ignored when `renderActions` is provided. |
+| `cancelText` | `string` | `"Cancel"` | Cancel button label (first step only). Ignored when `renderActions` is provided. |
+| `spacing` | `number` | `2` | MUI Grid spacing between fields. |
+| `validationMode` | `keyof ValidationMode` | `"onTouched"` | When react-hook-form triggers validation. |
+| `sx` | `SxProps` | — | MUI sx prop forwarded to the outer Paper container. |
+| `ref` | `React.Ref<FormBuilderHandle>` | — | Imperative handle — see [FormBuilderHandle](#formbuilderhandle-imperative-ref). |
 
 ### WizardStep
 
@@ -156,7 +210,48 @@ interface WizardStep {
 
 ### Per-step validation
 
-Clicking **Next** calls `trigger(stepFieldNames)`. The wizard advances only when all current-step fields pass validation. The final **Submit** validates the entire schema.
+Clicking **Next** calls `trigger(stepFieldNames)` — only the current step's fields are validated. The wizard advances only when every field in the current step passes. The final **Submit** validates the entire schema.
+
+When navigating with **Back** or by clicking a completed step in the Stepper, any existing validation errors are cleared so the target step starts clean.
+
+### Completed step navigation
+
+After a step passes validation and the user clicks Next, that step's label becomes a clickable `StepButton` in the Stepper. The user can jump back to any previously completed step to review or edit its values. Forward navigation to unvisited steps is not permitted.
+
+The currently active step is never rendered with a completion checkmark, even if it was previously completed — only steps that have been completed and are not currently active show the checkmark.
+
+### Submit error navigation
+
+If the final Submit call fails validation (e.g. a cross-field `refine` whose error path points to a field on a previous step), the wizard automatically navigates to the step containing the first error so the user can see and fix it.
+
+### Custom action buttons (renderActions)
+
+`renderActions` receives a [`FormWizardActionsParams`](#formwizardactionsparams) object.
+
+```tsx
+import type { FormWizardActionsParams } from 'mui-schema-form-builder';
+
+<FormWizard
+  steps={steps}
+  schema={schema}
+  onSubmit={fn}
+  renderActions={({
+    isSubmitting, isFirstStep, isLastStep, next, back, submit,
+  }: FormWizardActionsParams) => (
+    <Stack direction="row" spacing={2} justifyContent="space-between" width="100%">
+      <Button onClick={back} disabled={isFirstStep || isSubmitting}>← Back</Button>
+      {isLastStep
+        ? <Button variant="contained" color="success" onClick={submit} disabled={isSubmitting}>
+            Finish
+          </Button>
+        : <Button variant="contained" onClick={next} disabled={isSubmitting}>
+            Continue →
+          </Button>
+      }
+    </Stack>
+  )}
+/>
+```
 
 ### Example
 
@@ -171,6 +266,7 @@ const schema = z.object({
 });
 
 <FormWizard
+  title="Sign Up"
   schema={schema}
   steps={[
     {
@@ -231,6 +327,8 @@ import type { FieldConfig } from 'mui-schema-form-builder';
 | Property | Description |
 |----------|-------------|
 | `rows` | Visible text rows — TEXTAREA only (default `4`). |
+| `startAdornment` | `React.ReactNode` rendered inside an `InputAdornment` at the start of the input. E.g. `"$"`, an icon, or any React node. |
+| `endAdornment` | `React.ReactNode` rendered inside an `InputAdornment` at the end of the input. E.g. `"kg"`. |
 
 #### NUMBER
 | Property | Description |
@@ -238,6 +336,15 @@ import type { FieldConfig } from 'mui-schema-form-builder';
 | `min` | Minimum value. Also sets the HTML `min` attribute. |
 | `max` | Maximum value. Also sets the HTML `max` attribute. |
 | `step` | Step increment. Also sets the HTML `step` attribute. |
+| `startAdornment` | Prefix adornment (same as TEXT). |
+| `endAdornment` | Suffix adornment (same as TEXT). |
+
+#### PASSWORD
+| Property | Description |
+|----------|-------------|
+| `startAdornment` | Prefix adornment, same as TEXT. |
+
+> **Note:** PASSWORD fields have a fixed end adornment (the show/hide toggle button). Setting `endAdornment` on a PASSWORD field has no effect.
 
 #### SELECT / AUTOCOMPLETE / RADIO / CHECKBOX (group)
 | Property | Description |
@@ -259,7 +366,7 @@ import type { FieldConfig } from 'mui-schema-form-builder';
 
 ## FIELD_TYPE
 
-Const object of built-in field type strings.
+Const object of built-in field type strings. Prefer this over the deprecated `FieldType` enum alias.
 
 ```tsx
 import { FIELD_TYPE } from 'mui-schema-form-builder';
@@ -271,6 +378,7 @@ import { FIELD_TYPE } from 'mui-schema-form-builder';
 | `TEXTAREA` | `"textarea"` | MUI TextField (multiline) |
 | `NUMBER` | `"number"` | MUI TextField (number) — coerces to `number` before storing |
 | `DATE` | `"date"` | MUI TextField (type="date") |
+| `PASSWORD` | `"password"` | MUI TextField (password) with an inline show/hide toggle |
 | `DATE_PICKER` | `"datepicker"` | MUI DatePicker — register via `createDatePickerInput` |
 | `SELECT` | `"select"` | MUI Select |
 | `AUTOCOMPLETE` | `"autocomplete"` | MUI Autocomplete |
@@ -292,7 +400,7 @@ Pass `readOnly` to render all fields as formatted display text. Useful for revie
 
 | Type | Read-only output |
 |------|-----------------|
-| TEXT / TEXTAREA / NUMBER / DATE | Plain text value, or `—` if empty |
+| TEXT / TEXTAREA / NUMBER / DATE / PASSWORD | Plain text value, or `—` if empty |
 | SELECT single / RADIO | Resolved option label |
 | SELECT multiple | Chips for each selected label |
 | CHECKBOX (boolean) | `"Yes"` or `"No"` |
@@ -450,10 +558,13 @@ import {
   CheckboxInput,
   RadioInput,
   ArrayInput,
+  PasswordInput,
 } from 'mui-schema-form-builder';
 ```
 
 Each accepts `{ fieldConfig: FieldConfig; control: Control }` (`CustomFieldProps`).
+
+`PasswordInput` renders a text field that masks its value by default and toggles visibility via a built-in icon button. No icon library dependency is required.
 
 ---
 
@@ -461,16 +572,60 @@ Each accepts `{ fieldConfig: FieldConfig; control: Control }` (`CustomFieldProps
 
 ```tsx
 import type {
-  FieldConfig,           // Single field definition
-  FieldType,             // Union of FIELD_TYPE values (+ string for custom types)
-  FormBuilderProps,      // All props accepted by FormBuilder
-  FormBuilderHandle,     // Imperative ref shape (reset/submit/setError/getValues)
-  FormBuilderLabels,     // i18n label overrides
-  FormWizardProps,       // All props accepted by FormWizard
-  WizardStep,            // { label, description?, fields }
-  Option,                // { label: string; value: string | number; disabled?: boolean }
-  GridConfig,            // MUI Grid size breakpoints { xs?, sm?, md?, lg?, xl? }
-  CustomFieldProps,      // { fieldConfig: FieldConfig; control: Control }
-  UseFormBuilderOptions, // Options accepted by useFormBuilder hook
+  FieldConfig,                // Single field definition
+  FieldType,                  // Union of FIELD_TYPE values (+ string for custom types)
+  FormBuilderProps,           // All props accepted by FormBuilder
+  FormBuilderHandle,          // Imperative ref shape (reset/submit/setError/getValues)
+  FormBuilderLabels,          // i18n label overrides
+  FormBuilderActionsParams,   // Passed to the FormBuilder renderActions render-prop
+  FormWizardProps,            // All props accepted by FormWizard
+  FormWizardActionsParams,    // Passed to the FormWizard renderActions render-prop
+  WizardStep,                 // { label, description?, fields }
+  Option,                     // { label: string; value: string | number; disabled?: boolean }
+  GridConfig,                 // MUI Grid size breakpoints { xs?, sm?, md?, lg?, xl? }
+  CustomFieldProps,           // { fieldConfig: FieldConfig; control: Control }
+  UseFormBuilderOptions,      // Options accepted by useFormBuilder hook
 } from 'mui-schema-form-builder';
+```
+
+### FormBuilderActionsParams
+
+Passed to the `renderActions` render-prop of `FormBuilder`.
+
+```typescript
+interface FormBuilderActionsParams {
+  /** Whether the form is currently submitting. */
+  isSubmitting: boolean;
+  /** Programmatically trigger form submission (runs validation + onSubmit). */
+  submit: () => void;
+  /** Calls the onCancel callback if provided. Undefined when onCancel is not set. */
+  cancel?: () => void;
+  /** Calls the onReset callback and resets the form. Undefined when onReset is not set. */
+  reset?: () => void;
+}
+```
+
+### FormWizardActionsParams
+
+Passed to the `renderActions` render-prop of `FormWizard`.
+
+```typescript
+interface FormWizardActionsParams {
+  /** Whether the form is currently submitting. */
+  isSubmitting: boolean;
+  /** True when the wizard is on the first step. */
+  isFirstStep: boolean;
+  /** True when the wizard is on the last step. */
+  isLastStep: boolean;
+  /** Zero-based index of the currently visible step. */
+  activeStep: number;
+  /** Validate the current step and advance to the next one. */
+  next: () => void;
+  /** Navigate to the previous step without validation. */
+  back: () => void;
+  /** Programmatically trigger full-form submission (runs validation + onSubmit). */
+  submit: () => void;
+  /** Calls the onCancel callback if provided. Undefined when onCancel is not set. */
+  cancel?: () => void;
+}
 ```

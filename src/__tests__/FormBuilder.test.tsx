@@ -366,6 +366,79 @@ describe('FormBuilder — nested objects (dot-notation)', () => {
   });
 });
 
+describe('FormBuilder — title', () => {
+  it('renders the title when provided', () => {
+    renderWithTheme(<Builder title="My Form" />);
+    expect(screen.getByText('My Form')).toBeInTheDocument();
+  });
+
+  it('does not render a title element when title is omitted', () => {
+    renderWithTheme(<Builder />);
+    expect(screen.queryByRole('heading')).not.toBeInTheDocument();
+  });
+
+  it('applies titleAlign to the title text', () => {
+    renderWithTheme(<Builder title="Centered Form" titleAlign="center" />);
+    const title = screen.getByText('Centered Form');
+    expect(title).toBeInTheDocument();
+  });
+
+  it('renders title inside the form area by default (titlePosition=inside)', () => {
+    const { container } = renderWithTheme(<Builder title="Inside Title" />);
+    const form = container.querySelector('form');
+    expect(form).not.toBeNull();
+    expect(form?.textContent).toContain('Inside Title');
+  });
+
+  it('renders title above the form area when titlePosition=above', () => {
+    const { container } = renderWithTheme(<Builder title="Above Title" titlePosition="above" />);
+    const form = container.querySelector('form');
+    expect(form).not.toBeNull();
+    expect(form?.textContent).not.toContain('Above Title');
+    expect(screen.getByText('Above Title')).toBeInTheDocument();
+  });
+});
+
+describe('FormBuilder — renderActions', () => {
+  it('renders custom action buttons when renderActions is provided', () => {
+    renderWithTheme(
+      <Builder
+        renderActions={({ submit }) => (
+          <button type="button" onClick={submit}>
+            Custom Submit
+          </button>
+        )}
+      />,
+    );
+    expect(screen.getByRole('button', { name: 'Custom Submit' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Submit' })).not.toBeInTheDocument();
+  });
+
+  it('hides default buttons when renderActions is provided', () => {
+    renderWithTheme(
+      <Builder onCancel={vi.fn()} onReset={vi.fn()} renderActions={() => <span>custom</span>} />,
+    );
+    expect(screen.queryByRole('button', { name: 'Submit' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Cancel' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Reset' })).not.toBeInTheDocument();
+  });
+
+  it('passes isSubmitting, cancel, and reset to renderActions', () => {
+    const renderFn = vi.fn(() => <span>custom</span>);
+    const onCancel = vi.fn();
+    const onReset = vi.fn();
+    renderWithTheme(<Builder onCancel={onCancel} onReset={onReset} renderActions={renderFn} />);
+    expect(renderFn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isSubmitting: false,
+        cancel: onCancel,
+        reset: expect.any(Function),
+        submit: expect.any(Function),
+      }),
+    );
+  });
+});
+
 describe('FormBuilder — virtualize', () => {
   it('falls back to normal list when react-window is unavailable', async () => {
     // FormBuilder loads react-window via a dynamic import inside useEffect. In the

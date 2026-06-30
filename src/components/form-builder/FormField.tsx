@@ -11,6 +11,7 @@ import { AutocompleteInput } from './inputs/AutocompleteInput';
 import { RadioInput } from './inputs/RadioInput';
 import { CheckboxInput } from './inputs/CheckboxInput';
 import { ArrayInput } from './inputs/ArrayInput';
+import { PasswordInput } from './inputs/PasswordInput';
 
 interface FormFieldProps {
   fieldConfig: FieldConfig;
@@ -35,6 +36,7 @@ const fieldRegistry: Record<string, React.ComponentType<CustomFieldProps>> = {
   // TEXTAREA and DATE reuse TextInput — it handles multiline and date type internally.
   [FIELD_TYPE.TEXTAREA]: TextInput,
   [FIELD_TYPE.DATE]: TextInput,
+  [FIELD_TYPE.PASSWORD]: PasswordInput,
   [FIELD_TYPE.ARRAY]: ArrayInput,
   // DATE_PICKER is not pre-registered — use registerFieldType(FIELD_TYPE.DATE_PICKER, createDatePickerInput(DatePicker))
 };

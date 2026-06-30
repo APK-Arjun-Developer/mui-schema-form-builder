@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextField, Box } from '@mui/material';
+import { Box, InputAdornment, TextField } from '@mui/material';
 import { useController, type Control } from 'react-hook-form';
 import { FIELD_TYPE, type FieldConfig } from '../types/field.types';
 import { FieldLabel } from './FieldLabel';
@@ -24,6 +24,13 @@ export const TextInput = React.memo(({ fieldConfig, control }: InputProps) => {
   const isDate = fieldConfig.type === FIELD_TYPE.DATE;
   const isTextarea = fieldConfig.type === FIELD_TYPE.TEXTAREA;
 
+  const startAdornment = fieldConfig.startAdornment ? (
+    <InputAdornment position="start">{fieldConfig.startAdornment}</InputAdornment>
+  ) : undefined;
+  const endAdornment = fieldConfig.endAdornment ? (
+    <InputAdornment position="end">{fieldConfig.endAdornment}</InputAdornment>
+  ) : undefined;
+
   return (
     <Box>
       <FieldLabel
@@ -43,6 +50,7 @@ export const TextInput = React.memo(({ fieldConfig, control }: InputProps) => {
             'aria-invalid': !!error,
             'aria-describedby': errorId,
           },
+          input: { startAdornment, endAdornment },
         }}
         type={isDate ? 'date' : 'text'}
         placeholder={fieldConfig.placeholder}

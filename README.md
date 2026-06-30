@@ -11,6 +11,11 @@ Generate complex, production-ready forms from a plain JSON config. No boilerplat
 - **Zero-config forms** — one `fields` array, one `schema`, done
 - **Type-safe submit** — `onSubmit` data is fully typed from your Zod schema
 - **MUI-native** — built on `@mui/material` v9, not bolted on
+- **Password input** — `FIELD_TYPE.PASSWORD` with a built-in show/hide toggle (no icon library needed)
+- **Input adornments** — `startAdornment` / `endAdornment` on TEXT and NUMBER fields for prefixes, suffixes, and icons
+- **Form title** — optional heading with alignment (`titleAlign`) and placement (`titlePosition`) control
+- **Custom action buttons** — replace Submit/Cancel/Reset with your own layout via `renderActions`
+- **Multi-step wizard** — `FormWizard` with per-step validation, completed-step navigation, and submit-error navigation
 - **Async autocomplete** — debounced fetch with built-in stale-response protection
 - **Conditional fields** — hide/show fields based on other field values
 - **Performance** — fields without `visibleIf` never re-render on sibling changes
@@ -81,40 +86,155 @@ export default function App() {
 
 ## Field Schema Reference
 
-| Property       | Type                                   | Required | Description                                           |
-| -------------- | -------------------------------------- | -------- | ----------------------------------------------------- |
-| `name`         | `string`                               | ✓        | Field name — must match a key in your Zod schema      |
-| `label`        | `string`                               | ✓        | Display label                                         |
-| `type`         | `FieldType`                            | ✓        | See field types below                                 |
-| `defaultValue` | `unknown`                              |          | Initial value                                         |
-| `placeholder`  | `string`                               |          | Input placeholder                                     |
-| `required`     | `boolean`                              |          | Shows asterisk, sets `aria-required`                  |
-| `disabled`     | `boolean`                              |          | Disables the field                                    |
-| `options`      | `Option[]`                             |          | For SELECT, RADIO, CHECKBOX                           |
-| `multiple`     | `boolean`                              |          | Multi-select for SELECT and AUTOCOMPLETE              |
-| `grid`         | `GridConfig`                           |          | MUI Grid `size` — e.g. `{ xs: 12, sm: 6 }`            |
-| `size`         | `'small' \| 'medium'`                  |          | MUI component size                                    |
-| `fullWidth`    | `boolean`                              |          | Full-width input (default `true`)                     |
-| `min`          | `number`                               |          | Min value — NUMBER only; also sets HTML `min`         |
-| `max`          | `number`                               |          | Max value — NUMBER only; also sets HTML `max`         |
-| `step`         | `number`                               |          | Step — NUMBER only; also sets HTML `step`             |
-| `fetchOptions` | `(query: string) => Promise<Option[]>` |          | Async options for AUTOCOMPLETE                        |
-| `visibleIf`    | `(values: FieldValues) => boolean`     |          | Hides field when returns `false`                      |
-| `muiProps`     | `Record<string, any>`                  |          | Extra props forwarded to the underlying MUI component |
+| Property         | Type                                   | Required | Description                                                    |
+| ---------------- | -------------------------------------- | -------- | -------------------------------------------------------------- |
+| `name`           | `string`                               | ✓        | Field name — must match a key in your Zod schema               |
+| `label`          | `string`                               | ✓        | Display label                                                  |
+| `type`           | `FieldType`                            | ✓        | See field types below                                          |
+| `defaultValue`   | `unknown`                              |          | Initial value                                                  |
+| `placeholder`    | `string`                               |          | Input placeholder                                              |
+| `required`       | `boolean`                              |          | Shows asterisk, sets `aria-required`                           |
+| `disabled`       | `boolean`                              |          | Disables the field                                             |
+| `options`        | `Option[]`                             |          | For SELECT, RADIO, CHECKBOX                                    |
+| `multiple`       | `boolean`                              |          | Multi-select for SELECT and AUTOCOMPLETE                       |
+| `grid`           | `GridConfig`                           |          | MUI Grid `size` — e.g. `{ xs: 12, sm: 6 }`                    |
+| `size`           | `'small' \| 'medium'`                  |          | MUI component size                                             |
+| `fullWidth`      | `boolean`                              |          | Full-width input (default `true`)                              |
+| `min`            | `number`                               |          | Min value — NUMBER only; also sets HTML `min`                  |
+| `max`            | `number`                               |          | Max value — NUMBER only; also sets HTML `max`                  |
+| `step`           | `number`                               |          | Step — NUMBER only; also sets HTML `step`                      |
+| `rows`           | `number`                               |          | Visible text rows — TEXTAREA only (default `4`)                |
+| `startAdornment` | `React.ReactNode`                      |          | Prefix node inside the input (TEXT, NUMBER). E.g. `"$"`, icon |
+| `endAdornment`   | `React.ReactNode`                      |          | Suffix node inside the input (TEXT, NUMBER). E.g. `"kg"`       |
+| `fetchOptions`   | `(query: string) => Promise<Option[]>` |          | Async options for AUTOCOMPLETE                                 |
+| `visibleIf`      | `(values: FieldValues) => boolean`     |          | Hides field when returns `false`                               |
+| `muiProps`       | `Record<string, any>`                  |          | Extra props forwarded to the underlying MUI component          |
+| `section`        | `string`                               |          | Groups consecutive same-section fields under a shared header   |
 
 ### Field Types
 
 ```tsx
 import { FIELD_TYPE } from 'mui-schema-form-builder';
 
-FIELD_TYPE.TEXT; // <input type="text">
-FIELD_TYPE.TEXTAREA; // <textarea> (multiline)
-FIELD_TYPE.NUMBER; // <input type="number">
-FIELD_TYPE.DATE; // <input type="date">
-FIELD_TYPE.SELECT; // <Select> single or multi
+FIELD_TYPE.TEXT;         // <input type="text">
+FIELD_TYPE.TEXTAREA;     // <textarea> (multiline)
+FIELD_TYPE.NUMBER;       // <input type="number">
+FIELD_TYPE.DATE;         // <input type="date">
+FIELD_TYPE.PASSWORD;     // Password input with show/hide toggle
+FIELD_TYPE.SELECT;       // <Select> single or multi
 FIELD_TYPE.AUTOCOMPLETE; // <Autocomplete> static or async
-FIELD_TYPE.RADIO; // <RadioGroup>
-FIELD_TYPE.CHECKBOX; // Boolean or checkbox group
+FIELD_TYPE.RADIO;        // <RadioGroup>
+FIELD_TYPE.CHECKBOX;     // Boolean or checkbox group
+FIELD_TYPE.ARRAY;        // Dynamic list with add/remove (useFieldArray)
+FIELD_TYPE.DATE_PICKER;  // MUI DatePicker — register via createDatePickerInput
+```
+
+---
+
+## Password Input
+
+Use `FIELD_TYPE.PASSWORD` for a text input with a built-in show/hide toggle. The toggle uses an inline SVG icon — no `@mui/icons-material` dependency needed.
+
+```tsx
+{
+  name: 'password',
+  label: 'Password',
+  type: FIELD_TYPE.PASSWORD,
+  required: true,
+}
+```
+
+---
+
+## Input Adornments
+
+Add a prefix or suffix decoration to TEXT and NUMBER fields via `startAdornment` and `endAdornment`. Pass any React node — a string, an icon, or an interactive element.
+
+```tsx
+[
+  {
+    name: 'price',
+    label: 'Price',
+    type: FIELD_TYPE.NUMBER,
+    startAdornment: '$',
+    endAdornment: 'USD',
+  },
+  {
+    name: 'username',
+    label: 'Username',
+    type: FIELD_TYPE.TEXT,
+    startAdornment: '@',
+  },
+]
+```
+
+> **Note:** PASSWORD fields have their own fixed end adornment (the visibility toggle). Setting `endAdornment` on a PASSWORD field has no effect.
+
+---
+
+## Form Title
+
+Add a heading to `FormBuilder` or `FormWizard` with the `title`, `titleAlign`, and `titlePosition` props.
+
+```tsx
+<FormBuilder
+  title="Edit Profile"
+  titleAlign="left"        // 'left' | 'center' | 'right' — default: 'left'
+  titlePosition="inside"   // 'inside' | 'above' — default: 'inside'
+  ...
+/>
+```
+
+- `titlePosition="inside"` — the heading renders inside the Paper container above the fields.
+- `titlePosition="above"` — the heading renders outside the Paper, useful when you control the container styling.
+
+---
+
+## Custom Action Buttons
+
+Replace the default Submit / Cancel / Reset buttons with your own layout via `renderActions`.
+
+### FormBuilder
+
+```tsx
+import type { FormBuilderActionsParams } from 'mui-schema-form-builder';
+
+<FormBuilder
+  onSubmit={fn}
+  onCancel={cancelFn}
+  onReset={resetFn}
+  renderActions={({ isSubmitting, submit, cancel, reset }: FormBuilderActionsParams) => (
+    <Stack direction="row" spacing={1} justifyContent="flex-end">
+      {cancel && <Button onClick={cancel}>Discard</Button>}
+      <Button variant="contained" onClick={submit} disabled={isSubmitting}>
+        Save Changes
+      </Button>
+    </Stack>
+  )}
+/>
+```
+
+### FormWizard
+
+```tsx
+import type { FormWizardActionsParams } from 'mui-schema-form-builder';
+
+<FormWizard
+  steps={steps}
+  schema={schema}
+  onSubmit={fn}
+  renderActions={({
+    isSubmitting, isFirstStep, isLastStep, next, back, submit,
+  }: FormWizardActionsParams) => (
+    <Stack direction="row" spacing={2} justifyContent="space-between" width="100%">
+      <Button onClick={back} disabled={isFirstStep}>← Back</Button>
+      {isLastStep
+        ? <Button variant="contained" onClick={submit}>Finish</Button>
+        : <Button variant="contained" onClick={next}>Continue →</Button>
+      }
+    </Stack>
+  )}
+/>
 ```
 
 ---
@@ -193,19 +313,29 @@ Built-in 300ms debounce and stale-response protection. If a later search resolve
 
 ## FormBuilder Props
 
-| Prop             | Type                                                | Default       | Description                         |
-| ---------------- | --------------------------------------------------- | ------------- | ----------------------------------- |
-| `fields`         | `FieldConfig[]`                                     | required      | Field configuration                 |
-| `schema`         | `z.ZodType`                                         | required      | Zod validation schema               |
-| `onSubmit`       | `(data: z.infer<TSchema>) => void \| Promise<void>` | required      | Typed submit handler                |
-| `onCancel`       | `() => void`                                        |               | Renders Cancel button when provided |
-| `onReset`        | `() => void`                                        |               | Renders Reset button when provided  |
-| `submitText`     | `string`                                            | `'Submit'`    | Submit button label                 |
-| `cancelText`     | `string`                                            | `'Cancel'`    | Cancel button label                 |
-| `resetText`      | `string`                                            | `'Reset'`     | Reset button label                  |
-| `spacing`        | `number`                                            | `2`           | MUI Grid spacing between fields     |
-| `virtualize`     | `boolean`                                           | `false`       | Enable react-window for large forms |
-| `validationMode` | `ValidationMode`                                    | `'onTouched'` | When validation triggers            |
+| Prop                 | Type                                                | Default       | Description                                                      |
+| -------------------- | --------------------------------------------------- | ------------- | ---------------------------------------------------------------- |
+| `fields`             | `FieldConfig[]`                                     | required      | Field configuration                                              |
+| `schema`             | `z.ZodType`                                         | required\*    | Zod validation schema (\*or `resolver`)                          |
+| `resolver`           | `Resolver`                                          |               | react-hook-form resolver (alternative to `schema`)               |
+| `onSubmit`           | `(data: z.infer<TSchema>) => void \| Promise<void>` | required      | Typed submit handler                                             |
+| `onCancel`           | `() => void`                                        |               | Renders Cancel button when provided                              |
+| `onReset`            | `() => void`                                        |               | Renders Reset button when provided                               |
+| `onChange`           | `(values: FieldValues) => void`                     |               | Called on every field value change                               |
+| `onFieldChange`      | `(name: string, value: unknown) => void`            |               | Called when a single field changes                               |
+| `submitText`         | `string`                                            | `'Submit'`    | Submit button label                                              |
+| `cancelText`         | `string`                                            | `'Cancel'`    | Cancel button label                                              |
+| `resetText`          | `string`                                            | `'Reset'`     | Reset button label                                               |
+| `title`              | `string`                                            |               | Optional form heading                                            |
+| `titleAlign`         | `'left' \| 'center' \| 'right'`                     | `'left'`      | Horizontal alignment of the title                                |
+| `titlePosition`      | `'inside' \| 'above'`                               | `'inside'`    | Whether the title is inside or above the Paper container         |
+| `renderActions`      | `(params: FormBuilderActionsParams) => ReactNode`   |               | Replace default buttons with a custom render                     |
+| `readOnly`           | `boolean`                                           | `false`       | Render all fields as display text                                |
+| `labels`             | `FormBuilderLabels`                                 |               | Override built-in UI strings                                     |
+| `spacing`            | `number`                                            | `2`           | MUI Grid spacing between fields                                  |
+| `virtualize`         | `boolean`                                           | `false`       | Enable react-window for large forms                              |
+| `validationMode`     | `ValidationMode`                                    | `'onTouched'` | When validation triggers                                         |
+| `sx`                 | `SxProps`                                           |               | MUI sx prop for the outer Paper                                  |
 
 ---
 

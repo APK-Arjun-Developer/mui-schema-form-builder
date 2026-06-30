@@ -1,15 +1,29 @@
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { z } from 'zod';
-import { Typography, Box, Card, CardContent, Paper, Tab, Tabs, Button, Chip } from '@mui/material';
+import {
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  Paper,
+  Tab,
+  Tabs,
+  Button,
+  Chip,
+  Stack,
+  CircularProgress,
+} from '@mui/material';
 import { FormBuilder } from '../components/form-builder/FormBuilder';
 import { FormWizard } from '../components/form-builder/FormWizard';
 import {
   FIELD_TYPE,
   type FieldConfig,
   type Option,
+  type FormBuilderActionsParams,
+  type FormWizardActionsParams,
 } from '../components/form-builder/types/field.types';
 
-// ─── Shared types ─────────────────────────────────────────────────────────────
+// ─── Shared types ────────────────────────────────────────────────────────────
 
 const formSchema = z.object({
   fullName: z
@@ -71,7 +85,7 @@ function TabPanel({
   return value === index ? <Box sx={{ pt: 3 }}>{children}</Box> : null;
 }
 
-// ─── JSON preview ─────────────────────────────────────────────────────────────
+// ─── JSON preview ──────────────────────────────────────────────────────────────
 
 function JsonPreview({ data }: { data: unknown }) {
   return (
@@ -131,7 +145,7 @@ function FormBuilderDemo() {
         type: FIELD_TYPE.TEXT,
         required: true,
         grid: { xs: 12, sm: 6 },
-        placeholder: '+1 (555) 000-0000',
+        placeholder: 'Eg: 9876543210',
         section: 'Contact',
       },
       {
@@ -255,6 +269,8 @@ function FormBuilderDemo() {
         </Box>
       )}
       <FormBuilder
+        title="Your Profile"
+        titleAlign="left"
         fields={fields}
         schema={formSchema}
         onSubmit={handleSubmit}
@@ -263,10 +279,44 @@ function FormBuilderDemo() {
           setSubmittedData(null);
           setReadOnly(false);
         }}
-        submitText={readOnly ? 'Confirmed' : 'Save Profile'}
-        cancelText="Cancel"
-        resetText="Clear Form"
         readOnly={readOnly}
+        renderActions={({ isSubmitting, submit, cancel, reset }: FormBuilderActionsParams) => (
+          <Stack direction="row" spacing={1} justifyContent="flex-end" flexWrap="wrap">
+            {reset && (
+              <Button
+                size="small"
+                color="inherit"
+                onClick={reset}
+                disabled={isSubmitting}
+                sx={{ textTransform: 'none' }}
+              >
+                Clear Form
+              </Button>
+            )}
+            {cancel && (
+              <Button
+                size="small"
+                variant="outlined"
+                onClick={cancel}
+                disabled={isSubmitting}
+                sx={{ textTransform: 'none' }}
+              >
+                Cancel
+              </Button>
+            )}
+            <Button
+              size="small"
+              variant="contained"
+              color="primary"
+              onClick={submit}
+              disabled={isSubmitting || readOnly}
+              startIcon={isSubmitting ? <CircularProgress size={14} color="inherit" /> : undefined}
+              sx={{ textTransform: 'none', fontWeight: 600 }}
+            >
+              {isSubmitting ? 'Saving…' : readOnly ? 'Confirmed' : 'Save Profile'}
+            </Button>
+          </Stack>
+        )}
       />
       {submittedData && <JsonPreview data={submittedData} />}
     </Box>
@@ -280,6 +330,7 @@ const wizardSchema = z.object({
   lastName: z.string().min(1, 'Required'),
   email: z.string().email('Invalid email'),
   phone: z.string().optional(),
+  password: z.string().min(8, 'At least 8 characters'),
   country: z.string().min(1, 'Please select a country'),
   role: z.string().min(1, 'Please select a role'),
   startDate: z.string().min(1, 'Please select a date'),
@@ -293,6 +344,8 @@ function WizardDemo() {
   return (
     <Box>
       <FormWizard
+        title="Application Form"
+        titleAlign="center"
         schema={wizardSchema}
         steps={[
           {
@@ -320,7 +373,24 @@ function WizardDemo() {
                 required: true,
                 grid: { xs: 12, sm: 6 },
               },
-              { name: 'phone', label: 'Phone', type: FIELD_TYPE.TEXT, grid: { xs: 12, sm: 6 } },
+              {
+                name: 'phone',
+                label: 'Phone',
+                type: FIELD_TYPE.TEXT,
+                grid: { xs: 12, sm: 6 },
+              },
+            ],
+          },
+          {
+            label: 'Security',
+            description: 'Set a password',
+            fields: [
+              {
+                name: 'password',
+                label: 'Password',
+                type: FIELD_TYPE.PASSWORD,
+                required: true,
+              },
             ],
           },
           {
@@ -383,7 +453,64 @@ function WizardDemo() {
         ]}
         onSubmit={(data) => setSubmittedData(data)}
         onCancel={() => setSubmittedData(null)}
-        submitText="Submit Application"
+        renderActions={({
+          isSubmitting,
+          isFirstStep,
+          isLastStep,
+          next,
+          back,
+          submit,
+          cancel,
+        }: FormWizardActionsParams) => (
+          <Stack direction="row" spacing={1} justifyContent="flex-end" flexWrap="wrap">
+            {isFirstStep && cancel && (
+              <Button
+                variant="outlined"
+                color="inherit"
+                onClick={cancel}
+                disabled={isSubmitting}
+                sx={{ textTransform: 'none' }}
+              >
+                Cancel
+              </Button>
+            )}
+            {!isFirstStep && (
+              <Button
+                variant="outlined"
+                color="inherit"
+                onClick={back}
+                disabled={isSubmitting}
+                sx={{ textTransform: 'none' }}
+              >
+                ← Back
+              </Button>
+            )}
+            {isLastStep ? (
+              <Button
+                variant="contained"
+                color="success"
+                onClick={submit}
+                disabled={isSubmitting}
+                startIcon={
+                  isSubmitting ? <CircularProgress size={14} color="inherit" /> : undefined
+                }
+                sx={{ textTransform: 'none', fontWeight: 600 }}
+              >
+                {isSubmitting ? 'Submitting…' : 'Submit Application'}
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={next}
+                disabled={isSubmitting}
+                sx={{ textTransform: 'none', fontWeight: 600 }}
+              >
+                Continue →
+              </Button>
+            )}
+          </Stack>
+        )}
       />
       {submittedData && <JsonPreview data={submittedData} />}
     </Box>
@@ -480,7 +607,7 @@ function ArrayFieldDemo() {
   );
 }
 
-// ─── ExampleForm (tabbed) ─────────────────────────────────────────────────────
+// ─── ExampleForm (tabbed) ──────────────────────────────────────────────────────
 
 export const ExampleForm = () => {
   const [tab, setTab] = useState(0);

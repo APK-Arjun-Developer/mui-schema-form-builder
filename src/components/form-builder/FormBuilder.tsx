@@ -2,7 +2,7 @@ import React, { useEffect, useImperativeHandle, useMemo, useState } from 'react'
 import type { Control, FieldValues } from 'react-hook-form';
 import { FormProvider } from 'react-hook-form';
 import { Box, Button, Divider, Grid, Paper, Typography } from '@mui/material';
-import type { FieldConfig, FormBuilderProps } from './types/field.types';
+import type { FieldConfig, FormBuilderActionsParams, FormBuilderProps } from './types/field.types';
 import { FormField } from './FormField';
 import { useFormBuilder } from '../../hooks/useFormBuilder';
 import { FormBuilderContext, DEFAULT_LABELS, type ResolvedLabels } from './FormBuilderContext';
@@ -99,6 +99,10 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
     sx,
     readOnly = false,
     labels,
+    title,
+    titleAlign = 'left',
+    titlePosition = 'inside',
+    renderActions,
   }: FormBuilderProps<TSchema>,
   ref: React.Ref<FormBuilderHandle>,
 ) => {
@@ -167,8 +171,18 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
     [readOnly, resolvedLabels],
   );
 
+  const titleNode = title ? (
+    <Typography
+      variant="h6"
+      sx={{ fontWeight: 700, textAlign: titleAlign, mb: titlePosition === 'inside' ? 2 : 1 }}
+    >
+      {title}
+    </Typography>
+  ) : null;
+
   return (
     <FormBuilderContext.Provider value={ctxValue}>
+      {titlePosition === 'above' && titleNode}
       {/* methods is typed as UseFormReturn<any> internally; the public onSubmit on
         FormBuilderProps<TSchema> carries the correct typed signature for consumers. */}
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
@@ -182,6 +196,7 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
               ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
             ]}
           >
+            {titlePosition === 'inside' && titleNode}
             {virtualize && FixedSizeList ? (
               // Sections are not supported in virtual mode — all fields render flat.
               <FixedSizeList
@@ -218,42 +233,48 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
             <Box
               sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'flex-end', flexWrap: 'wrap' }}
             >
-              {onReset && (
-                <Button
-                  variant="text"
-                  color="secondary"
-                  onClick={handleFormReset}
-                  disabled={isSubmitting}
-                  sx={{ textTransform: 'none', fontWeight: 500 }}
-                >
-                  {resetText}
-                </Button>
+              {renderActions ? (
+                renderActions({
+                  isSubmitting,
+                  submit: () => void methods.handleSubmit(onSubmit as never)(),
+                  cancel: onCancel,
+                  reset: onReset ? handleFormReset : undefined,
+                } satisfies FormBuilderActionsParams)
+              ) : (
+                <>
+                  {onReset && (
+                    <Button
+                      variant="text"
+                      color="secondary"
+                      onClick={handleFormReset}
+                      disabled={isSubmitting}
+                      sx={{ textTransform: 'none', fontWeight: 500 }}
+                    >
+                      {resetText}
+                    </Button>
+                  )}
+                  {onCancel && (
+                    <Button
+                      variant="outlined"
+                      color="inherit"
+                      onClick={onCancel}
+                      disabled={isSubmitting}
+                      sx={{ textTransform: 'none', fontWeight: 500 }}
+                    >
+                      {cancelText}
+                    </Button>
+                  )}
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    loading={isSubmitting}
+                    sx={{ px: 4, py: 1, fontWeight: 600 }}
+                  >
+                    {submitText}
+                  </Button>
+                </>
               )}
-              {onCancel && (
-                <Button
-                  variant="outlined"
-                  color="inherit"
-                  onClick={onCancel}
-                  disabled={isSubmitting}
-                  sx={{ textTransform: 'none', fontWeight: 500 }}
-                >
-                  {cancelText}
-                </Button>
-              )}
-
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                loading={isSubmitting}
-                sx={{
-                  px: 4,
-                  py: 1,
-                  fontWeight: 600,
-                }}
-              >
-                {submitText}
-              </Button>
             </Box>
           </Paper>
         </form>

@@ -1,7 +1,10 @@
+import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { z } from 'zod';
+import { Button, CircularProgress, Stack } from '@mui/material';
 import { FormBuilder } from '../components/form-builder/FormBuilder';
 import { FIELD_TYPE } from '../components/form-builder/types/field.types';
+import type { FormBuilderActionsParams } from '../components/form-builder/types/field.types';
 
 const meta: Meta<typeof FormBuilder> = {
   title: 'FormBuilder',
@@ -89,6 +92,212 @@ export const AllFieldTypes: Story = {
     submitText: 'Save',
     onCancel: () => alert('Cancelled'),
     onReset: () => alert('Form reset'),
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Password field
+// ---------------------------------------------------------------------------
+export const PasswordField: Story = {
+  name: 'Password input',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Use `FIELD_TYPE.PASSWORD` for a text input with a built-in show/hide visibility toggle. No extra dependencies needed — the toggle icon is an inline SVG.',
+      },
+    },
+  },
+  args: {
+    schema: z.object({
+      password: z.string().min(8, 'At least 8 characters'),
+      confirm: z.string().min(1, 'Required'),
+    }),
+    fields: [
+      {
+        name: 'password',
+        label: 'New Password',
+        type: FIELD_TYPE.PASSWORD,
+        required: true,
+      },
+      {
+        name: 'confirm',
+        label: 'Confirm Password',
+        type: FIELD_TYPE.PASSWORD,
+        required: true,
+      },
+    ],
+    onSubmit: (data) => alert(JSON.stringify(data, null, 2)),
+    submitText: 'Set Password',
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Input adornments (startAdornment / endAdornment)
+// ---------------------------------------------------------------------------
+export const InputAdornments: Story = {
+  name: 'Input adornments',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Add prefix/suffix decorations to TEXT and NUMBER fields using `startAdornment` and `endAdornment` on FieldConfig. Pass any React node — text, icons, or interactive elements.',
+      },
+    },
+  },
+  args: {
+    schema: z.object({
+      price: z.number().min(0, 'Must be positive'),
+      weight: z.number().min(0),
+      url: z.string().url('Enter a valid URL').optional(),
+      username: z.string().min(3, 'At least 3 characters'),
+    }),
+    fields: [
+      {
+        name: 'price',
+        label: 'Price',
+        type: FIELD_TYPE.NUMBER,
+        startAdornment: '$',
+        endAdornment: 'USD',
+        min: 0,
+        grid: { xs: 12, sm: 6 },
+      },
+      {
+        name: 'weight',
+        label: 'Weight',
+        type: FIELD_TYPE.NUMBER,
+        endAdornment: 'kg',
+        min: 0,
+        grid: { xs: 12, sm: 6 },
+      },
+      {
+        name: 'url',
+        label: 'Website',
+        type: FIELD_TYPE.TEXT,
+        startAdornment: 'https://',
+        placeholder: 'example.com',
+        grid: { xs: 12, sm: 6 },
+      },
+      {
+        name: 'username',
+        label: 'Username',
+        type: FIELD_TYPE.TEXT,
+        startAdornment: '@',
+        grid: { xs: 12, sm: 6 },
+      },
+    ],
+    onSubmit: (data) => alert(JSON.stringify(data, null, 2)),
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Title — inside (default) and above
+// ---------------------------------------------------------------------------
+export const WithTitleInside: Story = {
+  name: 'Form title (inside)',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Use the `title` prop to display a heading. `titlePosition="inside"` (default) places it inside the Paper container above the fields.',
+      },
+    },
+  },
+  args: {
+    title: 'Edit Profile',
+    titleAlign: 'left',
+    titlePosition: 'inside',
+    schema: z.object({
+      name: z.string().min(1, 'Required'),
+      email: z.string().email('Invalid email'),
+    }),
+    fields: [
+      { name: 'name', label: 'Name', type: FIELD_TYPE.TEXT, required: true },
+      { name: 'email', label: 'Email', type: FIELD_TYPE.TEXT, required: true },
+    ],
+    onSubmit: (data) => alert(JSON.stringify(data, null, 2)),
+  },
+};
+
+export const WithTitleAbove: Story = {
+  name: 'Form title (above)',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`titlePosition="above"` renders the heading outside the Paper so you can add your own container styling around it.',
+      },
+    },
+  },
+  args: {
+    title: 'Create Account',
+    titleAlign: 'center',
+    titlePosition: 'above',
+    schema: z.object({
+      name: z.string().min(1, 'Required'),
+      email: z.string().email('Invalid email'),
+    }),
+    fields: [
+      { name: 'name', label: 'Name', type: FIELD_TYPE.TEXT, required: true },
+      { name: 'email', label: 'Email', type: FIELD_TYPE.TEXT, required: true },
+    ],
+    onSubmit: (data) => alert(JSON.stringify(data, null, 2)),
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Custom action buttons (renderActions)
+// ---------------------------------------------------------------------------
+export const CustomActions: Story = {
+  name: 'Custom action buttons (renderActions)',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Supply a `renderActions` render-prop to replace the default Submit / Cancel / Reset buttons. It receives `{ isSubmitting, submit, cancel, reset }` for full control over layout and styling.',
+      },
+    },
+  },
+  render: () => {
+    return (
+      <FormBuilder
+        schema={z.object({
+          name: z.string().min(1, 'Required'),
+          email: z.string().email('Invalid email'),
+        })}
+        fields={[
+          { name: 'name', label: 'Full Name', type: FIELD_TYPE.TEXT, required: true },
+          { name: 'email', label: 'Email Address', type: FIELD_TYPE.TEXT, required: true },
+        ]}
+        onSubmit={(data) => alert(JSON.stringify(data, null, 2))}
+        onCancel={() => alert('Cancelled')}
+        onReset={() => alert('Reset')}
+        renderActions={({ isSubmitting, submit, cancel, reset }: FormBuilderActionsParams) => (
+          <Stack direction="row" spacing={1} justifyContent="flex-end">
+            {reset && (
+              <Button size="small" color="inherit" onClick={reset} disabled={isSubmitting}>
+                Clear
+              </Button>
+            )}
+            {cancel && (
+              <Button size="small" variant="outlined" onClick={cancel} disabled={isSubmitting}>
+                Discard
+              </Button>
+            )}
+            <Button
+              size="small"
+              variant="contained"
+              color="primary"
+              onClick={submit}
+              disabled={isSubmitting}
+              startIcon={isSubmitting ? <CircularProgress size={14} /> : undefined}
+            >
+              {isSubmitting ? 'Saving…' : 'Save Changes'}
+            </Button>
+          </Stack>
+        )}
+      />
+    );
   },
 };
 
