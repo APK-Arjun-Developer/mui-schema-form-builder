@@ -12,6 +12,8 @@ Generate complex, production-ready forms from a plain JSON config. No boilerplat
 - **Type-safe submit** — `onSubmit` data is fully typed from your Zod schema
 - **MUI-native** — built on `@mui/material` v9, not bolted on
 - **Password input** — `FIELD_TYPE.PASSWORD` with a built-in show/hide toggle (no icon library needed)
+- **Combo input** — `FIELD_TYPE.COMBO_INPUT` fuses a Select dropdown with a text/number/search input into a single compound field
+- **Filter form** — `FilterForm` fires `onChange` on every keystroke — no submit button, no schema required
 - **Input adornments** — `startAdornment` / `endAdornment` on TEXT and NUMBER fields for prefixes, suffixes, and icons
 - **Form title** — optional heading with alignment (`titleAlign`) and placement (`titlePosition`) control
 - **Custom action buttons** — replace Submit/Cancel/Reset with your own layout via `renderActions`
@@ -106,10 +108,15 @@ export default function App() {
 | `rows`           | `number`                               |          | Visible text rows — TEXTAREA only (default `4`)                |
 | `startAdornment` | `React.ReactNode`                      |          | Prefix node inside the input (TEXT, NUMBER). E.g. `"$"`, icon |
 | `endAdornment`   | `React.ReactNode`                      |          | Suffix node inside the input (TEXT, NUMBER). E.g. `"kg"`       |
-| `fetchOptions`   | `(query: string) => Promise<Option[]>` |          | Async options for AUTOCOMPLETE                                 |
-| `visibleIf`      | `(values: FieldValues) => boolean`     |          | Hides field when returns `false`                               |
-| `muiProps`       | `Record<string, any>`                  |          | Extra props forwarded to the underlying MUI component          |
-| `section`        | `string`                               |          | Groups consecutive same-section fields under a shared header   |
+| `fetchOptions`      | `(query: string) => Promise<Option[]>` |          | Async options for AUTOCOMPLETE                                 |
+| `visibleIf`         | `(values: FieldValues) => boolean`     |          | Hides field when returns `false`                               |
+| `muiProps`          | `Record<string, any>`                  |          | Extra props forwarded to the underlying MUI component          |
+| `section`           | `string`                               |          | Groups consecutive same-section fields under a shared header   |
+| `selectOptions`     | `Option[]`                             |          | Dropdown options — COMBO_INPUT only                            |
+| `selectPosition`    | `'start' \| 'end'`                     |          | Which side the Select appears on — COMBO_INPUT (default `'start'`) |
+| `selectPlaceholder` | `string`                               |          | Placeholder shown when no option is selected — COMBO_INPUT only |
+| `inputType`         | `'text' \| 'number' \| 'search'`       |          | HTML input type for the text portion — COMBO_INPUT (default `'text'`) |
+| `selectWidth`       | `number`                               |          | Width in px of the Select portion — COMBO_INPUT (default `120`) |
 
 ### Field Types
 
@@ -127,7 +134,110 @@ FIELD_TYPE.RADIO;        // <RadioGroup>
 FIELD_TYPE.CHECKBOX;     // Boolean or checkbox group
 FIELD_TYPE.ARRAY;        // Dynamic list with add/remove (useFieldArray)
 FIELD_TYPE.DATE_PICKER;  // MUI DatePicker — register via createDatePickerInput
+FIELD_TYPE.COMBO_INPUT;  // Fused Select + text/number/search — value shape: { select, input }
 ```
+
+---
+
+## FilterForm
+
+`FilterForm` is a reactive filter bar that fires `onChange` on every field change. No submit button, no Zod schema required — designed for search bars, filter sidebars, and toolbar filters.
+
+```tsx
+import { FilterForm, FIELD_TYPE } from 'mui-schema-form-builder';
+
+<FilterForm
+  fields={[
+    { name: 'search', label: 'Search', type: FIELD_TYPE.TEXT, placeholder: 'Search…', grid: { xs: 12, sm: 8 } },
+    {
+      name: 'status',
+      label: 'Status',
+      type: FIELD_TYPE.SELECT,
+      options: [
+        { label: 'All', value: '' },
+        { label: 'Active', value: 'active' },
+        { label: 'Inactive', value: 'inactive' },
+      ],
+      grid: { xs: 12, sm: 4 },
+    },
+  ]}
+  onChange={(values) => console.log(values)}
+  showReset
+  defaultValues={{ search: '', status: '' }}
+/>
+```
+
+| Prop            | Type                            | Default | Description                                          |
+| --------------- | ------------------------------- | ------- | ---------------------------------------------------- |
+| `fields`        | `FieldConfig[]`                 | required | Field configuration                                |
+| `onChange`      | `(values: FieldValues) => void` | required | Called on every field change with the full state   |
+| `defaultValues` | `FieldValues`                   |         | Initial field values                               |
+| `showReset`     | `boolean`                       | `false` | Show a Reset button that restores `defaultValues`  |
+| `spacing`       | `number`                        | `2`     | MUI Grid spacing between fields                    |
+| `resetText`     | `string`                        | `'Reset'` | Reset button label                               |
+
+---
+
+## Combo Input
+
+`FIELD_TYPE.COMBO_INPUT` fuses a Select dropdown with a text, number, or search input into a single compound field. The RHF value shape is `{ select, input }`.
+
+```tsx
+// Phone number — country code at start
+{
+  name: 'phone',
+  label: 'Phone number',
+  type: FIELD_TYPE.COMBO_INPUT,
+  required: true,
+  selectOptions: [
+    { label: '+1', value: '+1' },
+    { label: '+44', value: '+44' },
+    { label: '+91', value: '+91' },
+  ],
+  selectPlaceholder: 'Code',
+  selectWidth: 88,
+  placeholder: '(555) 000-0000',
+}
+
+// Currency amount — selector at start, number input
+{
+  name: 'price',
+  label: 'Price',
+  type: FIELD_TYPE.COMBO_INPUT,
+  selectOptions: [{ label: 'USD $', value: 'usd' }, { label: 'EUR €', value: 'eur' }],
+  selectPlaceholder: 'Currency',
+  selectWidth: 104,
+  inputType: 'number',
+  min: 0,
+  placeholder: '0.00',
+}
+
+// Search with category — selector at end
+{
+  name: 'query',
+  label: 'Search',
+  type: FIELD_TYPE.COMBO_INPUT,
+  selectPosition: 'end',
+  selectOptions: [{ label: 'All', value: '' }, { label: 'Books', value: 'books' }],
+  selectPlaceholder: 'Category',
+  selectWidth: 130,
+  inputType: 'search',
+  placeholder: 'Search products…',
+}
+```
+
+The Zod schema for a COMBO_INPUT field uses a nested object:
+
+```tsx
+const schema = z.object({
+  phone: z.object({
+    select: z.string().min(1, 'Select a country code'),
+    input: z.string().min(6, 'Enter a valid phone number'),
+  }),
+});
+```
+
+> **Note:** When `inputType: 'search'`, a magnifying-glass icon is automatically rendered as a start adornment — no extra configuration needed.
 
 ---
 

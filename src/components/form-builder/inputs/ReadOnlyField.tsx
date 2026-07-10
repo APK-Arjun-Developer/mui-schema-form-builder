@@ -126,6 +126,28 @@ export const ReadOnlyField = React.memo(({ fieldConfig, control }: ReadOnlyField
         break;
       }
 
+      case FIELD_TYPE.COMBO_INPUT: {
+        const comboVal = value as { select?: string | number; input?: string | number };
+        const selectLabel =
+          fieldConfig.selectOptions?.find((o) => o.value === comboVal.select)?.label ??
+          String(comboVal.select ?? '');
+        const inputStr = String(comboVal.input ?? '');
+        if (!selectLabel && !inputStr) {
+          display = (
+            <Typography variant="body1" color="text.disabled">
+              —
+            </Typography>
+          );
+        } else {
+          const parts =
+            fieldConfig.selectPosition === 'end'
+              ? [inputStr, selectLabel]
+              : [selectLabel, inputStr];
+          display = <Typography variant="body1">{parts.filter(Boolean).join(' ')}</Typography>;
+        }
+        break;
+      }
+
       default:
         display = <Typography variant="body1">{String(value)}</Typography>;
     }

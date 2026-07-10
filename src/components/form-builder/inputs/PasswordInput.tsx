@@ -78,6 +78,7 @@ export const PasswordInput = React.memo(({ fieldConfig, control }: InputProps) =
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton
+                  type="button"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                   onClick={toggleVisibility}
                   onMouseDown={(e) => e.preventDefault()}

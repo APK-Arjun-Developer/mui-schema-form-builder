@@ -12,6 +12,7 @@ import { RadioInput } from './inputs/RadioInput';
 import { CheckboxInput } from './inputs/CheckboxInput';
 import { ArrayInput } from './inputs/ArrayInput';
 import { PasswordInput } from './inputs/PasswordInput';
+import { ComboInput } from './inputs/ComboInput';
 
 interface FormFieldProps {
   fieldConfig: FieldConfig;
@@ -38,6 +39,7 @@ const fieldRegistry: Record<string, React.ComponentType<CustomFieldProps>> = {
   [FIELD_TYPE.DATE]: TextInput,
   [FIELD_TYPE.PASSWORD]: PasswordInput,
   [FIELD_TYPE.ARRAY]: ArrayInput,
+  [FIELD_TYPE.COMBO_INPUT]: ComboInput,
   // DATE_PICKER is not pre-registered — use registerFieldType(FIELD_TYPE.DATE_PICKER, createDatePickerInput(DatePicker))
 };
 

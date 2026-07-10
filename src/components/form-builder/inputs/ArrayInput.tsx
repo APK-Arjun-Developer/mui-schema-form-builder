@@ -74,6 +74,7 @@ export const ArrayInput = React.memo(({ fieldConfig, control }: ArrayInputProps)
             </Typography>
             {canRemove && (
               <Button
+                type="button"
                 size="small"
                 color="error"
                 variant="text"
@@ -103,6 +104,7 @@ export const ArrayInput = React.memo(({ fieldConfig, control }: ArrayInputProps)
 
       {canAdd && (
         <Button
+          type="button"
           variant="outlined"
           size="small"
           onClick={() => append(buildDefaultItem())}

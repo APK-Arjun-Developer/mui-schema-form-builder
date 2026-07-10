@@ -127,6 +127,7 @@ const FormWizardInner = <TSchema extends z.ZodType>(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const valid = await trigger(stepFieldNames as any);
     if (valid) {
+      clearErrors();
       setCompletedSteps((prev) => new Set(prev).add(activeStep));
       setActiveStep((prev) => prev + 1);
     }

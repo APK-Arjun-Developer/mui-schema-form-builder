@@ -424,6 +424,18 @@ const features = [
     desc: 'Override built-in UI strings via the labels prop — no extra i18n library required.',
     color: '#15803d',
   },
+  {
+    num: '10',
+    title: 'Filter Form',
+    desc: 'FilterForm turns any field config into a reactive filter bar. onChange fires on every keystroke — no submit button, no Zod schema required.',
+    color: '#0f766e',
+  },
+  {
+    num: '11',
+    title: 'Combo Input',
+    desc: 'FIELD_TYPE.COMBO_INPUT fuses a Select dropdown with a text/number/search input into a single compound field — perfect for phone, currency, search-with-category, and unit inputs.',
+    color: '#b45309',
+  },
 ];
 
 const techStack = [
