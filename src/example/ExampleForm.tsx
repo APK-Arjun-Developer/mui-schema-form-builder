@@ -667,7 +667,7 @@ function FilterFormDemo() {
             {
               name: 'search',
               label: 'Search',
-              type: FIELD_TYPE.TEXT,
+              type: FIELD_TYPE.SEARCH,
               placeholder: 'Search products…',
               grid: { xs: 12, sm: 4 },
             },

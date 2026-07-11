@@ -309,7 +309,7 @@ import type { FieldConfig } from 'mui-schema-form-builder';
 |----------|------|-------------|
 | `name` | `string` | Field key. Dot-notation supported (`"address.city"`). |
 | `label` | `string` | Human-readable label. |
-| `type` | `FieldType \| string` | One of the `FIELD_TYPE` constants, or a custom string (see `registerFieldType`). |
+| `type` | `string` | One of the `FIELD_TYPE` constants, or a custom string (see `registerFieldType`). |
 | `defaultValue` | `unknown` | Initial value for this field. |
 | `placeholder` | `string` | Input placeholder text. |
 | `disabled` | `boolean` | Disables the field. |
@@ -366,7 +366,7 @@ import type { FieldConfig } from 'mui-schema-form-builder';
 
 ## FIELD_TYPE
 
-Const object of built-in field type strings. Prefer this over the deprecated `FieldType` enum alias.
+Const object of built-in field type strings.
 
 ```tsx
 import { FIELD_TYPE } from 'mui-schema-form-builder';

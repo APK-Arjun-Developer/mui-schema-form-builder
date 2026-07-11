@@ -3,13 +3,6 @@ import type { z } from 'zod';
 import type { SxProps } from '@mui/material';
 import type { FieldValues, ValidationMode, Resolver } from 'react-hook-form';
 
-/**
- * Use FIELD_TYPE (const object) instead of an enum for tree-shaking compatibility
- * and correct behaviour with isolatedModules.
- *
- * Migration from enum:  FieldType.TEXT  →  FIELD_TYPE.TEXT
- * The value-level alias `FieldType = FIELD_TYPE` keeps existing code working.
- */
 export const FIELD_TYPE = {
   TEXT: 'text',
   NUMBER: 'number',
@@ -27,13 +20,11 @@ export const FIELD_TYPE = {
   DATE_PICKER: 'datepicker',
   /** Fused Select + text/number/search input rendered as a single compound field. */
   COMBO_INPUT: 'combo_input',
+  /** Text input with a magnifying-glass start adornment and type="search" — no extra config needed. */
+  SEARCH: 'search',
 } as const;
 
 export type FieldType = (typeof FIELD_TYPE)[keyof typeof FIELD_TYPE];
-
-/** @deprecated Import FIELD_TYPE instead. Kept for backward compatibility. */
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const FieldType = FIELD_TYPE;
 
 export interface Option {
   label: string;
@@ -120,7 +111,9 @@ export interface FieldConfig {
   selectPosition?: 'start' | 'end';
   /** Placeholder shown in the selector when no option is chosen — COMBO_INPUT fields only. */
   selectPlaceholder?: string;
-  /** HTML input type for the text portion — COMBO_INPUT fields only. Defaults to 'text'. */
+  /** HTML input type for the text portion — COMBO_INPUT fields only. Defaults to 'text'.
+   *  Use 'search' to auto-render a lens icon inside the fused input.
+   *  For a standalone search field use FIELD_TYPE.SEARCH instead. */
   inputType?: 'text' | 'number' | 'search';
   /** Width in pixels of the selector portion — COMBO_INPUT fields only. Defaults to 120. */
   selectWidth?: number;

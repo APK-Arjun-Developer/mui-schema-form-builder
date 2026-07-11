@@ -440,6 +440,12 @@ const features = [
     desc: 'FIELD_TYPE.COMBO_INPUT fuses a Select dropdown with a text/number/search input into a single compound field — perfect for phone, currency, search-with-category, and unit inputs.',
     color: '#b45309',
   },
+  {
+    num: '12',
+    title: 'Search Input',
+    desc: 'FIELD_TYPE.SEARCH is a ready-to-use search field with a magnifying-glass icon pre-wired. Drop it into any FilterForm or FormBuilder — no startAdornment config needed.',
+    color: '#0369a1',
+  },
 ];
 
 const techStack = [

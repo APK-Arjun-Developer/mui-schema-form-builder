@@ -18,6 +18,7 @@ export { RadioInput } from './components/form-builder/inputs/RadioInput';
 export { ArrayInput } from './components/form-builder/inputs/ArrayInput';
 export { PasswordInput } from './components/form-builder/inputs/PasswordInput';
 export { ComboInput } from './components/form-builder/inputs/ComboInput';
+export { SearchInput } from './components/form-builder/inputs/SearchInput';
 /**
  * createDatePickerInput produces a FormBuilder field component that wraps
  * @mui/x-date-pickers DatePicker. Pass the imported DatePicker component as the
@@ -25,13 +26,11 @@ export { ComboInput } from './components/form-builder/inputs/ComboInput';
  */
 export { createDatePickerInput } from './components/form-builder/inputs/DatePickerInput';
 
-// FIELD_TYPE const object (preferred) + FieldType backward-compat alias (value AND type).
-// `export { FieldType }` makes both the value (FieldType.TEXT) and the type available.
-// No separate `export type { FieldType }` is needed — it would duplicate the identifier.
-export { FIELD_TYPE, FieldType } from './components/form-builder/types/field.types';
+export { FIELD_TYPE } from './components/form-builder/types/field.types';
 
-// Public types — note: FieldType is already accessible via the value export above.
+// Public types
 export type {
+  FieldType,
   FieldConfig,
   FormBuilderProps,
   FormBuilderLabels,

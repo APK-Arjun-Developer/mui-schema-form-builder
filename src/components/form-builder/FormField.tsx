@@ -13,6 +13,7 @@ import { CheckboxInput } from './inputs/CheckboxInput';
 import { ArrayInput } from './inputs/ArrayInput';
 import { PasswordInput } from './inputs/PasswordInput';
 import { ComboInput } from './inputs/ComboInput';
+import { SearchInput } from './inputs/SearchInput';
 
 interface FormFieldProps {
   fieldConfig: FieldConfig;
@@ -40,6 +41,7 @@ const fieldRegistry: Record<string, React.ComponentType<CustomFieldProps>> = {
   [FIELD_TYPE.PASSWORD]: PasswordInput,
   [FIELD_TYPE.ARRAY]: ArrayInput,
   [FIELD_TYPE.COMBO_INPUT]: ComboInput,
+  [FIELD_TYPE.SEARCH]: SearchInput,
   // DATE_PICKER is not pre-registered — use registerFieldType(FIELD_TYPE.DATE_PICKER, createDatePickerInput(DatePicker))
 };
 

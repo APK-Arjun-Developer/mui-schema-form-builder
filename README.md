@@ -13,6 +13,7 @@ Generate complex, production-ready forms from a plain JSON config. No boilerplat
 - **MUI-native** — built on `@mui/material` v9, not bolted on
 - **Password input** — `FIELD_TYPE.PASSWORD` with a built-in show/hide toggle (no icon library needed)
 - **Combo input** — `FIELD_TYPE.COMBO_INPUT` fuses a Select dropdown with a text/number/search input into a single compound field
+- **Search input** — `FIELD_TYPE.SEARCH` is a ready-to-use search field with a magnifying-glass icon pre-wired — no `startAdornment` config needed
 - **Filter form** — `FilterForm` fires `onChange` on every keystroke — no submit button, no schema required
 - **Input adornments** — `startAdornment` / `endAdornment` on TEXT and NUMBER fields for prefixes, suffixes, and icons
 - **Form title** — optional heading with alignment (`titleAlign`) and placement (`titlePosition`) control
@@ -92,7 +93,7 @@ export default function App() {
 | ---------------- | -------------------------------------- | -------- | -------------------------------------------------------------- |
 | `name`           | `string`                               | ✓        | Field name — must match a key in your Zod schema               |
 | `label`          | `string`                               | ✓        | Display label                                                  |
-| `type`           | `FieldType`                            | ✓        | See field types below                                          |
+| `type`           | `string`                               | ✓        | See field types below                                          |
 | `defaultValue`   | `unknown`                              |          | Initial value                                                  |
 | `placeholder`    | `string`                               |          | Input placeholder                                              |
 | `required`       | `boolean`                              |          | Shows asterisk, sets `aria-required`                           |
@@ -135,6 +136,7 @@ FIELD_TYPE.CHECKBOX;     // Boolean or checkbox group
 FIELD_TYPE.ARRAY;        // Dynamic list with add/remove (useFieldArray)
 FIELD_TYPE.DATE_PICKER;  // MUI DatePicker — register via createDatePickerInput
 FIELD_TYPE.COMBO_INPUT;  // Fused Select + text/number/search — value shape: { select, input }
+FIELD_TYPE.SEARCH;       // Text input with magnifying-glass icon pre-wired, type="search"
 ```
 
 ---
@@ -238,6 +240,41 @@ const schema = z.object({
 ```
 
 > **Note:** When `inputType: 'search'`, a magnifying-glass icon is automatically rendered as a start adornment — no extra configuration needed.
+
+---
+
+## Search Input
+
+`FIELD_TYPE.SEARCH` renders a text input with a magnifying-glass icon automatically pre-wired as the start adornment and `type="search"` set on the HTML input. No extra configuration required.
+
+```tsx
+{
+  name: 'search',
+  label: 'Search',
+  type: FIELD_TYPE.SEARCH,
+  placeholder: 'Search products…',
+}
+```
+
+Use it anywhere a `FIELD_TYPE.TEXT` field would go — especially inside `FilterForm`:
+
+```tsx
+<FilterForm
+  fields={[
+    { name: 'search', label: 'Search', type: FIELD_TYPE.SEARCH, placeholder: 'Search…', grid: { xs: 12, sm: 8 } },
+    { name: 'status', label: 'Status', type: FIELD_TYPE.SELECT, options: [...], grid: { xs: 12, sm: 4 } },
+  ]}
+  onChange={(values) => console.log(values)}
+/>
+```
+
+You can still override the icon via `startAdornment`, or add an `endAdornment` (e.g. a clear button):
+
+```tsx
+{ name: 'search', label: 'Search', type: FIELD_TYPE.SEARCH, endAdornment: <ClearButton /> }
+```
+
+> **Note:** For a fused Select + search input (e.g. category + keyword), use `FIELD_TYPE.COMBO_INPUT` with `inputType: 'search'` instead.
 
 ---
 
