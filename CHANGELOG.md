@@ -1,3 +1,15 @@
+# [1.5.0](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.4.0...v1.5.0) (2026-07-11)
+
+
+### Bug Fixes
+
+* update grid layout for FilterForm fields ([a6da23e](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/commit/a6da23e8d4f87e5bc49c38deaa29fb88d8ffd2fd))
+
+
+### Features
+
+* add FilterForm and ComboInput field types ([45da555](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/commit/45da555fdf15abebc0b2bd22dcf178477ca04b16)), closes [#11](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/issues/11)
+
 # [1.4.0](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.3.0...v1.4.0) (2026-06-30)
 
 
