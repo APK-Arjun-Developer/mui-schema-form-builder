@@ -682,7 +682,7 @@ function FilterFormDemo() {
                 { label: 'Software', value: 'software' },
                 { label: 'Templates', value: 'templates' },
               ],
-              grid: { xs: 12, sm: 3 },
+              grid: { xs: 12, sm: 4 },
             },
             {
               name: 'maxPrice',
@@ -690,13 +690,13 @@ function FilterFormDemo() {
               type: FIELD_TYPE.NUMBER,
               min: 0,
               placeholder: 'Any',
-              grid: { xs: 12, sm: 3 },
+              grid: { xs: 12, sm: 4 },
             },
             {
               name: 'inStock',
               label: 'In stock only',
               type: FIELD_TYPE.CHECKBOX,
-              grid: { xs: 12, sm: 2 },
+              grid: { xs: 12, sm: 4 },
             },
           ]}
           onChange={setFilters}

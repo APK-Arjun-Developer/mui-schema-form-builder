@@ -236,27 +236,27 @@ function FilterMultipleTypes() {
               { label: 'Books', value: 'books' },
               { label: 'Electronics', value: 'electronics' },
             ],
-            grid: { xs: 12, sm: 3 },
+            grid: { xs: 12, sm: 4 },
           },
           {
             name: 'minPrice',
             label: 'Min price ($)',
             type: FIELD_TYPE.NUMBER,
             min: 0,
-            grid: { xs: 6, sm: 2 },
+            grid: { xs: 6, sm: 4 },
           },
           {
             name: 'maxPrice',
             label: 'Max price ($)',
             type: FIELD_TYPE.NUMBER,
             min: 0,
-            grid: { xs: 6, sm: 2 },
+            grid: { xs: 6, sm: 4 },
           },
           {
             name: 'inStock',
             label: 'In stock only',
             type: FIELD_TYPE.CHECKBOX,
-            grid: { xs: 12, sm: 1 },
+            grid: { xs: 12, sm: 4 },
           },
         ]}
         onChange={setFilters}
