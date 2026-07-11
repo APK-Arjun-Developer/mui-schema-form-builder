@@ -1,3 +1,11 @@
+# [1.6.0](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.5.0...v1.6.0) (2026-07-11)
+
+
+### Features
+
+* add FIELD_TYPE.SEARCH input and remove deprecated FieldType alias ([088797d](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/commit/088797d5bfcf23f01c315d30b29a81eb3bfcf340))
+* add Storybook link to navbar, hero, and footer ([a1c309a](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/commit/a1c309ab2b75495e915ce8d77a128ca74d1ce7f6))
+
 # [1.5.0](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.4.0...v1.5.0) (2026-07-11)
 
 
