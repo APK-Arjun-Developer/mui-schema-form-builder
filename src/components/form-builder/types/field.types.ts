@@ -25,6 +25,8 @@ export const FIELD_TYPE = {
   ARRAY: 'array',
   /** MUI DatePicker — requires @mui/x-date-pickers peer dep + LocalizationProvider. */
   DATE_PICKER: 'datepicker',
+  /** Fused Select + text/number/search input rendered as a single compound field. */
+  COMBO_INPUT: 'combo_input',
 } as const;
 
 export type FieldType = (typeof FIELD_TYPE)[keyof typeof FIELD_TYPE];
@@ -112,6 +114,16 @@ export interface FieldConfig {
   minItems?: number;
   /** Maximum number of array items — ARRAY fields only. */
   maxItems?: number;
+  /** Options for the fused dropdown selector — COMBO_INPUT fields only. */
+  selectOptions?: Option[];
+  /** Which side the selector appears on — COMBO_INPUT fields only. Defaults to 'start'. */
+  selectPosition?: 'start' | 'end';
+  /** Placeholder shown in the selector when no option is chosen — COMBO_INPUT fields only. */
+  selectPlaceholder?: string;
+  /** HTML input type for the text portion — COMBO_INPUT fields only. Defaults to 'text'. */
+  inputType?: 'text' | 'number' | 'search';
+  /** Width in pixels of the selector portion — COMBO_INPUT fields only. Defaults to 120. */
+  selectWidth?: number;
 }
 
 export interface FormBuilderProps<TSchema extends z.ZodType = z.ZodType> {

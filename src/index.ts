@@ -3,6 +3,8 @@ export { FormBuilder } from './components/form-builder/FormBuilder';
 export type { FormBuilderHandle } from './components/form-builder/FormBuilder';
 export { FormWizard } from './components/form-builder/FormWizard';
 export type { FormWizardProps, WizardStep } from './components/form-builder/FormWizard';
+export { FilterForm } from './components/form-builder/FilterForm';
+export type { FilterFormProps } from './components/form-builder/FilterForm';
 export { FormField, registerFieldType } from './components/form-builder/FormField';
 export type { CustomFieldProps } from './components/form-builder/FormField';
 
@@ -15,6 +17,7 @@ export { CheckboxInput } from './components/form-builder/inputs/CheckboxInput';
 export { RadioInput } from './components/form-builder/inputs/RadioInput';
 export { ArrayInput } from './components/form-builder/inputs/ArrayInput';
 export { PasswordInput } from './components/form-builder/inputs/PasswordInput';
+export { ComboInput } from './components/form-builder/inputs/ComboInput';
 /**
  * createDatePickerInput produces a FormBuilder field component that wraps
  * @mui/x-date-pickers DatePicker. Pass the imported DatePicker component as the

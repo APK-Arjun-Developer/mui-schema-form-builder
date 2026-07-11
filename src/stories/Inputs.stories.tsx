@@ -284,3 +284,245 @@ export const CheckboxGroup: StoryObj = {
     />
   ),
 };
+
+// ---------------------------------------------------------------------------
+// ComboInput
+// ---------------------------------------------------------------------------
+
+export const ComboPhoneNumber: StoryObj = {
+  name: 'ComboInput — phone number',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A country-code selector fused to a phone number input. The value shape is `{ select, input }` — one field in the schema holds both parts.',
+      },
+    },
+  },
+  render: () => (
+    <SingleFieldForm
+      fieldConfig={{
+        name: 'phone',
+        label: 'Phone number',
+        type: FIELD_TYPE.COMBO_INPUT,
+        required: true,
+        selectOptions: [
+          { label: '+1', value: '+1' },
+          { label: '+44', value: '+44' },
+          { label: '+49', value: '+49' },
+          { label: '+33', value: '+33' },
+          { label: '+81', value: '+81' },
+          { label: '+91', value: '+91' },
+        ],
+        selectPlaceholder: 'Code',
+        selectWidth: 90,
+        placeholder: '(555) 000-0000',
+        inputType: 'text',
+      }}
+      schema={z.object({
+        phone: z
+          .object({
+            select: z.string().min(1, 'Select a country code'),
+            input: z.string().min(6, 'Enter a valid number'),
+          })
+          .refine((v) => v.select && v.input, 'Phone number is required'),
+      })}
+    />
+  ),
+};
+
+export const ComboCurrency: StoryObj = {
+  name: 'ComboInput — currency amount',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Currency selector at the start with a numeric amount input. `inputType: "number"` stores the input portion as a JS number.',
+      },
+    },
+  },
+  render: () => (
+    <SingleFieldForm
+      fieldConfig={{
+        name: 'price',
+        label: 'Price',
+        type: FIELD_TYPE.COMBO_INPUT,
+        required: true,
+        selectOptions: [
+          { label: 'USD $', value: 'usd' },
+          { label: 'EUR €', value: 'eur' },
+          { label: 'GBP £', value: 'gbp' },
+          { label: 'JPY ¥', value: 'jpy' },
+        ],
+        selectPlaceholder: 'Currency',
+        selectWidth: 100,
+        inputType: 'number',
+        min: 0,
+        placeholder: '0.00',
+      }}
+      schema={z.object({
+        price: z.object({
+          select: z.string().min(1, 'Select a currency'),
+          input: z.union([z.number().min(0, 'Must be ≥ 0'), z.literal('')]),
+        }),
+      })}
+    />
+  ),
+};
+
+export const ComboSearchWithCategory: StoryObj = {
+  name: 'ComboInput — search with category',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Selector at the end: the free-text search box comes first, the category dropdown is fused on the right. Use `selectPosition: "end"` to flip the order.',
+      },
+    },
+  },
+  render: () => (
+    <SingleFieldForm
+      fieldConfig={{
+        name: 'search',
+        label: 'Search',
+        type: FIELD_TYPE.COMBO_INPUT,
+        selectPosition: 'end',
+        selectOptions: [
+          { label: 'All', value: '' },
+          { label: 'Books', value: 'books' },
+          { label: 'Electronics', value: 'electronics' },
+          { label: 'Clothing', value: 'clothing' },
+          { label: 'Home', value: 'home' },
+        ],
+        selectPlaceholder: 'Category',
+        selectWidth: 130,
+        inputType: 'search',
+        placeholder: 'Search products…',
+      }}
+      schema={z.object({
+        search: z.object({ select: z.string(), input: z.string() }),
+      })}
+    />
+  ),
+};
+
+export const ComboMeasurement: StoryObj = {
+  name: 'ComboInput — measurement with unit',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Number input with a unit selector on the right — ideal for weight, distance, or any measurable quantity.',
+      },
+    },
+  },
+  render: () => (
+    <SingleFieldForm
+      fieldConfig={{
+        name: 'weight',
+        label: 'Weight',
+        type: FIELD_TYPE.COMBO_INPUT,
+        required: true,
+        selectPosition: 'end',
+        selectOptions: [
+          { label: 'kg', value: 'kg' },
+          { label: 'lb', value: 'lb' },
+          { label: 'g', value: 'g' },
+          { label: 'oz', value: 'oz' },
+        ],
+        selectPlaceholder: 'Unit',
+        selectWidth: 80,
+        inputType: 'number',
+        min: 0,
+        placeholder: '0',
+      }}
+      schema={z.object({
+        weight: z.object({
+          select: z.string().min(1, 'Select a unit'),
+          input: z.union([z.number().min(0), z.literal('')]),
+        }),
+      })}
+    />
+  ),
+};
+
+export const ComboInForm: StoryObj = {
+  name: 'ComboInput — inside a full form',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'ComboInput fields work alongside any other field type inside FormBuilder. Here a product listing form pairs a currency+price combo with a weight+unit combo.',
+      },
+    },
+  },
+  render: () => (
+    <FormBuilder
+      title="Add product"
+      fields={[
+        {
+          name: 'name',
+          label: 'Product name',
+          type: FIELD_TYPE.TEXT,
+          required: true,
+          placeholder: 'e.g. Wireless Headphones',
+          grid: { xs: 12 },
+        },
+        {
+          name: 'price',
+          label: 'Price',
+          type: FIELD_TYPE.COMBO_INPUT,
+          required: true,
+          selectOptions: [
+            { label: 'USD $', value: 'usd' },
+            { label: 'EUR €', value: 'eur' },
+            { label: 'GBP £', value: 'gbp' },
+          ],
+          selectPlaceholder: 'Currency',
+          selectWidth: 100,
+          inputType: 'number',
+          min: 0,
+          placeholder: '0.00',
+          grid: { xs: 12, sm: 6 },
+        },
+        {
+          name: 'weight',
+          label: 'Weight',
+          type: FIELD_TYPE.COMBO_INPUT,
+          selectPosition: 'end',
+          selectOptions: [
+            { label: 'kg', value: 'kg' },
+            { label: 'lb', value: 'lb' },
+            { label: 'g', value: 'g' },
+          ],
+          selectPlaceholder: 'Unit',
+          selectWidth: 80,
+          inputType: 'number',
+          min: 0,
+          placeholder: '0',
+          grid: { xs: 12, sm: 6 },
+        },
+        {
+          name: 'sku',
+          label: 'SKU',
+          type: FIELD_TYPE.TEXT,
+          placeholder: 'e.g. PRD-001',
+          grid: { xs: 12 },
+        },
+      ]}
+      schema={z.object({
+        name: z.string().min(1, 'Product name is required'),
+        price: z.object({
+          select: z.string().min(1, 'Select a currency'),
+          input: z.union([z.number().min(0), z.literal('')]),
+        }),
+        weight: z.object({
+          select: z.string(),
+          input: z.union([z.number().min(0), z.literal('')]),
+        }),
+        sku: z.string().optional(),
+      })}
+      onSubmit={(d) => alert(JSON.stringify(d, null, 2))}
+    />
+  ),
+};

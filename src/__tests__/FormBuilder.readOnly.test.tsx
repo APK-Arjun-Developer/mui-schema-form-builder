@@ -294,6 +294,77 @@ describe('FormWizard — imperative ref', () => {
   });
 });
 
+describe('ReadOnlyField — COMBO_INPUT', () => {
+  it('displays select label + input value for selectPosition start', () => {
+    renderWithTheme(
+      <FormBuilder
+        fields={[
+          {
+            name: 'phone',
+            label: 'Phone',
+            type: FIELD_TYPE.COMBO_INPUT,
+            defaultValue: { select: '+44', input: '7911123456' },
+            selectOptions: [
+              { label: '+1', value: '+1' },
+              { label: '+44', value: '+44' },
+            ],
+          },
+        ]}
+        schema={z.object({ phone: z.object({ select: z.string(), input: z.string() }) })}
+        onSubmit={vi.fn()}
+        readOnly
+      />,
+    );
+    expect(screen.getByText('+44 7911123456')).toBeInTheDocument();
+  });
+
+  it('displays input value + select label for selectPosition end', () => {
+    renderWithTheme(
+      <FormBuilder
+        fields={[
+          {
+            name: 'weight',
+            label: 'Weight',
+            type: FIELD_TYPE.COMBO_INPUT,
+            selectPosition: 'end',
+            defaultValue: { select: 'kg', input: 5 },
+            selectOptions: [
+              { label: 'kg', value: 'kg' },
+              { label: 'lb', value: 'lb' },
+            ],
+          },
+        ]}
+        schema={z.object({
+          weight: z.object({ select: z.string(), input: z.union([z.number(), z.literal('')]) }),
+        })}
+        onSubmit={vi.fn()}
+        readOnly
+      />,
+    );
+    expect(screen.getByText('5 kg')).toBeInTheDocument();
+  });
+
+  it('shows em-dash when both select and input are empty', () => {
+    renderWithTheme(
+      <FormBuilder
+        fields={[
+          {
+            name: 'phone',
+            label: 'Phone',
+            type: FIELD_TYPE.COMBO_INPUT,
+            defaultValue: { select: '', input: '' },
+            selectOptions: [{ label: '+1', value: '+1' }],
+          },
+        ]}
+        schema={z.object({ phone: z.object({ select: z.string(), input: z.string() }) })}
+        onSubmit={vi.fn()}
+        readOnly
+      />,
+    );
+    expect(screen.getByText('—')).toBeInTheDocument();
+  });
+});
+
 describe('FormBuilder — labels i18n', () => {
   it('uses custom arrayAddItem and arrayRemove labels from the labels prop', async () => {
     const { default: userEvent } = await import('@testing-library/user-event');

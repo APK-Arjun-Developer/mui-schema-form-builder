@@ -39,6 +39,8 @@ function buildDefaultValues(fields: FieldConfig[]): Record<string, unknown> {
       value = [];
     } else if (field.type === FIELD_TYPE.CHECKBOX) {
       value = false;
+    } else if (field.type === FIELD_TYPE.COMBO_INPUT) {
+      value = { select: '', input: '' };
     } else {
       value = '';
     }
