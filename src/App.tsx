@@ -334,6 +334,10 @@ function CodeBlock({
 
 const INSTALL_CMD = 'npm install mui-schema-form-builder';
 
+const STORYBOOK_URL = import.meta.env.DEV
+  ? 'http://localhost:6006'
+  : 'https://apk-arjun-developer.github.io/mui-schema-form-builder/storybook/';
+
 const CODE_EXAMPLE = `import { FormBuilder, FIELD_TYPE } from 'mui-schema-form-builder';
 import { z } from 'zod';
 
@@ -534,6 +538,15 @@ export default function App() {
             sx={{ color: 'rgba(255,255,255,0.65)', fontWeight: 600, '&:hover': { color: 'white' } }}
           >
             GitHub
+          </Button>
+          <Button
+            href={STORYBOOK_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            size="small"
+            sx={{ color: 'rgba(255,255,255,0.65)', fontWeight: 600, '&:hover': { color: 'white' } }}
+          >
+            Storybook
           </Button>
           <Button
             href="https://www.npmjs.com/package/mui-schema-form-builder"
@@ -751,7 +764,7 @@ export default function App() {
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             spacing={2}
-            sx={{ justifyContent: 'center', alignItems: 'center' }}
+            sx={{ justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}
           >
             <Button
               href="https://github.com/APK-Arjun-Developer/mui-schema-form-builder"
@@ -768,6 +781,22 @@ export default function App() {
               }}
             >
               View on GitHub
+            </Button>
+            <Button
+              href={STORYBOOK_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="outlined"
+              size="large"
+              sx={{
+                color: '#e9d5ff',
+                borderColor: 'rgba(167,139,250,0.4)',
+                px: 4,
+                borderRadius: 2.5,
+                '&:hover': { borderColor: '#a78bfa', bgcolor: 'rgba(167,139,250,0.08)' },
+              }}
+            >
+              View Storybook
             </Button>
             <Button
               href="#demo"
@@ -1166,6 +1195,10 @@ export default function App() {
                   href: 'https://github.com/APK-Arjun-Developer/mui-schema-form-builder',
                 },
                 { label: 'npm', href: 'https://www.npmjs.com/package/mui-schema-form-builder' },
+                {
+                  label: 'Storybook',
+                  href: STORYBOOK_URL,
+                },
                 {
                   label: 'Issues',
                   href: 'https://github.com/APK-Arjun-Developer/mui-schema-form-builder/issues',
