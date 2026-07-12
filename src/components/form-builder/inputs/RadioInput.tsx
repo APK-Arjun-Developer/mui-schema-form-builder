@@ -8,13 +8,9 @@ import {
   FormHelperText,
   Box,
 } from '@mui/material';
-import { useController, type Control } from 'react-hook-form';
-import type { FieldConfig } from '../types/field.types';
-
-interface InputProps {
-  fieldConfig: FieldConfig;
-  control: Control;
-}
+import { useController } from 'react-hook-form';
+import type { InputProps } from '../types/component.types';
+import { radioInputSx, getRadioGroupLabelSx } from './RadioInput.styles';
 
 export const RadioInput = React.memo(({ fieldConfig, control }: InputProps) => {
   const {
@@ -43,21 +39,12 @@ export const RadioInput = React.memo(({ fieldConfig, control }: InputProps) => {
         disabled={fieldConfig.disabled}
         aria-required={fieldConfig.required}
         aria-describedby={error ? errorId : undefined}
-        sx={{ width: '100%' }}
+        sx={radioInputSx.formControl}
       >
-        <FormLabel
-          component="legend"
-          sx={{
-            fontWeight: 600,
-            fontSize: '0.875rem',
-            mb: 1,
-            color: error ? 'error.main' : fieldConfig.disabled ? 'text.disabled' : 'text.primary',
-            '&.Mui-focused': { color: 'inherit' },
-          }}
-        >
+        <FormLabel component="legend" sx={getRadioGroupLabelSx(!!error, fieldConfig.disabled)}>
           {fieldConfig.label}
           {fieldConfig.required && (
-            <Box component="span" aria-hidden="true" sx={{ color: 'error.main', ml: 0.5 }}>
+            <Box component="span" aria-hidden="true" sx={radioInputSx.asterisk}>
               *
             </Box>
           )}

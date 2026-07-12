@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Box,
   FormControl,
@@ -8,14 +8,9 @@ import {
   Checkbox,
   ListItemText,
 } from '@mui/material';
-import { useController, type Control } from 'react-hook-form';
-import type { FieldConfig } from '../types/field.types';
+import { useController } from 'react-hook-form';
+import type { InputProps } from '../types/component.types';
 import { FieldLabel } from './FieldLabel';
-
-interface InputProps {
-  fieldConfig: FieldConfig;
-  control: Control;
-}
 
 export const SelectInput = React.memo(({ fieldConfig, control }: InputProps) => {
   const {
@@ -33,6 +28,22 @@ export const SelectInput = React.memo(({ fieldConfig, control }: InputProps) => 
   // labelId points to the FieldLabel wrapper — MUI Select uses it for aria-labelledby.
   const labelId = `${fieldConfig.name}-label`;
   const errorId = error ? `${fieldConfig.name}-error` : undefined;
+
+  const renderValue = useMemo(() => {
+    if (fieldConfig.multiple) {
+      return (selected: unknown) => {
+        const values = selected as (string | number)[];
+        if (!values || values.length === 0) return fieldConfig.placeholder ?? 'Select options';
+        return values
+          .map((val) => fieldConfig.options?.find((o) => o.value === val)?.label ?? val)
+          .join(', ');
+      };
+    }
+    return (selected: unknown) => {
+      if (!selected) return fieldConfig.placeholder ?? 'Select an option';
+      return fieldConfig.options?.find((o) => o.value === selected)?.label ?? String(selected);
+    };
+  }, [fieldConfig.multiple, fieldConfig.options, fieldConfig.placeholder]);
 
   return (
     <Box>
@@ -62,21 +73,7 @@ export const SelectInput = React.memo(({ fieldConfig, control }: InputProps) => 
           }}
           multiple={fieldConfig.multiple}
           displayEmpty
-          renderValue={
-            fieldConfig.multiple
-              ? (selected) => {
-                  const values = selected as (string | number)[];
-                  if (!values || values.length === 0)
-                    return fieldConfig.placeholder ?? 'Select options';
-                  return values
-                    .map((val) => fieldConfig.options?.find((o) => o.value === val)?.label ?? val)
-                    .join(', ');
-                }
-              : (selected) => {
-                  if (!selected) return fieldConfig.placeholder ?? 'Select an option';
-                  return fieldConfig.options?.find((o) => o.value === selected)?.label ?? selected;
-                }
-          }
+          renderValue={renderValue}
           {...fieldConfig.muiProps}
         >
           {fieldConfig.options?.map((option) => (

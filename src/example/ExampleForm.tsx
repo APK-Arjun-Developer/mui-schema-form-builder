@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { z } from 'zod';
 import {
   Typography,
@@ -26,6 +26,8 @@ import {
   type FormBuilderActionsParams,
   type FormWizardActionsParams,
 } from '../components/form-builder/types/field.types';
+import type { TabPanelProps, JsonPreviewProps } from './ExampleForm.types';
+import { exampleFormSx, getCategoryChipSx, getSearchCategoryChipSx } from './ExampleForm.styles';
 
 // ─── Shared types ────────────────────────────────────────────────────────────
 
@@ -77,38 +79,32 @@ async function fetchSkills(query: string): Promise<Option[]> {
 
 // ─── Tab panel helper ─────────────────────────────────────────────────────────
 
-function TabPanel({
-  value,
-  index,
-  children,
-}: {
-  value: number;
-  index: number;
-  children: React.ReactNode;
-}) {
-  return value === index ? <Box sx={{ pt: 3 }}>{children}</Box> : null;
-}
+const TabPanel = React.memo(({ value, index, children }: TabPanelProps) => {
+  return value === index ? <Box sx={exampleFormSx.tabPanel}>{children}</Box> : null;
+});
+TabPanel.displayName = 'TabPanel';
 
 // ─── JSON preview ──────────────────────────────────────────────────────────────
 
-function JsonPreview({ data }: { data: unknown }) {
+const JsonPreview = React.memo(({ data }: JsonPreviewProps) => {
   return (
-    <Box sx={{ mt: 4 }}>
+    <Box sx={exampleFormSx.jsonPreviewBox}>
       <Typography variant="h6" gutterBottom>
         Submitted Data
       </Typography>
-      <Paper sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
+      <Paper sx={exampleFormSx.jsonPreviewPaper}>
         <pre style={{ margin: 0, overflow: 'auto', fontSize: 13 }}>
           {JSON.stringify(data, null, 2)}
         </pre>
       </Paper>
     </Box>
   );
-}
+});
+JsonPreview.displayName = 'JsonPreview';
 
 // ─── Tab 1: FormBuilder ───────────────────────────────────────────────────────
 
-function FormBuilderDemo() {
+const FormBuilderDemo = React.memo(() => {
   const [submittedData, setSubmittedData] = useState<FormData | null>(null);
   const [readOnly, setReadOnly] = useState(false);
 
@@ -257,15 +253,63 @@ function FormBuilderDemo() {
     [],
   );
 
-  const handleSubmit = (data: FormData) => {
+  const handleSubmit = useCallback((data: FormData) => {
     setSubmittedData(data);
     setReadOnly(true);
-  };
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setSubmittedData(null);
+    setReadOnly(false);
+  }, []);
+
+  const handleCancel = useCallback(() => setSubmittedData(null), []);
+
+  const renderActions = useCallback(
+    ({ isSubmitting, submit, cancel, reset }: FormBuilderActionsParams) => (
+      <Stack direction="row" spacing={1} sx={exampleFormSx.actionsStack}>
+        {reset && (
+          <Button
+            size="small"
+            color="inherit"
+            onClick={reset}
+            disabled={isSubmitting}
+            sx={exampleFormSx.clearButton}
+          >
+            Clear Form
+          </Button>
+        )}
+        {cancel && (
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={cancel}
+            disabled={isSubmitting}
+            sx={exampleFormSx.cancelButton}
+          >
+            Cancel
+          </Button>
+        )}
+        <Button
+          size="small"
+          variant="contained"
+          color="primary"
+          onClick={submit}
+          disabled={isSubmitting || readOnly}
+          startIcon={isSubmitting ? <CircularProgress size={14} color="inherit" /> : undefined}
+          sx={exampleFormSx.saveButton}
+        >
+          {isSubmitting ? 'Saving…' : readOnly ? 'Confirmed' : 'Save Profile'}
+        </Button>
+      </Stack>
+    ),
+    [readOnly],
+  );
 
   return (
     <Box>
       {readOnly && submittedData && (
-        <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={exampleFormSx.readOnlyBox}>
           <Chip label="Read-only preview" color="success" size="small" />
           <Button size="small" variant="outlined" onClick={() => setReadOnly(false)}>
             Back to Edit
@@ -278,54 +322,16 @@ function FormBuilderDemo() {
         fields={fields}
         schema={formSchema}
         onSubmit={handleSubmit}
-        onCancel={() => setSubmittedData(null)}
-        onReset={() => {
-          setSubmittedData(null);
-          setReadOnly(false);
-        }}
+        onCancel={handleCancel}
+        onReset={handleReset}
         readOnly={readOnly}
-        renderActions={({ isSubmitting, submit, cancel, reset }: FormBuilderActionsParams) => (
-          <Stack direction="row" spacing={1} sx={{ justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-            {reset && (
-              <Button
-                size="small"
-                color="inherit"
-                onClick={reset}
-                disabled={isSubmitting}
-                sx={{ textTransform: 'none' }}
-              >
-                Clear Form
-              </Button>
-            )}
-            {cancel && (
-              <Button
-                size="small"
-                variant="outlined"
-                onClick={cancel}
-                disabled={isSubmitting}
-                sx={{ textTransform: 'none' }}
-              >
-                Cancel
-              </Button>
-            )}
-            <Button
-              size="small"
-              variant="contained"
-              color="primary"
-              onClick={submit}
-              disabled={isSubmitting || readOnly}
-              startIcon={isSubmitting ? <CircularProgress size={14} color="inherit" /> : undefined}
-              sx={{ textTransform: 'none', fontWeight: 600 }}
-            >
-              {isSubmitting ? 'Saving…' : readOnly ? 'Confirmed' : 'Save Profile'}
-            </Button>
-          </Stack>
-        )}
+        renderActions={renderActions}
       />
       {submittedData && <JsonPreview data={submittedData} />}
     </Box>
   );
-}
+});
+FormBuilderDemo.displayName = 'FormBuilderDemo';
 
 // ─── Tab 2: FormWizard ────────────────────────────────────────────────────────
 
@@ -342,8 +348,74 @@ const wizardSchema = z.object({
   acceptTerms: z.boolean().refine((v) => v, 'Must accept terms'),
 });
 
-function WizardDemo() {
+const WizardDemo = React.memo(() => {
   const [submittedData, setSubmittedData] = useState<z.infer<typeof wizardSchema> | null>(null);
+
+  const handleSubmit = useCallback((data: z.infer<typeof wizardSchema>) => {
+    setSubmittedData(data);
+  }, []);
+
+  const handleCancel = useCallback(() => setSubmittedData(null), []);
+
+  const renderActions = useCallback(
+    ({
+      isSubmitting,
+      isFirstStep,
+      isLastStep,
+      next,
+      back,
+      submit,
+      cancel,
+    }: FormWizardActionsParams) => (
+      <Stack direction="row" spacing={1} sx={exampleFormSx.actionsStack}>
+        {isFirstStep && cancel && (
+          <Button
+            variant="outlined"
+            color="inherit"
+            onClick={cancel}
+            disabled={isSubmitting}
+            sx={exampleFormSx.cancelButton}
+          >
+            Cancel
+          </Button>
+        )}
+        {!isFirstStep && (
+          <Button
+            variant="outlined"
+            color="inherit"
+            onClick={back}
+            disabled={isSubmitting}
+            sx={exampleFormSx.cancelButton}
+          >
+            ← Back
+          </Button>
+        )}
+        {isLastStep ? (
+          <Button
+            variant="contained"
+            color="success"
+            onClick={submit}
+            disabled={isSubmitting}
+            startIcon={isSubmitting ? <CircularProgress size={14} color="inherit" /> : undefined}
+            sx={exampleFormSx.saveButton}
+          >
+            {isSubmitting ? 'Submitting…' : 'Submit Application'}
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={next}
+            disabled={isSubmitting}
+            sx={exampleFormSx.saveButton}
+          >
+            Continue →
+          </Button>
+        )}
+      </Stack>
+    ),
+    [],
+  );
 
   return (
     <Box>
@@ -455,71 +527,15 @@ function WizardDemo() {
             ],
           },
         ]}
-        onSubmit={(data) => setSubmittedData(data)}
-        onCancel={() => setSubmittedData(null)}
-        renderActions={({
-          isSubmitting,
-          isFirstStep,
-          isLastStep,
-          next,
-          back,
-          submit,
-          cancel,
-        }: FormWizardActionsParams) => (
-          <Stack direction="row" spacing={1} sx={{ justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-            {isFirstStep && cancel && (
-              <Button
-                variant="outlined"
-                color="inherit"
-                onClick={cancel}
-                disabled={isSubmitting}
-                sx={{ textTransform: 'none' }}
-              >
-                Cancel
-              </Button>
-            )}
-            {!isFirstStep && (
-              <Button
-                variant="outlined"
-                color="inherit"
-                onClick={back}
-                disabled={isSubmitting}
-                sx={{ textTransform: 'none' }}
-              >
-                ← Back
-              </Button>
-            )}
-            {isLastStep ? (
-              <Button
-                variant="contained"
-                color="success"
-                onClick={submit}
-                disabled={isSubmitting}
-                startIcon={
-                  isSubmitting ? <CircularProgress size={14} color="inherit" /> : undefined
-                }
-                sx={{ textTransform: 'none', fontWeight: 600 }}
-              >
-                {isSubmitting ? 'Submitting…' : 'Submit Application'}
-              </Button>
-            ) : (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={next}
-                disabled={isSubmitting}
-                sx={{ textTransform: 'none', fontWeight: 600 }}
-              >
-                Continue →
-              </Button>
-            )}
-          </Stack>
-        )}
+        onSubmit={handleSubmit}
+        onCancel={handleCancel}
+        renderActions={renderActions}
       />
       {submittedData && <JsonPreview data={submittedData} />}
     </Box>
   );
-}
+});
+WizardDemo.displayName = 'WizardDemo';
 
 // ─── Tab 3: Array fields ──────────────────────────────────────────────────────
 
@@ -537,8 +553,14 @@ const teamSchema = z.object({
   tags: z.array(z.string()),
 });
 
-function ArrayFieldDemo() {
+const ArrayFieldDemo = React.memo(() => {
   const [submittedData, setSubmittedData] = useState<z.infer<typeof teamSchema> | null>(null);
+
+  const handleSubmit = useCallback((data: z.infer<typeof teamSchema>) => {
+    setSubmittedData(data);
+  }, []);
+
+  const handleReset = useCallback(() => setSubmittedData(null), []);
 
   return (
     <Box>
@@ -602,14 +624,15 @@ function ArrayFieldDemo() {
             maxItems: 6,
           },
         ]}
-        onSubmit={(data) => setSubmittedData(data)}
-        onReset={() => setSubmittedData(null)}
+        onSubmit={handleSubmit}
+        onReset={handleReset}
         submitText="Create Project"
       />
       {submittedData && <JsonPreview data={submittedData} />}
     </Box>
   );
-}
+});
+ArrayFieldDemo.displayName = 'ArrayFieldDemo';
 
 // ─── Tab 4: FilterForm ────────────────────────────────────────────────────────
 
@@ -633,7 +656,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   templates: '#d97706',
 };
 
-function FilterFormDemo() {
+const FilterFormDemo = React.memo(() => {
   const [filters, setFilters] = useState<FieldValues>({});
 
   const filtered = PRODUCTS.filter((p) => {
@@ -657,8 +680,7 @@ function FilterFormDemo() {
         Every keystroke updates the product list instantly — no submit button needed.
       </Typography>
 
-      {/* Filter bar */}
-      <Paper variant="outlined" sx={{ p: 2.5, mb: 3, borderRadius: 2 }}>
+      <Paper variant="outlined" sx={exampleFormSx.filterPaper}>
         <FilterForm
           showReset
           resetText="Clear filters"
@@ -703,8 +725,7 @@ function FilterFormDemo() {
         />
       </Paper>
 
-      {/* Results */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+      <Box sx={exampleFormSx.filterResultsBox}>
         <Typography variant="body2" color="text.secondary">
           {filtered.length} of {PRODUCTS.length} products
         </Typography>
@@ -714,46 +735,19 @@ function FilterFormDemo() {
       </Box>
 
       {filtered.length === 0 ? (
-        <Paper
-          variant="outlined"
-          sx={{ p: 6, textAlign: 'center', borderRadius: 2, borderStyle: 'dashed' }}
-        >
+        <Paper variant="outlined" sx={exampleFormSx.emptyPaper}>
           <Typography color="text.secondary">No products match the current filters.</Typography>
         </Paper>
       ) : (
         <Grid container spacing={2}>
           {filtered.map((product) => (
             <Grid size={{ xs: 12, sm: 6, md: 4 }} key={product.id}>
-              <Paper
-                variant="outlined"
-                sx={{
-                  p: 2.5,
-                  borderRadius: 2,
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 1,
-                  transition: 'box-shadow 0.2s',
-                  '&:hover': { boxShadow: '0 4px 20px rgba(0,0,0,0.1)' },
-                }}
-              >
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
-                  }}
-                >
+              <Paper variant="outlined" sx={exampleFormSx.productCard}>
+                <Box sx={exampleFormSx.productCardHeader}>
                   <Chip
                     label={product.category}
                     size="small"
-                    sx={{
-                      bgcolor: `${CATEGORY_COLORS[product.category]}18`,
-                      color: CATEGORY_COLORS[product.category],
-                      fontWeight: 600,
-                      fontSize: 11,
-                      border: `1px solid ${CATEGORY_COLORS[product.category]}33`,
-                    }}
+                    sx={getCategoryChipSx(CATEGORY_COLORS[product.category])}
                   />
                   <Chip
                     label={product.inStock ? 'In stock' : 'Out of stock'}
@@ -766,10 +760,7 @@ function FilterFormDemo() {
                 <Typography variant="subtitle2" sx={{ fontWeight: 700, lineHeight: 1.4 }}>
                   {product.name}
                 </Typography>
-                <Typography
-                  variant="h6"
-                  sx={{ fontWeight: 800, color: 'primary.main', mt: 'auto' }}
-                >
+                <Typography variant="h6" sx={exampleFormSx.productPrice}>
                   ${product.price}
                 </Typography>
               </Paper>
@@ -778,10 +769,10 @@ function FilterFormDemo() {
         </Grid>
       )}
 
-      <Divider sx={{ my: 3 }} />
+      <Divider sx={exampleFormSx.dividerMy3} />
       <Typography variant="caption" color="text.secondary">
         Current filters:{' '}
-        <Box component="span" sx={{ fontFamily: 'monospace' }}>
+        <Box component="span" sx={exampleFormSx.filtersMonospace}>
           {JSON.stringify(
             Object.fromEntries(
               Object.entries(filters).filter(([, v]) => v !== '' && v !== false && v != null),
@@ -793,7 +784,8 @@ function FilterFormDemo() {
       </Typography>
     </Box>
   );
-}
+});
+FilterFormDemo.displayName = 'FilterFormDemo';
 
 // ─── Tab 5: ComboInput ────────────────────────────────────────────────────────
 
@@ -832,9 +824,15 @@ const comboOrderSchema = z.object({
   serviceType: z.string().min(1, 'Select a service type'),
 });
 
-function ComboInputDemo() {
+const ComboInputDemo = React.memo(() => {
   const [searchFilters, setSearchFilters] = useState<FieldValues>({});
   const [submitted, setSubmitted] = useState<z.infer<typeof comboOrderSchema> | null>(null);
+
+  const handleSubmit = useCallback((data: z.infer<typeof comboOrderSchema>) => {
+    setSubmitted(data);
+  }, []);
+
+  const handleReset = useCallback(() => setSubmitted(null), []);
 
   const combo = searchFilters.query as { select?: string; input?: string } | undefined;
   const keyword = (combo?.input ?? '').toLowerCase();
@@ -849,7 +847,7 @@ function ComboInputDemo() {
   return (
     <Box>
       {/* ── Search bar ── */}
-      <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 0.5 }}>
+      <Typography variant="subtitle1" sx={exampleFormSx.sectionSubtitle}>
         Search bar — ComboInput with selector at end
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -857,7 +855,7 @@ function ComboInputDemo() {
         no submit button needed.
       </Typography>
 
-      <Paper variant="outlined" sx={{ p: 2.5, mb: 2.5, borderRadius: 2 }}>
+      <Paper variant="outlined" sx={exampleFormSx.comboSearchPaper}>
         <FilterForm
           showReset
           resetText="Clear"
@@ -886,7 +884,7 @@ function ComboInputDemo() {
         />
       </Paper>
 
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+      <Box sx={exampleFormSx.filterResultsBox}>
         <Typography variant="body2" color="text.secondary">
           {filteredProducts.length} of {SEARCH_PRODUCTS.length} products
         </Typography>
@@ -896,36 +894,18 @@ function ComboInputDemo() {
       </Box>
 
       {filteredProducts.length === 0 ? (
-        <Paper
-          variant="outlined"
-          sx={{ p: 5, textAlign: 'center', borderRadius: 2, borderStyle: 'dashed', mb: 4 }}
-        >
+        <Paper variant="outlined" sx={exampleFormSx.comboEmptyPaper}>
           <Typography color="text.secondary">No products match.</Typography>
         </Paper>
       ) : (
-        <Grid container spacing={1.5} sx={{ mb: 4 }}>
+        <Grid container spacing={1.5} sx={exampleFormSx.comboResultsGrid}>
           {filteredProducts.map((product) => (
             <Grid size={{ xs: 12, sm: 6, md: 3 }} key={product.name}>
-              <Paper
-                variant="outlined"
-                sx={{
-                  p: 2,
-                  borderRadius: 2,
-                  transition: 'box-shadow 0.2s',
-                  '&:hover': { boxShadow: '0 4px 20px rgba(0,0,0,0.1)' },
-                }}
-              >
+              <Paper variant="outlined" sx={exampleFormSx.comboProductCard}>
                 <Chip
                   label={product.category}
                   size="small"
-                  sx={{
-                    mb: 1,
-                    fontSize: 10,
-                    fontWeight: 600,
-                    bgcolor: `${SEARCH_CATEGORY_COLORS[product.category]}18`,
-                    color: SEARCH_CATEGORY_COLORS[product.category],
-                    border: `1px solid ${SEARCH_CATEGORY_COLORS[product.category]}33`,
-                  }}
+                  sx={getSearchCategoryChipSx(SEARCH_CATEGORY_COLORS[product.category])}
                 />
                 <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
                   {product.name}
@@ -939,11 +919,11 @@ function ComboInputDemo() {
         </Grid>
       )}
 
-      <Divider sx={{ mb: 3 }} />
+      <Divider sx={exampleFormSx.dividerMb3} />
 
       {/* ── Order form ── */}
-      <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 0.5 }}>
-        Order form — phone, currency & weight combos
+      <Typography variant="subtitle1" sx={exampleFormSx.sectionSubtitle}>
+        Order form — phone, currency &amp; weight combos
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
         Three ComboInput fields in one form: country code + phone, currency + amount, value + unit.
@@ -1018,29 +998,27 @@ function ComboInputDemo() {
             grid: { xs: 12, sm: 6 },
           },
         ]}
-        onSubmit={(data) => setSubmitted(data)}
-        onReset={() => setSubmitted(null)}
+        onSubmit={handleSubmit}
+        onReset={handleReset}
         submitText="Book shipment"
       />
       {submitted && <JsonPreview data={submitted} />}
     </Box>
   );
-}
+});
+ComboInputDemo.displayName = 'ComboInputDemo';
 
 // ─── ExampleForm (tabbed) ──────────────────────────────────────────────────────
 
-export const ExampleForm = () => {
+export const ExampleForm = React.memo(() => {
   const [tab, setTab] = useState(0);
+
+  const handleTabChange = useCallback((_: React.SyntheticEvent, v: number) => setTab(v), []);
 
   return (
     <Box>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 1 }}>
-        <Tabs
-          value={tab}
-          onChange={(_, v) => setTab(v as number)}
-          variant="scrollable"
-          scrollButtons="auto"
-        >
+      <Box sx={exampleFormSx.tabsBox}>
+        <Tabs value={tab} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
           <Tab label="FormBuilder" />
           <Tab label="Multi-step Wizard" />
           <Tab label="Array Fields" />
@@ -1050,54 +1028,45 @@ export const ExampleForm = () => {
       </Box>
 
       <TabPanel value={tab} index={0}>
-        <Card
-          sx={{ borderRadius: 4, boxShadow: '0 8px 32px rgba(0,0,0,0.08)', overflow: 'visible' }}
-        >
-          <CardContent sx={{ p: 4 }}>
+        <Card sx={exampleFormSx.card}>
+          <CardContent sx={exampleFormSx.cardContent}>
             <FormBuilderDemo />
           </CardContent>
         </Card>
       </TabPanel>
 
       <TabPanel value={tab} index={1}>
-        <Card
-          sx={{ borderRadius: 4, boxShadow: '0 8px 32px rgba(0,0,0,0.08)', overflow: 'visible' }}
-        >
-          <CardContent sx={{ p: 4 }}>
+        <Card sx={exampleFormSx.card}>
+          <CardContent sx={exampleFormSx.cardContent}>
             <WizardDemo />
           </CardContent>
         </Card>
       </TabPanel>
 
       <TabPanel value={tab} index={2}>
-        <Card
-          sx={{ borderRadius: 4, boxShadow: '0 8px 32px rgba(0,0,0,0.08)', overflow: 'visible' }}
-        >
-          <CardContent sx={{ p: 4 }}>
+        <Card sx={exampleFormSx.card}>
+          <CardContent sx={exampleFormSx.cardContent}>
             <ArrayFieldDemo />
           </CardContent>
         </Card>
       </TabPanel>
 
       <TabPanel value={tab} index={3}>
-        <Card
-          sx={{ borderRadius: 4, boxShadow: '0 8px 32px rgba(0,0,0,0.08)', overflow: 'visible' }}
-        >
-          <CardContent sx={{ p: 4 }}>
+        <Card sx={exampleFormSx.card}>
+          <CardContent sx={exampleFormSx.cardContent}>
             <FilterFormDemo />
           </CardContent>
         </Card>
       </TabPanel>
 
       <TabPanel value={tab} index={4}>
-        <Card
-          sx={{ borderRadius: 4, boxShadow: '0 8px 32px rgba(0,0,0,0.08)', overflow: 'visible' }}
-        >
-          <CardContent sx={{ p: 4 }}>
+        <Card sx={exampleFormSx.card}>
+          <CardContent sx={exampleFormSx.cardContent}>
             <ComboInputDemo />
           </CardContent>
         </Card>
       </TabPanel>
     </Box>
   );
-};
+});
+ExampleForm.displayName = 'ExampleForm';

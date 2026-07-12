@@ -1,0 +1,62 @@
+export const exampleFormSx = {
+  tabsBox: { borderBottom: 1, borderColor: 'divider', mb: 1 },
+  tabPanel: { pt: 3 },
+  card: { borderRadius: 4, boxShadow: '0 8px 32px rgba(0,0,0,0.08)', overflow: 'visible' },
+  cardContent: { p: 4 },
+  jsonPreviewBox: { mt: 4 },
+  jsonPreviewPaper: { p: 2, bgcolor: 'grey.50', borderRadius: 2 },
+  readOnlyBox: { mb: 3, display: 'flex', alignItems: 'center', gap: 2 },
+  actionsStack: { justifyContent: 'flex-end', flexWrap: 'wrap' },
+  clearButton: { textTransform: 'none' },
+  cancelButton: { textTransform: 'none' },
+  saveButton: { textTransform: 'none', fontWeight: 600 },
+  filterPaper: { p: 2.5, mb: 3, borderRadius: 2 },
+  filterResultsBox: { display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 },
+  emptyPaper: { p: 6, textAlign: 'center', borderRadius: 2, borderStyle: 'dashed' },
+  productCard: {
+    p: 2.5,
+    borderRadius: 2,
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 1,
+    transition: 'box-shadow 0.2s',
+    '&:hover': { boxShadow: '0 4px 20px rgba(0,0,0,0.1)' },
+  },
+  productCardHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  productPrice: { fontWeight: 800, color: 'primary.main', mt: 'auto' },
+  comboSearchPaper: { p: 2.5, mb: 2.5, borderRadius: 2 },
+  comboResultsGrid: { mb: 4 },
+  comboProductCard: {
+    p: 2,
+    borderRadius: 2,
+    transition: 'box-shadow 0.2s',
+    '&:hover': { boxShadow: '0 4px 20px rgba(0,0,0,0.1)' },
+  },
+  comboEmptyPaper: { p: 5, textAlign: 'center', borderRadius: 2, borderStyle: 'dashed', mb: 4 },
+  dividerMy3: { my: 3 },
+  dividerMb3: { mb: 3 },
+  filtersMonospace: { fontFamily: 'monospace' },
+  sectionSubtitle: { fontWeight: 700, mb: 0.5 },
+} as const;
+
+export const getCategoryChipSx = (color: string) => ({
+  bgcolor: `${color}18`,
+  color,
+  fontWeight: 600,
+  fontSize: 11,
+  border: `1px solid ${color}33`,
+});
+
+export const getSearchCategoryChipSx = (color: string) => ({
+  mb: 1,
+  fontSize: 10,
+  fontWeight: 600,
+  bgcolor: `${color}18`,
+  color,
+  border: `1px solid ${color}33`,
+});

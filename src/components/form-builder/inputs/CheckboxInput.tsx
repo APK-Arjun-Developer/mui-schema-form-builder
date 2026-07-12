@@ -8,14 +8,10 @@ import {
   FormGroup,
   Box,
 } from '@mui/material';
-import { useController, type Control } from 'react-hook-form';
-import type { FieldConfig } from '../types/field.types';
+import { useController } from 'react-hook-form';
+import type { InputProps } from '../types/component.types';
 import { FieldLabel } from './FieldLabel';
-
-interface InputProps {
-  fieldConfig: FieldConfig;
-  control: Control;
-}
+import { checkboxInputSx, getCheckboxGroupLabelSx } from './CheckboxInput.styles';
 
 export const CheckboxInput = React.memo(({ fieldConfig, control }: InputProps) => {
   const isGroup = !!fieldConfig.options;
@@ -61,21 +57,12 @@ export const CheckboxInput = React.memo(({ fieldConfig, control }: InputProps) =
           disabled={fieldConfig.disabled}
           aria-required={fieldConfig.required}
           aria-describedby={error ? errorId : undefined}
-          sx={{ width: '100%' }}
+          sx={checkboxInputSx.formControl}
         >
-          <FormLabel
-            component="legend"
-            sx={{
-              fontWeight: 600,
-              fontSize: '0.875rem',
-              mb: 1,
-              color: error ? 'error.main' : fieldConfig.disabled ? 'text.disabled' : 'text.primary',
-              '&.Mui-focused': { color: 'inherit' },
-            }}
-          >
+          <FormLabel component="legend" sx={getCheckboxGroupLabelSx(!!error, fieldConfig.disabled)}>
             {fieldConfig.label}
             {fieldConfig.required && (
-              <Box component="span" aria-hidden="true" sx={{ color: 'error.main', ml: 0.5 }}>
+              <Box component="span" aria-hidden="true" sx={checkboxInputSx.asterisk}>
                 *
               </Box>
             )}

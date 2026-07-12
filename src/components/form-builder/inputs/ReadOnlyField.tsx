@@ -1,16 +1,12 @@
 import React from 'react';
-import { useController, type Control } from 'react-hook-form';
+import { useController } from 'react-hook-form';
 import { Box, Typography, Chip, Stack } from '@mui/material';
-import { type FieldConfig, FIELD_TYPE } from '../types/field.types';
+import { FIELD_TYPE } from '../types/field.types';
+import type { ReadOnlyFieldProps } from '../types/component.types';
 import { FieldLabel } from './FieldLabel';
+import { readOnlyFieldSx } from './ReadOnlyField.styles';
 
-interface ReadOnlyFieldProps {
-  fieldConfig: FieldConfig;
-  control: Control;
-}
-
-// Chips row helper used for multi-value fields
-function ChipRow({ labels }: { labels: string[] }) {
+const ChipRow = React.memo(function ChipRow({ labels }: { labels: string[] }) {
   if (!labels.length)
     return (
       <Typography variant="body1" color="text.disabled">
@@ -18,13 +14,14 @@ function ChipRow({ labels }: { labels: string[] }) {
       </Typography>
     );
   return (
-    <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
+    <Stack direction="row" sx={readOnlyFieldSx.chipRow}>
       {labels.map((l) => (
         <Chip key={l} label={l} size="small" />
       ))}
     </Stack>
   );
-}
+});
+ChipRow.displayName = 'ChipRow';
 
 export const ReadOnlyField = React.memo(({ fieldConfig, control }: ReadOnlyFieldProps) => {
   const { field } = useController({ name: fieldConfig.name, control });
@@ -95,16 +92,13 @@ export const ReadOnlyField = React.memo(({ fieldConfig, control }: ReadOnlyField
           );
         } else {
           display = (
-            <Stack spacing={1} sx={{ mt: 0.5 }}>
+            <Stack spacing={1} sx={readOnlyFieldSx.arrayStack}>
               {items.map((_, idx) => (
-                <Box
-                  key={idx}
-                  sx={{ p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}
-                >
+                <Box key={idx} sx={readOnlyFieldSx.arrayItem}>
                   <Typography
                     variant="caption"
                     color="text.secondary"
-                    sx={{ mb: 1, display: 'block' }}
+                    sx={readOnlyFieldSx.arrayItemCaption}
                   >
                     Item {idx + 1}
                   </Typography>
@@ -154,14 +148,14 @@ export const ReadOnlyField = React.memo(({ fieldConfig, control }: ReadOnlyField
   }
 
   return (
-    <Box sx={{ mb: 1 }}>
+    <Box sx={readOnlyFieldSx.wrapper}>
       <FieldLabel
         htmlFor={fieldConfig.name}
         label={fieldConfig.label}
         required={fieldConfig.required}
         component="label"
       />
-      <Box sx={{ pl: 0.5 }}>{display}</Box>
+      <Box sx={readOnlyFieldSx.valueBox}>{display}</Box>
     </Box>
   );
 });

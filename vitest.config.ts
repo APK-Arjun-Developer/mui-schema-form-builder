@@ -17,9 +17,14 @@ export default defineConfig({
         'src/__tests__/**',
         'src/main.tsx',
         'src/App.tsx',
+        'src/App.styles.ts',
+        'src/App.types.ts',
         'src/index.css',
         'src/example/**',
         'src/stories/**',
+        // Pure TypeScript declaration files — no runtime code, nothing to cover.
+        'src/components/form-builder/types/builder.types.ts',
+        'src/components/form-builder/types/component.types.ts',
       ],
       thresholds: {
         branches: 85,

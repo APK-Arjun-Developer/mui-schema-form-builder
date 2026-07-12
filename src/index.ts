@@ -1,12 +1,15 @@
 // Core components
 export { FormBuilder } from './components/form-builder/FormBuilder';
-export type { FormBuilderHandle } from './components/form-builder/FormBuilder';
 export { FormWizard } from './components/form-builder/FormWizard';
-export type { FormWizardProps, WizardStep } from './components/form-builder/FormWizard';
 export { FilterForm } from './components/form-builder/FilterForm';
-export type { FilterFormProps } from './components/form-builder/FilterForm';
 export { FormField, registerFieldType } from './components/form-builder/FormField';
-export type { CustomFieldProps } from './components/form-builder/FormField';
+export type {
+  FormBuilderHandle,
+  WizardStep,
+  FormWizardProps,
+  FilterFormProps,
+  CustomFieldProps,
+} from './components/form-builder/types/builder.types';
 
 // Individual input components — exported for consumers who compose their own layouts
 export { TextInput } from './components/form-builder/inputs/TextInput';

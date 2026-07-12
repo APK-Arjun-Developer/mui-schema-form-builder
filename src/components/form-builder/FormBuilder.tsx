@@ -1,52 +1,21 @@
-import React, { useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import type { Control, FieldValues } from 'react-hook-form';
+import React, { useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { Box, Button, Divider, Grid, Paper, Typography } from '@mui/material';
 import type { FieldConfig, FormBuilderActionsParams, FormBuilderProps } from './types/field.types';
+import type { FormBuilderHandle } from './types/builder.types';
+import type { VirtualRowData, FixedSizeListType } from './types/component.types';
 import { FormField } from './FormField';
 import { useFormBuilder } from '../../hooks/useFormBuilder';
 import { FormBuilderContext, DEFAULT_LABELS, type ResolvedLabels } from './FormBuilderContext';
+import { formBuilderSx, getTitleSx, getSectionHeaderSx } from './FormBuilder.styles';
 
-/** Imperative handle exposed via a ref on FormBuilder. */
-export interface FormBuilderHandle {
-  /** Reset the form to its default values. */
-  reset: () => void;
-  /** Programmatically submit the form, triggering validation and onSubmit. */
-  submit: () => void;
-  /** Manually set a field error. */
-  setError: (name: string, error: { type: string; message: string }) => void;
-  /** Return current form values without triggering validation. */
-  getValues: () => FieldValues;
-}
-
-// ---------------------------------------------------------------------------
-// FixedSizeListType — module-level type alias for the lazily-imported
-// react-window FixedSizeList component. Defined at module scope (not inside
-// the component function) to keep the type away from render cycles.
-// ---------------------------------------------------------------------------
-type FixedSizeListType = React.ComponentType<{
-  height: number;
-  itemCount: number;
-  itemSize: number;
-  width: string | number;
-  itemData: VirtualRowData;
-  children: React.ComponentType<{
-    index: number;
-    style: React.CSSProperties;
-    data: VirtualRowData;
-  }>;
-}>;
+export type { FormBuilderHandle };
 
 // ---------------------------------------------------------------------------
 // VirtualRow — defined OUTSIDE FormBuilder so its component identity is stable
 // across parent re-renders. Defining it inside causes react-window to unmount
 // and remount every row on every render, defeating virtualization entirely.
 // ---------------------------------------------------------------------------
-interface VirtualRowData {
-  fields: FieldConfig[];
-  control: Control;
-}
-
 const VirtualRow = React.memo(
   ({ index, style, data }: { index: number; style: React.CSSProperties; data: VirtualRowData }) => (
     <div style={style}>
@@ -171,11 +140,14 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
     [readOnly, resolvedLabels],
   );
 
+  const handleSubmitAction = useCallback(
+    () => void methods.handleSubmit(onSubmit as never)(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [methods, onSubmit],
+  );
+
   const titleNode = title ? (
-    <Typography
-      variant="h6"
-      sx={{ fontWeight: 700, textAlign: titleAlign, mb: titlePosition === 'inside' ? 2 : 1 }}
-    >
+    <Typography variant="h6" sx={getTitleSx(titleAlign, titlePosition === 'inside')}>
       {title}
     </Typography>
   ) : null;
@@ -191,10 +163,7 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
         <form onSubmit={handleSubmit(onSubmit as any)} noValidate>
           <Paper
             elevation={0}
-            sx={[
-              { p: 0, bgcolor: 'transparent', boxShadow: 'none' },
-              ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
-            ]}
+            sx={[formBuilderSx.paper, ...(Array.isArray(sx) ? sx : sx ? [sx] : [])]}
           >
             {titlePosition === 'inside' && titleNode}
             {virtualize && FixedSizeList ? (
@@ -213,8 +182,12 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
                 {fieldSegments.map((segment, segIdx) => (
                   <Box key={segIdx}>
                     {segment.section && (
-                      <Box sx={{ mt: segIdx === 0 ? 0 : 3, mb: 2 }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 700 }} gutterBottom>
+                      <Box sx={getSectionHeaderSx(segIdx === 0)}>
+                        <Typography
+                          variant="subtitle1"
+                          sx={formBuilderSx.sectionTitle}
+                          gutterBottom
+                        >
                           {segment.section}
                         </Typography>
                         <Divider />
@@ -230,13 +203,11 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
               </>
             )}
 
-            <Box
-              sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'flex-end', flexWrap: 'wrap' }}
-            >
+            <Box sx={formBuilderSx.actionsBox}>
               {renderActions ? (
                 renderActions({
                   isSubmitting,
-                  submit: () => void methods.handleSubmit(onSubmit as never)(),
+                  submit: handleSubmitAction,
                   cancel: onCancel,
                   reset: onReset ? handleFormReset : undefined,
                 } satisfies FormBuilderActionsParams)
@@ -248,7 +219,7 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
                       color="secondary"
                       onClick={handleFormReset}
                       disabled={isSubmitting}
-                      sx={{ textTransform: 'none', fontWeight: 500 }}
+                      sx={formBuilderSx.resetButton}
                     >
                       {resetText}
                     </Button>
@@ -259,7 +230,7 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
                       color="inherit"
                       onClick={onCancel}
                       disabled={isSubmitting}
-                      sx={{ textTransform: 'none', fontWeight: 500 }}
+                      sx={formBuilderSx.cancelButton}
                     >
                       {cancelText}
                     </Button>
@@ -269,7 +240,7 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
                     variant="contained"
                     color="primary"
                     loading={isSubmitting}
-                    sx={{ px: 4, py: 1, fontWeight: 600 }}
+                    sx={formBuilderSx.submitButton}
                   >
                     {submitText}
                   </Button>

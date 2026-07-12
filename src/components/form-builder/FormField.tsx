@@ -1,8 +1,10 @@
 import React from 'react';
-import { type Control, useWatch } from 'react-hook-form';
+import { useWatch } from 'react-hook-form';
 import { Grid } from '@mui/material';
-import { type FieldConfig, FIELD_TYPE } from './types/field.types';
+import { FIELD_TYPE } from './types/field.types';
 import { useFormBuilderContext } from './FormBuilderContext';
+import type { FormFieldProps } from './types/component.types';
+import type { CustomFieldProps } from './types/builder.types';
 import { ReadOnlyField } from './inputs/ReadOnlyField';
 import { TextInput } from './inputs/TextInput';
 import { NumberInput } from './inputs/NumberInput';
@@ -15,16 +17,7 @@ import { PasswordInput } from './inputs/PasswordInput';
 import { ComboInput } from './inputs/ComboInput';
 import { SearchInput } from './inputs/SearchInput';
 
-interface FormFieldProps {
-  fieldConfig: FieldConfig;
-  control: Control;
-}
-
-/** Props shape every custom field component must accept. */
-export interface CustomFieldProps {
-  fieldConfig: FieldConfig;
-  control: Control;
-}
+export type { CustomFieldProps };
 
 // Registry maps field type strings to their render components.
 // Defined outside the component — a stable module-level constant.

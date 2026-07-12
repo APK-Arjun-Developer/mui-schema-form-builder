@@ -1,13 +1,8 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Box, InputAdornment, TextField } from '@mui/material';
-import { useController, type Control } from 'react-hook-form';
-import type { FieldConfig } from '../types/field.types';
+import { useController } from 'react-hook-form';
+import type { InputProps } from '../types/component.types';
 import { FieldLabel } from './FieldLabel';
-
-interface InputProps {
-  fieldConfig: FieldConfig;
-  control: Control;
-}
 
 export const NumberInput = React.memo(({ fieldConfig, control }: InputProps) => {
   const {
@@ -28,6 +23,16 @@ export const NumberInput = React.memo(({ fieldConfig, control }: InputProps) => 
   const endAdornment = fieldConfig.endAdornment ? (
     <InputAdornment position="end">{fieldConfig.endAdornment}</InputAdornment>
   ) : undefined;
+
+  // Coerce to number immediately so RHF stores a number, not a string.
+  // Zod number validation then works correctly without coerce().
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const val = e.target.value === '' ? '' : Number(e.target.value);
+      field.onChange(val);
+    },
+    [field],
+  );
 
   return (
     <Box>
@@ -68,12 +73,7 @@ export const NumberInput = React.memo(({ fieldConfig, control }: InputProps) => 
             </span>
           ) : null
         }
-        onChange={(e) => {
-          // Coerce to number immediately so RHF stores a number, not a string.
-          // Zod number validation then works correctly without coerce().
-          const val = e.target.value === '' ? '' : Number(e.target.value);
-          field.onChange(val);
-        }}
+        onChange={handleChange}
         {...fieldConfig.muiProps}
       />
     </Box>

@@ -1,13 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Box, IconButton, InputAdornment, SvgIcon, TextField } from '@mui/material';
-import { useController, type Control } from 'react-hook-form';
-import type { FieldConfig } from '../types/field.types';
+import { useController } from 'react-hook-form';
+import type { InputProps } from '../types/component.types';
 import { FieldLabel } from './FieldLabel';
-
-interface InputProps {
-  fieldConfig: FieldConfig;
-  control: Control;
-}
 
 function VisibilityIcon() {
   return (
@@ -40,7 +35,7 @@ export const PasswordInput = React.memo(({ fieldConfig, control }: InputProps) =
   const { ref: fieldRef, ...fieldProps } = field;
   const errorId = error ? `${fieldConfig.name}-error` : undefined;
 
-  const toggleVisibility = () => setShowPassword((prev) => !prev);
+  const toggleVisibility = useCallback(() => setShowPassword((prev) => !prev), []);
 
   return (
     <Box>
