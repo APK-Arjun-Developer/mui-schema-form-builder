@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.6.0...v1.7.0) (2026-07-12)
+
+
+### Features
+
+* enhance App component with new styles and types ([e7bd250](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/commit/e7bd250b1ea8d48161f90ddc3ed9a50436ef46ca))
+
 # [1.6.0](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.5.0...v1.6.0) (2026-07-11)
 
 
