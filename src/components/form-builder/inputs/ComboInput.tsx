@@ -9,17 +9,11 @@ import {
   FormHelperText,
   type SelectChangeEvent,
 } from '@mui/material';
-import { useController, type Control } from 'react-hook-form';
-import type { FieldConfig } from '../types/field.types';
+import { useController } from 'react-hook-form';
+import type { InputProps, ComboValue } from '../types/component.types';
 import { FieldLabel } from './FieldLabel';
 import { SearchIcon } from './icons';
-
-interface InputProps {
-  fieldConfig: FieldConfig;
-  control: Control;
-}
-
-type ComboValue = { select: string | number; input: string | number };
+import { comboInputSx, getComboSelectSx, getComboTextFieldSx } from './ComboInput.styles';
 
 const EMPTY_VALUE: ComboValue = { select: '', input: '' };
 
@@ -70,13 +64,7 @@ export const ComboInput = React.memo(({ fieldConfig, control }: InputProps) => {
 
   const selectEl = (
     <FormControl
-      sx={{
-        minWidth: selectWidth,
-        flexShrink: 0,
-        '& .MuiOutlinedInput-root': {
-          borderRadius: selectPosition === 'start' ? '4px 0 0 4px' : '0 4px 4px 0',
-        },
-      }}
+      sx={getComboSelectSx(selectPosition, selectWidth)}
       size={fieldConfig.size ?? 'medium'}
       disabled={fieldConfig.disabled}
       error={!!error}
@@ -126,11 +114,7 @@ export const ComboInput = React.memo(({ fieldConfig, control }: InputProps) => {
       size={fieldConfig.size ?? 'medium'}
       error={!!error}
       fullWidth
-      sx={{
-        '& .MuiOutlinedInput-root': {
-          borderRadius: selectPosition === 'start' ? '0 4px 4px 0' : '4px 0 0 4px',
-        },
-      }}
+      sx={getComboTextFieldSx(selectPosition)}
       slotProps={{
         htmlInput: {
           'aria-required': fieldConfig.required,
@@ -156,14 +140,7 @@ export const ComboInput = React.memo(({ fieldConfig, control }: InputProps) => {
         disabled={fieldConfig.disabled}
         error={!!error}
       />
-      <Box
-        ref={containerRef}
-        sx={{
-          display: 'flex',
-          '& > :not(:first-of-type)': { marginLeft: '-1px' },
-          '& > :focus-within': { position: 'relative', zIndex: 1 },
-        }}
-      >
+      <Box ref={containerRef} sx={comboInputSx.container}>
         {selectPosition === 'start' ? (
           <>
             {selectEl}

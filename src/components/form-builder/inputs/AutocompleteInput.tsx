@@ -1,14 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Autocomplete, TextField, Checkbox, Box } from '@mui/material';
-import { useController, type Control } from 'react-hook-form';
-import type { FieldConfig, Option } from '../types/field.types';
+import { useController } from 'react-hook-form';
+import type { Option } from '../types/field.types';
+import type { InputProps } from '../types/component.types';
 import { debounce } from '../utils/debounce';
 import { FieldLabel } from './FieldLabel';
-
-interface InputProps {
-  fieldConfig: FieldConfig;
-  control: Control;
-}
 
 export const AutocompleteInput = React.memo(({ fieldConfig, control }: InputProps) => {
   const {

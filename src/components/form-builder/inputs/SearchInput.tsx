@@ -1,14 +1,9 @@
 import React from 'react';
 import { Box, InputAdornment, TextField } from '@mui/material';
-import { useController, type Control } from 'react-hook-form';
-import type { FieldConfig } from '../types/field.types';
+import { useController } from 'react-hook-form';
+import type { InputProps } from '../types/component.types';
 import { FieldLabel } from './FieldLabel';
 import { SearchIcon } from './icons';
-
-interface InputProps {
-  fieldConfig: FieldConfig;
-  control: Control;
-}
 
 export const SearchInput = React.memo(({ fieldConfig, control }: InputProps) => {
   const {

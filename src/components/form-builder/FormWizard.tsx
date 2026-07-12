@@ -1,4 +1,4 @@
-import React, { useImperativeHandle, useMemo, useState } from 'react';
+import React, { useCallback, useImperativeHandle, useMemo, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import {
   Box,
@@ -12,57 +12,16 @@ import {
   Stepper,
   Typography,
 } from '@mui/material';
-import type { SxProps } from '@mui/material';
 import type { z } from 'zod';
-import type { Resolver, ValidationMode } from 'react-hook-form';
-import type { FieldConfig, FormBuilderLabels, FormWizardActionsParams } from './types/field.types';
+import type { FieldConfig, FormWizardActionsParams } from './types/field.types';
+import type { FormBuilderHandle, WizardStep, FormWizardProps } from './types/builder.types';
 import { FormField } from './FormField';
 import { FormBuilderContext, DEFAULT_LABELS, type ResolvedLabels } from './FormBuilderContext';
 import { useFormBuilder } from '../../hooks/useFormBuilder';
-import type { FormBuilderHandle } from './FormBuilder';
+import { formWizardSx } from './FormWizard.styles';
+import { getTitleSx } from './FormBuilder.styles';
 
-/** A single step in the wizard. */
-export interface WizardStep {
-  /** Label shown in the Stepper. */
-  label: string;
-  /** Optional sub-label shown beneath the step label. */
-  description?: string;
-  /** Fields rendered for this step. */
-  fields: FieldConfig[];
-}
-
-export interface FormWizardProps<TSchema extends z.ZodType = z.ZodType> {
-  steps: WizardStep[];
-  /** Zod schema covering all steps. Required unless `resolver` is provided. */
-  schema?: TSchema;
-  resolver?: Resolver;
-  onSubmit: (data: z.infer<TSchema>) => void | Promise<void>;
-  onCancel?: () => void;
-  nextText?: string;
-  backText?: string;
-  submitText?: string;
-  cancelText?: string;
-  spacing?: number;
-  validationMode?: keyof ValidationMode;
-  sx?: SxProps;
-  readOnly?: boolean;
-  labels?: FormBuilderLabels;
-  /** Optional heading displayed for the wizard. */
-  title?: string;
-  /** Horizontal alignment of the title. Defaults to 'left'. */
-  titleAlign?: 'left' | 'center' | 'right';
-  /**
-   * Where the title is placed.
-   * - 'inside' (default): title renders inside the Paper, above the Stepper.
-   * - 'above': title renders above the Paper container.
-   */
-  titlePosition?: 'above' | 'inside';
-  /**
-   * Replace the default Next / Back / Submit / Cancel buttons with your own rendering.
-   * When provided, the built-in action buttons are not rendered.
-   */
-  renderActions?: (params: FormWizardActionsParams) => React.ReactNode;
-}
+export type { WizardStep, FormWizardProps };
 
 const FormWizardInner = <TSchema extends z.ZodType>(
   {
@@ -121,7 +80,7 @@ const FormWizardInner = <TSchema extends z.ZodType>(
     getValues: () => methods.getValues(),
   }));
 
-  const handleNext = async () => {
+  const handleNext = useCallback(async () => {
     const stepFieldNames = steps[activeStep].fields.map((f) => f.name);
     // Only validate the current step's fields — other steps' errors must not block navigation.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -131,45 +90,57 @@ const FormWizardInner = <TSchema extends z.ZodType>(
       setCompletedSteps((prev) => new Set(prev).add(activeStep));
       setActiveStep((prev) => prev + 1);
     }
-  };
+  }, [steps, activeStep, trigger, clearErrors]);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     // Clear errors when navigating back so the previous step starts clean.
     clearErrors();
     setActiveStep((prev) => prev - 1);
-  };
+  }, [clearErrors]);
 
-  const handleStepClick = (stepIndex: number) => {
-    // Allow jumping to any previously completed step or to any step that has
-    // already been visited (index < activeStep). Forward jumps are blocked to
-    // prevent skipping required validation.
-    if (stepIndex < activeStep || completedSteps.has(stepIndex)) {
-      clearErrors();
-      setActiveStep(stepIndex);
-    }
-  };
+  const handleStepClick = useCallback(
+    (stepIndex: number) => {
+      // Allow jumping to any previously completed step or to any step that has
+      // already been visited (index < activeStep). Forward jumps are blocked to
+      // prevent skipping required validation.
+      if (stepIndex < activeStep || completedSteps.has(stepIndex)) {
+        clearErrors();
+        setActiveStep(stepIndex);
+      }
+    },
+    [activeStep, completedSteps, clearErrors],
+  );
 
-  const handleSubmitError = (errors: Record<string, unknown>) => {
-    // Navigate to the first step that contains a field with an error so the
-    // user can see and fix the problem instead of staring at a blank step.
-    // Supports dot-notation field names (e.g. "address.city") by traversing
-    // the nested errors object rather than checking a flat key.
-    const hasNestedError = (path: string): boolean => {
-      const parts = path.split('.');
-      let node: unknown = errors;
-      for (const part of parts) {
-        if (node == null || typeof node !== 'object') return false;
-        node = (node as Record<string, unknown>)[part];
+  const handleSubmitError = useCallback(
+    (errors: Record<string, unknown>) => {
+      // Navigate to the first step that contains a field with an error so the
+      // user can see and fix the problem instead of staring at a blank step.
+      // Supports dot-notation field names (e.g. "address.city") by traversing
+      // the nested errors object rather than checking a flat key.
+      const hasNestedError = (path: string): boolean => {
+        const parts = path.split('.');
+        let node: unknown = errors;
+        for (const part of parts) {
+          if (node == null || typeof node !== 'object') return false;
+          node = (node as Record<string, unknown>)[part];
+        }
+        return node != null;
+      };
+      for (let i = 0; i < steps.length; i++) {
+        if (steps[i].fields.some((f) => hasNestedError(f.name))) {
+          setActiveStep(i);
+          break;
+        }
       }
-      return node != null;
-    };
-    for (let i = 0; i < steps.length; i++) {
-      if (steps[i].fields.some((f) => hasNestedError(f.name))) {
-        setActiveStep(i);
-        break;
-      }
-    }
-  };
+    },
+    [steps],
+  );
+
+  const handleSubmitAction = useCallback(
+    () => void methods.handleSubmit(onSubmit as never)(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [methods, onSubmit],
+  );
 
   const resolvedLabels = useMemo<ResolvedLabels>(
     () => ({
@@ -188,10 +159,7 @@ const FormWizardInner = <TSchema extends z.ZodType>(
   const currentFields = steps[activeStep]?.fields ?? [];
 
   const titleNode = title ? (
-    <Typography
-      variant="h6"
-      sx={{ fontWeight: 700, textAlign: titleAlign, mb: titlePosition === 'inside' ? 2 : 1 }}
-    >
+    <Typography variant="h6" sx={getTitleSx(titleAlign, titlePosition === 'inside')}>
       {title}
     </Typography>
   ) : null;
@@ -205,13 +173,10 @@ const FormWizardInner = <TSchema extends z.ZodType>(
         <form onSubmit={handleSubmit(onSubmit as any, handleSubmitError as any)} noValidate>
           <Paper
             elevation={0}
-            sx={[
-              { p: 0, bgcolor: 'transparent', boxShadow: 'none' },
-              ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
-            ]}
+            sx={[formWizardSx.paper, ...(Array.isArray(sx) ? sx : sx ? [sx] : [])]}
           >
             {titlePosition === 'inside' && titleNode}
-            <Stepper activeStep={activeStep} sx={{ mb: 3 }}>
+            <Stepper activeStep={activeStep} sx={formWizardSx.stepper}>
               {steps.map((step, idx) => {
                 const isClickable = idx < activeStep || completedSteps.has(idx);
                 return (
@@ -228,17 +193,15 @@ const FormWizardInner = <TSchema extends z.ZodType>(
               })}
             </Stepper>
 
-            <Divider sx={{ mb: 3 }} />
+            <Divider sx={formWizardSx.divider} />
 
             <Grid container spacing={spacing}>
-              {currentFields.map((field) => (
+              {currentFields.map((field: FieldConfig) => (
                 <FormField key={field.name} fieldConfig={field} control={control} />
               ))}
             </Grid>
 
-            <Box
-              sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'flex-end', flexWrap: 'wrap' }}
-            >
+            <Box sx={formWizardSx.actionsBox}>
               {renderActions ? (
                 renderActions({
                   isSubmitting,
@@ -247,7 +210,7 @@ const FormWizardInner = <TSchema extends z.ZodType>(
                   activeStep,
                   next: handleNext,
                   back: handleBack,
-                  submit: () => void methods.handleSubmit(onSubmit as never)(),
+                  submit: handleSubmitAction,
                   cancel: onCancel,
                 } satisfies FormWizardActionsParams)
               ) : (
@@ -258,7 +221,7 @@ const FormWizardInner = <TSchema extends z.ZodType>(
                       color="inherit"
                       onClick={onCancel}
                       disabled={isSubmitting}
-                      sx={{ textTransform: 'none', fontWeight: 500 }}
+                      sx={formWizardSx.cancelButton}
                     >
                       {cancelText}
                     </Button>
@@ -269,7 +232,7 @@ const FormWizardInner = <TSchema extends z.ZodType>(
                       color="inherit"
                       onClick={handleBack}
                       disabled={isSubmitting}
-                      sx={{ textTransform: 'none', fontWeight: 500 }}
+                      sx={formWizardSx.backButton}
                     >
                       {backText}
                     </Button>
@@ -280,7 +243,7 @@ const FormWizardInner = <TSchema extends z.ZodType>(
                       variant="contained"
                       color="primary"
                       loading={isSubmitting}
-                      sx={{ px: 4, py: 1, fontWeight: 600 }}
+                      sx={formWizardSx.submitButton}
                     >
                       {submitText}
                     </Button>
@@ -290,7 +253,7 @@ const FormWizardInner = <TSchema extends z.ZodType>(
                       color="primary"
                       onClick={handleNext}
                       disabled={isSubmitting}
-                      sx={{ px: 4, py: 1, fontWeight: 600, textTransform: 'none' }}
+                      sx={formWizardSx.nextButton}
                     >
                       {nextText}
                     </Button>
