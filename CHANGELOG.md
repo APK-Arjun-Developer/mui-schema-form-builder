@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.7.0...v1.8.0) (2026-07-20)
+
+
+### Features
+
+* enhance FormWizard to prevent onSubmit during non-last steps ([0ab8962](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/commit/0ab89622c575044266ef0902ca75df4271e88392))
+
 # [1.7.0](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.6.0...v1.7.0) (2026-07-12)
 
 
