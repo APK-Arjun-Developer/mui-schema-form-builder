@@ -296,6 +296,50 @@ describe('FormWizard — renderActions', () => {
     expect(screen.queryByRole('button', { name: 'Back' })).not.toBeInTheDocument();
   });
 
+  it('does not call onSubmit when a submit-type Next button advances a non-last step', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    renderWithTheme(
+      <FormWizard
+        steps={steps}
+        schema={schema}
+        onSubmit={onSubmit}
+        renderActions={({ isLastStep }) =>
+          isLastStep ? (
+            <button type="submit">Finish</button>
+          ) : (
+            // A submit-type button on a non-last step must advance, not submit.
+            <button type="submit">Go Next</button>
+          )
+        }
+      />,
+    );
+    await user.type(screen.getByLabelText('First Name'), 'Alice');
+    await user.type(screen.getByLabelText('Last Name'), 'Smith');
+    await user.click(screen.getByRole('button', { name: 'Go Next' }));
+    await waitFor(() => expect(screen.getByLabelText('Email')).toBeInTheDocument());
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('does not call onSubmit when a form submit reaches a non-last step (custom submit button)', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    renderWithTheme(
+      <FormWizard
+        steps={steps}
+        schema={schema}
+        onSubmit={onSubmit}
+        // Submit-type button present on every step: pressing Enter or clicking it
+        // on a non-last step must advance, never fire onSubmit.
+        renderActions={() => <button type="submit">Proceed</button>}
+      />,
+    );
+    await user.type(screen.getByLabelText('First Name'), 'Alice');
+    await user.type(screen.getByLabelText('Last Name'), 'Smith{Enter}');
+    await waitFor(() => expect(screen.getByLabelText('Email')).toBeInTheDocument());
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
   it('passes wizard context (activeStep, isFirstStep, isLastStep) to renderActions', () => {
     const renderFn = vi.fn(() => <span>custom</span>);
     renderWithTheme(

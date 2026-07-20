@@ -137,9 +137,23 @@ const FormWizardInner = <TSchema extends z.ZodType>(
   );
 
   const handleSubmitAction = useCallback(
-    () => void methods.handleSubmit(onSubmit as never)(),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [methods, onSubmit],
+    () => void methods.handleSubmit(onSubmit as never, handleSubmitError as never)(),
+    [methods, onSubmit, handleSubmitError],
+  );
+
+  const handleFormSubmit = useCallback(
+    (event: React.FormEvent<HTMLFormElement>) => {
+      // A form submission that reaches a non-last step (Enter key inside a field,
+      // or a submit-type button supplied through renderActions) must only advance
+      // to the next step — never run the final onSubmit for the whole schema.
+      if (!isLastStep) {
+        event.preventDefault();
+        void handleNext();
+        return;
+      }
+      void handleSubmit(onSubmit as never, handleSubmitError as never)(event);
+    },
+    [isLastStep, handleNext, handleSubmit, onSubmit, handleSubmitError],
   );
 
   const resolvedLabels = useMemo<ResolvedLabels>(
@@ -169,8 +183,7 @@ const FormWizardInner = <TSchema extends z.ZodType>(
       {titlePosition === 'above' && titleNode}
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       <FormProvider {...(methods as any)}>
-        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        <form onSubmit={handleSubmit(onSubmit as any, handleSubmitError as any)} noValidate>
+        <form onSubmit={handleFormSubmit} noValidate>
           <Paper
             elevation={0}
             sx={[formWizardSx.paper, ...(Array.isArray(sx) ? sx : sx ? [sx] : [])]}
@@ -217,6 +230,7 @@ const FormWizardInner = <TSchema extends z.ZodType>(
                 <>
                   {onCancel && activeStep === 0 && (
                     <Button
+                      type="button"
                       variant="outlined"
                       color="inherit"
                       onClick={onCancel}
@@ -228,6 +242,7 @@ const FormWizardInner = <TSchema extends z.ZodType>(
                   )}
                   {activeStep > 0 && (
                     <Button
+                      type="button"
                       variant="outlined"
                       color="inherit"
                       onClick={handleBack}
@@ -249,6 +264,7 @@ const FormWizardInner = <TSchema extends z.ZodType>(
                     </Button>
                   ) : (
                     <Button
+                      type="button"
                       variant="contained"
                       color="primary"
                       onClick={handleNext}
