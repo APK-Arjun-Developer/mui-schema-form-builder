@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.8.0...v1.9.0) (2026-07-21)
+
+
+### Features
+
+* enhance FormWizard with navigation state management ([6f0d07f](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/commit/6f0d07f85a7bf4ceb777ad7660e1b71de4685cee))
+
 # [1.8.0](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.7.0...v1.8.0) (2026-07-20)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "mui-schema-form-builder",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "Schema-driven, type-safe form builder for MUI + React Hook Form + Zod",
   "author": "Arjun Prakash <apkarjundeveloper@gmail.com>",
   "license": "MIT",
