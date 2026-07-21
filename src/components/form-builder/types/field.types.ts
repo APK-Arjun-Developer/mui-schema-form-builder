@@ -196,6 +196,8 @@ export interface FormBuilderActionsParams {
 export interface FormWizardActionsParams {
   /** Whether the form is currently submitting. */
   isSubmitting: boolean;
+  /** True while the current step is being validated (Next was clicked, async validation running). */
+  isNavigating: boolean;
   /** True when the wizard is on the first step. */
   isFirstStep: boolean;
   /** True when the wizard is on the last step. */
