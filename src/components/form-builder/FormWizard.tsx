@@ -1,4 +1,4 @@
-import React, { useCallback, useImperativeHandle, useMemo, useState } from 'react';
+import React, { useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import {
   Box,
@@ -51,6 +51,10 @@ const FormWizardInner = <TSchema extends z.ZodType>(
   // (i.e. the user has clicked Next on them). Only completed steps can be
   // navigated to directly by clicking their label in the Stepper.
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  // isNavigating is true while handleNext is awaiting per-step validation.
+  // isNextingRef prevents concurrent invocations; isNavigating drives the UI.
+  const isNextingRef = useRef(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const isLastStep = activeStep === steps.length - 1;
 
   // Flatten all fields to register them up-front — RHF needs all fields
@@ -81,14 +85,22 @@ const FormWizardInner = <TSchema extends z.ZodType>(
   }));
 
   const handleNext = useCallback(async () => {
-    const stepFieldNames = steps[activeStep].fields.map((f) => f.name);
-    // Only validate the current step's fields — other steps' errors must not block navigation.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const valid = await trigger(stepFieldNames as any);
-    if (valid) {
-      clearErrors();
-      setCompletedSteps((prev) => new Set(prev).add(activeStep));
-      setActiveStep((prev) => prev + 1);
+    if (isNextingRef.current) return;
+    isNextingRef.current = true;
+    setIsNavigating(true);
+    try {
+      const stepFieldNames = steps[activeStep].fields.map((f) => f.name);
+      // Only validate the current step's fields — other steps' errors must not block navigation.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const valid = await trigger(stepFieldNames as any);
+      if (valid) {
+        clearErrors();
+        setCompletedSteps((prev) => new Set(prev).add(activeStep));
+        setActiveStep((prev) => prev + 1);
+      }
+    } finally {
+      isNextingRef.current = false;
+      setIsNavigating(false);
     }
   }, [steps, activeStep, trigger, clearErrors]);
 
@@ -218,6 +230,7 @@ const FormWizardInner = <TSchema extends z.ZodType>(
               {renderActions ? (
                 renderActions({
                   isSubmitting,
+                  isNavigating,
                   isFirstStep: activeStep === 0,
                   isLastStep,
                   activeStep,
@@ -234,7 +247,7 @@ const FormWizardInner = <TSchema extends z.ZodType>(
                       variant="outlined"
                       color="inherit"
                       onClick={onCancel}
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || isNavigating}
                       sx={formWizardSx.cancelButton}
                     >
                       {cancelText}
@@ -246,7 +259,7 @@ const FormWizardInner = <TSchema extends z.ZodType>(
                       variant="outlined"
                       color="inherit"
                       onClick={handleBack}
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || isNavigating}
                       sx={formWizardSx.backButton}
                     >
                       {backText}
@@ -268,7 +281,8 @@ const FormWizardInner = <TSchema extends z.ZodType>(
                       variant="contained"
                       color="primary"
                       onClick={handleNext}
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || isNavigating}
+                      loading={isNavigating}
                       sx={formWizardSx.nextButton}
                     >
                       {nextText}

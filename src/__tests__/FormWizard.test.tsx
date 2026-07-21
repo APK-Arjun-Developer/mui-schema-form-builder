@@ -340,7 +340,7 @@ describe('FormWizard — renderActions', () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it('passes wizard context (activeStep, isFirstStep, isLastStep) to renderActions', () => {
+  it('passes wizard context (activeStep, isFirstStep, isLastStep, isNavigating) to renderActions', () => {
     const renderFn = vi.fn(() => <span>custom</span>);
     renderWithTheme(
       <FormWizard steps={steps} schema={schema} onSubmit={vi.fn()} renderActions={renderFn} />,
@@ -348,6 +348,7 @@ describe('FormWizard — renderActions', () => {
     expect(renderFn).toHaveBeenCalledWith(
       expect.objectContaining({
         isSubmitting: false,
+        isNavigating: false,
         isFirstStep: true,
         isLastStep: false,
         activeStep: 0,
