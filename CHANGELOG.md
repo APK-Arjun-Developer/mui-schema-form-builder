@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.9.0...v1.10.0) (2026-10-07)
+
+
+### Features
+
+* discriminated FieldConfig union, components prop, and UX improvements ([70b0e31](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/commit/70b0e31333656284fb5d9de65ebe9b3fe718f3a7))
+
 # [1.9.0](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.8.0...v1.9.0) (2026-07-21)
 
 
