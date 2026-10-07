@@ -237,7 +237,8 @@ describe('FormBuilder — readOnly edge cases', () => {
           {
             name: 'custom',
             label: 'Custom',
-            type: 'custom-type',
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- testing unknown custom type
+            type: 'custom-type' as any,
             defaultValue: 'custom-value',
           },
         ]}

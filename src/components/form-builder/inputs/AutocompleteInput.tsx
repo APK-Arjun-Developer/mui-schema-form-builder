@@ -1,12 +1,17 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Autocomplete, TextField, Checkbox, Box } from '@mui/material';
 import { useController } from 'react-hook-form';
-import type { Option } from '../types/field.types';
-import type { InputProps } from '../types/component.types';
+import type { AutocompleteFieldConfig, Option } from '../types/field.types';
+import type { Control } from 'react-hook-form';
 import { debounce } from '../utils/debounce';
 import { FieldLabel } from './FieldLabel';
 
-export const AutocompleteInput = React.memo(({ fieldConfig, control }: InputProps) => {
+export interface AutocompleteInputProps {
+  fieldConfig: AutocompleteFieldConfig;
+  control: Control;
+}
+
+export const AutocompleteInput = React.memo(({ fieldConfig, control }: AutocompleteInputProps) => {
   const {
     field,
     fieldState: { error },
@@ -25,7 +30,6 @@ export const AutocompleteInput = React.memo(({ fieldConfig, control }: InputProp
 
   // Register containerRef with RHF once on mount so shouldFocusError can scroll
   // to and focus this field when Zod validation fails.
-  // field.ref is stable across renders — no need to re-run when field changes.
   const containerRef = useRef<HTMLDivElement>(null);
   const fieldRef = field.ref;
   useEffect(() => {
@@ -33,7 +37,6 @@ export const AutocompleteInput = React.memo(({ fieldConfig, control }: InputProp
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Depend only on fetchOptions function reference, not the full fieldConfig object.
   const { fetchOptions } = fieldConfig;
 
   const debouncedFetch = useMemo(
@@ -74,27 +77,16 @@ export const AutocompleteInput = React.memo(({ fieldConfig, control }: InputProp
     );
     return () => {
       cancelled = true;
-      // Cancel the pending debounce timer so fetchOptions is not called after unmount.
       debouncedFetch.cancel();
     };
   }, [open, inputValue, debouncedFetch, fetchOptions]);
 
   const errorId = error ? `${fieldConfig.name}-error` : undefined;
 
-  // Spread the rest of field (onChange, onBlur, name, value) onto Autocomplete.
-  // We do NOT spread field.ref into the Autocomplete input — MUI Autocomplete
-  // manages its internal input ref itself. Connecting via containerRef above
-  // satisfies RHF's shouldFocusError requirement.
   const { ref: _unused, ...fieldProps } = field;
 
   return (
-    <Box
-      ref={containerRef}
-      // tabIndex={-1} makes the container programmatically focusable so RHF
-      // can call .focus() on it when shouldFocusError navigates to this field.
-      tabIndex={-1}
-      sx={{ outline: 'none' }}
-    >
+    <Box ref={containerRef} tabIndex={-1} sx={{ outline: 'none' }}>
       <FieldLabel
         htmlFor={fieldConfig.name}
         label={fieldConfig.label}

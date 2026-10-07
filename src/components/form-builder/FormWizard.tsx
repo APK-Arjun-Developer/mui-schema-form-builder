@@ -43,22 +43,16 @@ const FormWizardInner = <TSchema extends z.ZodType>(
     titleAlign = 'left',
     titlePosition = 'inside',
     renderActions,
+    components,
   }: FormWizardProps<TSchema>,
   ref: React.Ref<FormBuilderHandle>,
 ) => {
   const [activeStep, setActiveStep] = useState(0);
-  // completedSteps tracks which step indices have passed per-step validation
-  // (i.e. the user has clicked Next on them). Only completed steps can be
-  // navigated to directly by clicking their label in the Stepper.
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  // isNavigating is true while handleNext is awaiting per-step validation.
-  // isNextingRef prevents concurrent invocations; isNavigating drives the UI.
   const isNextingRef = useRef(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const isLastStep = activeStep === steps.length - 1;
 
-  // Flatten all fields to register them up-front — RHF needs all fields
-  // registered from the start for consistent validation state.
   const allFields = useMemo(() => steps.flatMap((s) => s.fields), [steps]);
 
   const { methods, handleFormReset } = useFormBuilder({
@@ -73,13 +67,13 @@ const FormWizardInner = <TSchema extends z.ZodType>(
     trigger,
     clearErrors,
     control,
+    unregister,
     formState: { isSubmitting },
   } = methods;
 
   useImperativeHandle(ref, () => ({
     reset: handleFormReset,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    submit: () => void methods.handleSubmit(onSubmit as any)(),
+    submit: () => void methods.handleSubmit(onSubmit as never)(),
     setError: (name, error) => methods.setError(name, error),
     getValues: () => methods.getValues(),
   }));
@@ -90,8 +84,7 @@ const FormWizardInner = <TSchema extends z.ZodType>(
     setIsNavigating(true);
     try {
       const stepFieldNames = steps[activeStep].fields.map((f) => f.name);
-      // Only validate the current step's fields — other steps' errors must not block navigation.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- RHF trigger accepts string[]
       const valid = await trigger(stepFieldNames as any);
       if (valid) {
         clearErrors();
@@ -105,16 +98,12 @@ const FormWizardInner = <TSchema extends z.ZodType>(
   }, [steps, activeStep, trigger, clearErrors]);
 
   const handleBack = useCallback(() => {
-    // Clear errors when navigating back so the previous step starts clean.
     clearErrors();
     setActiveStep((prev) => prev - 1);
   }, [clearErrors]);
 
   const handleStepClick = useCallback(
     (stepIndex: number) => {
-      // Allow jumping to any previously completed step or to any step that has
-      // already been visited (index < activeStep). Forward jumps are blocked to
-      // prevent skipping required validation.
       if (stepIndex < activeStep || completedSteps.has(stepIndex)) {
         clearErrors();
         setActiveStep(stepIndex);
@@ -125,10 +114,6 @@ const FormWizardInner = <TSchema extends z.ZodType>(
 
   const handleSubmitError = useCallback(
     (errors: Record<string, unknown>) => {
-      // Navigate to the first step that contains a field with an error so the
-      // user can see and fix the problem instead of staring at a blank step.
-      // Supports dot-notation field names (e.g. "address.city") by traversing
-      // the nested errors object rather than checking a flat key.
       const hasNestedError = (path: string): boolean => {
         const parts = path.split('.');
         let node: unknown = errors;
@@ -155,9 +140,6 @@ const FormWizardInner = <TSchema extends z.ZodType>(
 
   const handleFormSubmit = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
-      // A form submission that reaches a non-last step (Enter key inside a field,
-      // or a submit-type button supplied through renderActions) must only advance
-      // to the next step — never run the final onSubmit for the whole schema.
       if (!isLastStep) {
         event.preventDefault();
         void handleNext();
@@ -178,8 +160,13 @@ const FormWizardInner = <TSchema extends z.ZodType>(
   );
 
   const ctxValue = useMemo(
-    () => ({ readOnly, labels: resolvedLabels }),
-    [readOnly, resolvedLabels],
+    () => ({
+      readOnly,
+      labels: resolvedLabels,
+      components: components ?? {},
+      unregister,
+    }),
+    [readOnly, resolvedLabels, components, unregister],
   );
 
   const currentFields = steps[activeStep]?.fields ?? [];

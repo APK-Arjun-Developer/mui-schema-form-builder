@@ -10,14 +10,21 @@ import {
   type SelectChangeEvent,
 } from '@mui/material';
 import { useController } from 'react-hook-form';
-import type { InputProps, ComboValue } from '../types/component.types';
+import type { ComboFieldConfig } from '../types/field.types';
+import type { Control } from 'react-hook-form';
+import type { ComboValue } from '../types/component.types';
 import { FieldLabel } from './FieldLabel';
 import { SearchIcon } from './icons';
 import { comboInputSx, getComboSelectSx, getComboTextFieldSx } from './ComboInput.styles';
 
 const EMPTY_VALUE: ComboValue = { select: '', input: '' };
 
-export const ComboInput = React.memo(({ fieldConfig, control }: InputProps) => {
+export interface ComboInputProps {
+  fieldConfig: ComboFieldConfig;
+  control: Control;
+}
+
+export const ComboInput = React.memo(({ fieldConfig, control }: ComboInputProps) => {
   const {
     field,
     fieldState: { error },

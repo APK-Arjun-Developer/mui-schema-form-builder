@@ -1,10 +1,16 @@
 import React, { useCallback } from 'react';
 import { Box, InputAdornment, TextField } from '@mui/material';
 import { useController } from 'react-hook-form';
-import type { InputProps } from '../types/component.types';
+import type { NumberFieldConfig } from '../types/field.types';
+import type { Control } from 'react-hook-form';
 import { FieldLabel } from './FieldLabel';
 
-export const NumberInput = React.memo(({ fieldConfig, control }: InputProps) => {
+export interface NumberInputProps {
+  fieldConfig: NumberFieldConfig;
+  control: Control;
+}
+
+export const NumberInput = React.memo(({ fieldConfig, control }: NumberInputProps) => {
   const {
     field,
     fieldState: { error },
@@ -52,8 +58,6 @@ export const NumberInput = React.memo(({ fieldConfig, control }: InputProps) => 
             'aria-required': fieldConfig.required,
             'aria-invalid': !!error,
             'aria-describedby': errorId,
-            // Propagate schema-level constraints to the HTML input so browsers
-            // can show native validation UI as a secondary defense layer.
             min: fieldConfig.min,
             max: fieldConfig.max,
             step: fieldConfig.step,

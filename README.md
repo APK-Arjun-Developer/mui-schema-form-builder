@@ -96,7 +96,7 @@ export default function App() {
 | `type`           | `string`                               | ✓        | See field types below                                          |
 | `defaultValue`   | `unknown`                              |          | Initial value                                                  |
 | `placeholder`    | `string`                               |          | Input placeholder                                              |
-| `required`       | `boolean`                              |          | Shows asterisk, sets `aria-required`                           |
+| `required`       | `boolean`                              |          | Shows asterisk, sets `aria-required` — **does not add Zod validation** (use your schema for that) |
 | `disabled`       | `boolean`                              |          | Disables the field                                             |
 | `options`        | `Option[]`                             |          | For SELECT, RADIO, CHECKBOX                                    |
 | `multiple`       | `boolean`                              |          | Multi-select for SELECT and AUTOCOMPLETE                       |
@@ -110,7 +110,8 @@ export default function App() {
 | `startAdornment` | `React.ReactNode`                      |          | Prefix node inside the input (TEXT, NUMBER). E.g. `"$"`, icon |
 | `endAdornment`   | `React.ReactNode`                      |          | Suffix node inside the input (TEXT, NUMBER). E.g. `"kg"`       |
 | `fetchOptions`      | `(query: string) => Promise<Option[]>` |          | Async options for AUTOCOMPLETE                                 |
-| `visibleIf`         | `(values: FieldValues) => boolean`     |          | Hides field when returns `false`                               |
+| `visibleIf`              | `(values: FieldValues) => boolean`     |          | Hides field when returns `false`                               |
+| `unregisterWhenHidden`   | `boolean`                              |          | When `true`, removes the field's value from RHF state when hidden via `visibleIf` |
 | `muiProps`          | `Record<string, any>`                  |          | Extra props forwarded to the underlying MUI component          |
 | `section`           | `string`                               |          | Groups consecutive same-section fields under a shared header   |
 | `selectOptions`     | `Option[]`                             |          | Dropdown options — COMBO_INPUT only                            |
@@ -437,6 +438,64 @@ const fields = [
 ];
 ```
 
+By default, a hidden field's value is **kept** in RHF state so it is preserved when the field becomes visible again. Set `unregisterWhenHidden: true` to remove it from submitted data when hidden:
+
+```tsx
+{
+  name: 'company',
+  label: 'Company',
+  type: FIELD_TYPE.TEXT,
+  visibleIf: (values) => values['status'] === 'employed',
+  unregisterWhenHidden: true,  // value removed from form state while hidden
+}
+```
+
+---
+
+## Custom Field Types
+
+Register a custom field component via the `components` prop. The key matches the `type` string in your field config.
+
+```tsx
+import type { CustomFieldComponent } from 'mui-schema-form-builder';
+
+// 1. Implement your component — receives { fieldConfig, control }
+const RichTextEditor: CustomFieldComponent = ({ fieldConfig, control }) => {
+  const { field, fieldState } = useController({ name: fieldConfig.name, control });
+  return <MyEditor value={field.value} onChange={field.onChange} error={!!fieldState.error} />;
+};
+
+// 2. Pass it to FormBuilder (no global registration needed)
+<FormBuilder
+  fields={[
+    { name: 'bio', label: 'Bio', type: 'rich-text' },
+  ]}
+  schema={schema}
+  onSubmit={fn}
+  components={{ 'rich-text': RichTextEditor }}
+/>
+```
+
+Custom components can use `BaseFieldConfig` to add type-safe extra properties:
+
+```tsx
+import type { BaseFieldConfig, CustomFieldComponent } from 'mui-schema-form-builder';
+
+interface RichTextFieldConfig extends BaseFieldConfig {
+  type: 'rich-text';
+  toolbar?: 'full' | 'minimal';
+}
+
+const RichTextEditor: CustomFieldComponent = ({ fieldConfig }) => {
+  const cfg = fieldConfig as RichTextFieldConfig;
+  return <MyEditor toolbar={cfg.toolbar ?? 'full'} />;
+};
+```
+
+`components` is also available on `FormWizard` and `FilterForm`.
+
+> **Legacy API:** `registerFieldType(type, Component)` is still available but deprecated. Prefer `components` — it avoids global mutable state and keeps components scoped to a specific form instance.
+
 ---
 
 ## Async Autocomplete
@@ -483,6 +542,7 @@ Built-in 300ms debounce and stale-response protection. If a later search resolve
 | `virtualize`         | `boolean`                                           | `false`       | Enable react-window for large forms                              |
 | `validationMode`     | `ValidationMode`                                    | `'onTouched'` | When validation triggers                                         |
 | `sx`                 | `SxProps`                                           |               | MUI sx prop for the outer Paper                                  |
+| `components`         | `Record<string, CustomFieldComponent>`              |               | Custom field components keyed by type string                     |
 
 ---
 
@@ -501,6 +561,29 @@ const schema = z.object({ name: z.string(), age: z.number() });
     // data.age  → number ✓
   }}
 />;
+```
+
+**Use specific field config types** for type-safe field definitions. Each `FIELD_TYPE` maps to its own config interface:
+
+```tsx
+import type { TextFieldConfig, SelectFieldConfig, NumberFieldConfig } from 'mui-schema-form-builder';
+
+const fields: FieldConfig[] = [
+  {
+    name: 'name',
+    label: 'Name',
+    type: FIELD_TYPE.TEXT,
+    // TypeScript knows startAdornment, endAdornment, muiProps are valid here
+    startAdornment: '@',
+  } satisfies TextFieldConfig,
+  {
+    name: 'role',
+    label: 'Role',
+    type: FIELD_TYPE.SELECT,
+    // TypeScript knows options and multiple are valid here
+    options: [{ label: 'Admin', value: 'admin' }],
+  } satisfies SelectFieldConfig,
+];
 ```
 
 **Memoize your `fields` array** to prevent unnecessary recomputation of default values:

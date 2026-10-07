@@ -9,10 +9,16 @@ import {
   ListItemText,
 } from '@mui/material';
 import { useController } from 'react-hook-form';
-import type { InputProps } from '../types/component.types';
+import type { SelectFieldConfig } from '../types/field.types';
+import type { Control } from 'react-hook-form';
 import { FieldLabel } from './FieldLabel';
 
-export const SelectInput = React.memo(({ fieldConfig, control }: InputProps) => {
+export interface SelectInputProps {
+  fieldConfig: SelectFieldConfig;
+  control: Control;
+}
+
+export const SelectInput = React.memo(({ fieldConfig, control }: SelectInputProps) => {
   const {
     field,
     fieldState: { error },

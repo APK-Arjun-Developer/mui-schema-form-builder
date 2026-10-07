@@ -1,7 +1,7 @@
 import type React from 'react';
 import type { z } from 'zod';
-import type { SxProps } from '@mui/material';
-import type { FieldValues, ValidationMode, Resolver } from 'react-hook-form';
+import type { SxProps, TextFieldProps } from '@mui/material';
+import type { FieldValues, ValidationMode, Resolver, Control } from 'react-hook-form';
 
 export const FIELD_TYPE = {
   TEXT: 'text',
@@ -40,84 +40,167 @@ export interface GridConfig {
   xl?: number;
 }
 
-export interface FieldConfig {
+export interface BaseFieldConfig {
   /** Must match a key in the Zod schema object. Dot-notation supported (e.g. "address.city"). */
   name: string;
   label: string;
-  /** Use FIELD_TYPE constants or any custom type string registered via registerFieldType(). */
-  type: FieldType | string;
   defaultValue?: unknown;
   placeholder?: string;
-  options?: Option[];
-  multiple?: boolean;
   disabled?: boolean;
   fullWidth?: boolean;
   size?: 'small' | 'medium';
+  /**
+   * Display a required indicator (asterisk) and set `aria-required` on the input.
+   * This does NOT add schema validation — validation is solely the responsibility
+   * of your Zod schema or custom resolver.
+   */
   required?: boolean;
   grid?: GridConfig;
-  /** Minimum value — NUMBER fields only. Also sets the HTML min attribute. */
-  min?: number;
-  /** Maximum value — NUMBER fields only. Also sets the HTML max attribute. */
-  max?: number;
-  /** Step increment — NUMBER fields only. Also sets the HTML step attribute. */
-  step?: number;
-  /** Number of visible text rows — TEXTAREA fields only. Defaults to 4. */
-  rows?: number;
-  /** Async option fetching for AUTOCOMPLETE fields. Return empty array on error. */
-  fetchOptions?: (input: string) => Promise<Option[]>;
   /**
-   * Return false to hide this field. Receives current form values.
+   * Return false to hide this field. Receives the current form values.
    * Only fields that declare visibleIf subscribe to form-wide state changes —
    * all other fields are unaffected by sibling updates.
+   *
+   * Hidden fields retain their value in form state by default and are included
+   * in submitted data. Set `unregisterWhenHidden: true` to remove the value
+   * while hidden. When the field becomes visible again it re-initialises with
+   * its `defaultValue`.
    */
   visibleIf?: (values: FieldValues) => boolean;
   /**
-   * Escape hatch: extra props forwarded directly to the underlying MUI component.
-   * Values are typed loosely because MUI component prop shapes vary per field type.
-   * Prefer explicit FieldConfig properties where possible.
+   * When true and the field is hidden by `visibleIf`, the field is unregistered
+   * from the form state and its value is absent from submitted data while hidden.
+   * Requires the field to be inside a FormBuilder or FormWizard (has no effect in
+   * FilterForm). Default: false.
    */
-  muiProps?: Record<string, unknown>;
+  unregisterWhenHidden?: boolean;
   /**
    * Optional section label. Fields with the same consecutive section string are grouped
    * under a shared section header in FormBuilder. Sections are rendered in the order
    * they first appear in the fields array.
    */
   section?: string;
-  /**
-   * Node rendered inside an InputAdornment at the start of the input (e.g. "$", an icon).
-   * Supported by TEXT, TEXTAREA, NUMBER, and PASSWORD field types.
-   */
-  startAdornment?: React.ReactNode;
-  /**
-   * Node rendered inside an InputAdornment at the end of the input (e.g. "kg", a button).
-   * Supported by TEXT, TEXTAREA, NUMBER, and PASSWORD field types.
-   * Note: PASSWORD fields render their own visibility toggle as the trailing adornment;
-   * setting endAdornment on a PASSWORD field has no effect.
-   */
-  endAdornment?: React.ReactNode;
-  /** Sub-fields for each array item — ARRAY fields only. */
-  itemFields?: FieldConfig[];
-  /** Label for the "add item" button — ARRAY fields only. Default: "Add item". */
-  addLabel?: string;
-  /** Label for the per-item "remove" button — ARRAY fields only. Default: "Remove". */
-  removeLabel?: string;
-  /** Minimum number of array items — ARRAY fields only. */
-  minItems?: number;
-  /** Maximum number of array items — ARRAY fields only. */
-  maxItems?: number;
-  /** Options for the fused dropdown selector — COMBO_INPUT fields only. */
-  selectOptions?: Option[];
-  /** Which side the selector appears on — COMBO_INPUT fields only. Defaults to 'start'. */
-  selectPosition?: 'start' | 'end';
-  /** Placeholder shown in the selector when no option is chosen — COMBO_INPUT fields only. */
-  selectPlaceholder?: string;
-  /** HTML input type for the text portion — COMBO_INPUT fields only. Defaults to 'text'.
-   *  Use 'search' to auto-render a lens icon inside the fused input.
-   *  For a standalone search field use FIELD_TYPE.SEARCH instead. */
-  inputType?: 'text' | 'number' | 'search';
-  /** Width in pixels of the selector portion — COMBO_INPUT fields only. Defaults to 120. */
-  selectWidth?: number;
 }
+
+type TextMuiProps = TextFieldProps;
+
+export interface TextFieldConfig extends BaseFieldConfig {
+  type: typeof FIELD_TYPE.TEXT;
+  startAdornment?: React.ReactNode;
+  endAdornment?: React.ReactNode;
+  muiProps?: TextMuiProps;
+}
+
+export interface TextAreaFieldConfig extends BaseFieldConfig {
+  type: typeof FIELD_TYPE.TEXTAREA;
+  rows?: number;
+  startAdornment?: React.ReactNode;
+  endAdornment?: React.ReactNode;
+  muiProps?: TextMuiProps;
+}
+
+export interface DateFieldConfig extends BaseFieldConfig {
+  type: typeof FIELD_TYPE.DATE;
+  muiProps?: TextMuiProps;
+}
+
+export interface NumberFieldConfig extends BaseFieldConfig {
+  type: typeof FIELD_TYPE.NUMBER;
+  min?: number;
+  max?: number;
+  step?: number;
+  startAdornment?: React.ReactNode;
+  endAdornment?: React.ReactNode;
+  muiProps?: TextMuiProps;
+}
+
+export interface SelectFieldConfig extends BaseFieldConfig {
+  type: typeof FIELD_TYPE.SELECT;
+  options?: Option[];
+  multiple?: boolean;
+  muiProps?: Record<string, unknown>;
+}
+
+export interface AutocompleteFieldConfig extends BaseFieldConfig {
+  type: typeof FIELD_TYPE.AUTOCOMPLETE;
+  options?: Option[];
+  multiple?: boolean;
+  fetchOptions?: (input: string) => Promise<Option[]>;
+  muiProps?: Record<string, unknown>;
+}
+
+export interface RadioFieldConfig extends BaseFieldConfig {
+  type: typeof FIELD_TYPE.RADIO;
+  options?: Option[];
+}
+
+export interface CheckboxFieldConfig extends BaseFieldConfig {
+  type: typeof FIELD_TYPE.CHECKBOX;
+  /**
+   * When options are provided, renders a checkbox group (value is (string | number)[]).
+   * When omitted, renders a single boolean checkbox.
+   */
+  options?: Option[];
+}
+
+export interface PasswordFieldConfig extends BaseFieldConfig {
+  type: typeof FIELD_TYPE.PASSWORD;
+  startAdornment?: React.ReactNode;
+  muiProps?: TextMuiProps;
+}
+
+export interface SearchFieldConfig extends BaseFieldConfig {
+  type: typeof FIELD_TYPE.SEARCH;
+  startAdornment?: React.ReactNode;
+  endAdornment?: React.ReactNode;
+  muiProps?: TextMuiProps;
+}
+
+export interface DatePickerFieldConfig extends BaseFieldConfig {
+  type: typeof FIELD_TYPE.DATE_PICKER;
+  muiProps?: Record<string, unknown>;
+}
+
+export interface ArrayFieldConfig extends BaseFieldConfig {
+  type: typeof FIELD_TYPE.ARRAY;
+  itemFields?: FieldConfig[];
+  addLabel?: string;
+  removeLabel?: string;
+  minItems?: number;
+  maxItems?: number;
+}
+
+export interface ComboFieldConfig extends BaseFieldConfig {
+  type: typeof FIELD_TYPE.COMBO_INPUT;
+  selectOptions?: Option[];
+  selectPosition?: 'start' | 'end';
+  selectPlaceholder?: string;
+  inputType?: 'text' | 'number' | 'search';
+  selectWidth?: number;
+  min?: number;
+  max?: number;
+  step?: number;
+}
+
+export type FieldConfig =
+  | TextFieldConfig
+  | TextAreaFieldConfig
+  | DateFieldConfig
+  | NumberFieldConfig
+  | SelectFieldConfig
+  | AutocompleteFieldConfig
+  | RadioFieldConfig
+  | CheckboxFieldConfig
+  | PasswordFieldConfig
+  | SearchFieldConfig
+  | DatePickerFieldConfig
+  | ArrayFieldConfig
+  | ComboFieldConfig;
+
+export type CustomFieldComponent = React.ComponentType<{
+  fieldConfig: FieldConfig;
+  control: Control;
+}>;
 
 export interface FormBuilderProps<TSchema extends z.ZodType = z.ZodType> {
   fields: FieldConfig[];
@@ -178,6 +261,7 @@ export interface FormBuilderProps<TSchema extends z.ZodType = z.ZodType> {
    * When provided, the built-in action buttons are not rendered.
    */
   renderActions?: (params: FormBuilderActionsParams) => React.ReactNode;
+  components?: Record<string, CustomFieldComponent>;
 }
 
 /** Parameters passed to the FormBuilder renderActions render-prop. */

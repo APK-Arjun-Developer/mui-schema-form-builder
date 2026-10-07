@@ -25,7 +25,7 @@ export { SearchInput } from './components/form-builder/inputs/SearchInput';
 /**
  * createDatePickerInput produces a FormBuilder field component that wraps
  * @mui/x-date-pickers DatePicker. Pass the imported DatePicker component as the
- * argument, then register the result with registerFieldType.
+ * argument, then register the result via the `components` prop or registerFieldType.
  */
 export { createDatePickerInput } from './components/form-builder/inputs/DatePickerInput';
 
@@ -35,6 +35,21 @@ export { FIELD_TYPE } from './components/form-builder/types/field.types';
 export type {
   FieldType,
   FieldConfig,
+  BaseFieldConfig,
+  TextFieldConfig,
+  TextAreaFieldConfig,
+  DateFieldConfig,
+  NumberFieldConfig,
+  SelectFieldConfig,
+  AutocompleteFieldConfig,
+  RadioFieldConfig,
+  CheckboxFieldConfig,
+  PasswordFieldConfig,
+  SearchFieldConfig,
+  DatePickerFieldConfig,
+  ArrayFieldConfig,
+  ComboFieldConfig,
+  CustomFieldComponent,
   FormBuilderProps,
   FormBuilderLabels,
   FormBuilderActionsParams,

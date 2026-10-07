@@ -9,10 +9,16 @@ import {
   Box,
 } from '@mui/material';
 import { useController } from 'react-hook-form';
-import type { InputProps } from '../types/component.types';
+import type { RadioFieldConfig } from '../types/field.types';
+import type { Control } from 'react-hook-form';
 import { radioInputSx, getRadioGroupLabelSx } from './RadioInput.styles';
 
-export const RadioInput = React.memo(({ fieldConfig, control }: InputProps) => {
+export interface RadioInputProps {
+  fieldConfig: RadioFieldConfig;
+  control: Control;
+}
+
+export const RadioInput = React.memo(({ fieldConfig, control }: RadioInputProps) => {
   const {
     field,
     fieldState: { error },

@@ -1,5 +1,12 @@
 export const formBuilderSx = {
-  paper: { p: 0, bgcolor: 'transparent', boxShadow: 'none' },
+  paper: {
+    p: 0,
+    bgcolor: 'transparent',
+    boxShadow: 'none',
+    '& .MuiOutlinedInput-root.Mui-error.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: 'primary.main',
+    },
+  },
   actionsBox: { mt: 4, display: 'flex', gap: 2, justifyContent: 'flex-end', flexWrap: 'wrap' },
   resetButton: { textTransform: 'none', fontWeight: 500 },
   cancelButton: { textTransform: 'none', fontWeight: 500 },
