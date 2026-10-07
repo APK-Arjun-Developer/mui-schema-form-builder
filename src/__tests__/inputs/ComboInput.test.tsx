@@ -5,7 +5,7 @@ import { axe } from 'jest-axe';
 import { useForm } from 'react-hook-form';
 import { renderWithTheme } from '../helpers';
 import { ComboInput } from '../../components/form-builder/inputs/ComboInput';
-import { FIELD_TYPE, type FieldConfig } from '../../components/form-builder/types/field.types';
+import { FIELD_TYPE, type ComboFieldConfig } from '../../components/form-builder/types/field.types';
 
 const SELECT_OPTIONS = [
   { label: '+1', value: '+1' },
@@ -13,7 +13,7 @@ const SELECT_OPTIONS = [
   { label: '+49', value: '+49' },
 ];
 
-const baseField: FieldConfig = {
+const baseField: ComboFieldConfig = {
   name: 'phone',
   label: 'Phone',
   type: FIELD_TYPE.COMBO_INPUT,
@@ -26,7 +26,7 @@ function Fixture({
   fieldConfig = baseField,
   defaultValue,
 }: {
-  fieldConfig?: FieldConfig;
+  fieldConfig?: ComboFieldConfig;
   defaultValue?: { select: string; input: string };
 }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

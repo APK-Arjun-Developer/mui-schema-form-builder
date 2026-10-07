@@ -23,6 +23,7 @@ export const FilterForm = React.memo(
     sx,
     readOnly = false,
     labels,
+    components,
   }: FilterFormProps) => {
     const fieldsWithDefaults = useMemo(
       () =>
@@ -54,8 +55,13 @@ export const FilterForm = React.memo(
     );
 
     const ctxValue = useMemo(
-      () => ({ readOnly, labels: resolvedLabels }),
-      [readOnly, resolvedLabels],
+      () => ({
+        readOnly,
+        labels: resolvedLabels,
+        components: components ?? {},
+        unregister: undefined,
+      }),
+      [readOnly, resolvedLabels, components],
     );
 
     return (

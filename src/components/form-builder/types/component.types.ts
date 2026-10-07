@@ -1,7 +1,8 @@
 import type React from 'react';
 import type { Control } from 'react-hook-form';
-import type { FieldConfig } from './field.types';
+import type { FieldConfig, ArrayFieldConfig } from './field.types';
 
+/** Base input props used by all built-in field components. */
 export interface InputProps {
   fieldConfig: FieldConfig;
   control: Control;
@@ -23,7 +24,7 @@ export interface ReadOnlyFieldProps {
 }
 
 export interface ArrayInputProps {
-  fieldConfig: FieldConfig;
+  fieldConfig: ArrayFieldConfig;
   control: Control;
 }
 

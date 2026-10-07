@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useWatch } from 'react-hook-form';
 import { Grid } from '@mui/material';
 import { FIELD_TYPE } from './types/field.types';
@@ -19,28 +19,13 @@ import { SearchInput } from './inputs/SearchInput';
 
 export type { CustomFieldProps };
 
-// Registry maps field type strings to their render components.
-// Defined outside the component — a stable module-level constant.
-const fieldRegistry: Record<string, React.ComponentType<CustomFieldProps>> = {
-  [FIELD_TYPE.TEXT]: TextInput,
-  [FIELD_TYPE.NUMBER]: NumberInput,
-  [FIELD_TYPE.SELECT]: SelectInput,
-  [FIELD_TYPE.AUTOCOMPLETE]: AutocompleteInput,
-  [FIELD_TYPE.RADIO]: RadioInput,
-  [FIELD_TYPE.CHECKBOX]: CheckboxInput,
-  // TEXTAREA and DATE reuse TextInput — it handles multiline and date type internally.
-  [FIELD_TYPE.TEXTAREA]: TextInput,
-  [FIELD_TYPE.DATE]: TextInput,
-  [FIELD_TYPE.PASSWORD]: PasswordInput,
-  [FIELD_TYPE.ARRAY]: ArrayInput,
-  [FIELD_TYPE.COMBO_INPUT]: ComboInput,
-  [FIELD_TYPE.SEARCH]: SearchInput,
-  // DATE_PICKER is not pre-registered — use registerFieldType(FIELD_TYPE.DATE_PICKER, createDatePickerInput(DatePicker))
-};
+const fieldRegistry: Record<string, React.ComponentType<CustomFieldProps>> = {};
 
 /**
- * Register a custom field type that FormBuilder will render for the given type string.
- * Call this once at app startup before rendering any FormBuilder that uses the type.
+ * Register a custom (or override a built-in) field type globally.
+ * @deprecated Prefer the `components` prop on FormBuilder/FormWizard/FilterForm
+ *   to avoid global mutable state. `registerFieldType` is kept for backward
+ *   compatibility and for the DatePicker optional integration pattern.
  */
 export function registerFieldType(
   type: string,
@@ -50,7 +35,11 @@ export function registerFieldType(
 }
 
 export const FormField = React.memo(({ fieldConfig, control }: FormFieldProps) => {
-  const { readOnly } = useFormBuilderContext();
+  const {
+    readOnly,
+    components: ctxComponents,
+    unregister: ctxUnregister,
+  } = useFormBuilderContext();
 
   // CRITICAL: Only subscribe to form state when this field has a visibility condition.
   // Passing `disabled: true` tells react-hook-form NOT to run the subscription,
@@ -61,9 +50,15 @@ export const FormField = React.memo(({ fieldConfig, control }: FormFieldProps) =
     disabled: !fieldConfig.visibleIf,
   });
 
-  if (fieldConfig.visibleIf && !fieldConfig.visibleIf(watchedValues)) {
-    return null;
-  }
+  const isVisible = !fieldConfig.visibleIf || fieldConfig.visibleIf(watchedValues);
+
+  useEffect(() => {
+    if (!isVisible && fieldConfig.unregisterWhenHidden && ctxUnregister) {
+      ctxUnregister(fieldConfig.name);
+    }
+  }, [isVisible, fieldConfig.unregisterWhenHidden, fieldConfig.name, ctxUnregister]);
+
+  if (!isVisible) return null;
 
   if (readOnly) {
     return (
@@ -73,13 +68,81 @@ export const FormField = React.memo(({ fieldConfig, control }: FormFieldProps) =
     );
   }
 
-  const InputComponent = fieldRegistry[fieldConfig.type] ?? TextInput;
+  const CustomComponent = ctxComponents[fieldConfig.type] ?? fieldRegistry[fieldConfig.type];
+  if (CustomComponent) {
+    return (
+      <Grid size={fieldConfig.grid ?? { xs: 12 }}>
+        <CustomComponent fieldConfig={fieldConfig} control={control} />
+      </Grid>
+    );
+  }
 
-  return (
-    <Grid size={fieldConfig.grid ?? { xs: 12 }}>
-      <InputComponent fieldConfig={fieldConfig} control={control} />
-    </Grid>
-  );
+  switch (fieldConfig.type) {
+    case FIELD_TYPE.TEXT:
+    case FIELD_TYPE.TEXTAREA:
+    case FIELD_TYPE.DATE:
+      return (
+        <Grid size={fieldConfig.grid ?? { xs: 12 }}>
+          <TextInput fieldConfig={fieldConfig} control={control} />
+        </Grid>
+      );
+    case FIELD_TYPE.NUMBER:
+      return (
+        <Grid size={fieldConfig.grid ?? { xs: 12 }}>
+          <NumberInput fieldConfig={fieldConfig} control={control} />
+        </Grid>
+      );
+    case FIELD_TYPE.SELECT:
+      return (
+        <Grid size={fieldConfig.grid ?? { xs: 12 }}>
+          <SelectInput fieldConfig={fieldConfig} control={control} />
+        </Grid>
+      );
+    case FIELD_TYPE.AUTOCOMPLETE:
+      return (
+        <Grid size={fieldConfig.grid ?? { xs: 12 }}>
+          <AutocompleteInput fieldConfig={fieldConfig} control={control} />
+        </Grid>
+      );
+    case FIELD_TYPE.RADIO:
+      return (
+        <Grid size={fieldConfig.grid ?? { xs: 12 }}>
+          <RadioInput fieldConfig={fieldConfig} control={control} />
+        </Grid>
+      );
+    case FIELD_TYPE.CHECKBOX:
+      return (
+        <Grid size={fieldConfig.grid ?? { xs: 12 }}>
+          <CheckboxInput fieldConfig={fieldConfig} control={control} />
+        </Grid>
+      );
+    case FIELD_TYPE.PASSWORD:
+      return (
+        <Grid size={fieldConfig.grid ?? { xs: 12 }}>
+          <PasswordInput fieldConfig={fieldConfig} control={control} />
+        </Grid>
+      );
+    case FIELD_TYPE.ARRAY:
+      return (
+        <Grid size={fieldConfig.grid ?? { xs: 12 }}>
+          <ArrayInput fieldConfig={fieldConfig} control={control} />
+        </Grid>
+      );
+    case FIELD_TYPE.COMBO_INPUT:
+      return (
+        <Grid size={fieldConfig.grid ?? { xs: 12 }}>
+          <ComboInput fieldConfig={fieldConfig} control={control} />
+        </Grid>
+      );
+    case FIELD_TYPE.SEARCH:
+      return (
+        <Grid size={fieldConfig.grid ?? { xs: 12 }}>
+          <SearchInput fieldConfig={fieldConfig} control={control} />
+        </Grid>
+      );
+    default:
+      return null;
+  }
 });
 
 FormField.displayName = 'FormField';

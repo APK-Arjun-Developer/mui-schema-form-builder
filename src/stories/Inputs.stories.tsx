@@ -5,9 +5,7 @@ import { FIELD_TYPE } from '../components/form-builder/types/field.types';
 
 // A thin wrapper that renders a single-field FormBuilder for each input story.
 function SingleFieldForm({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fieldConfig,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   schema,
 }: {
   fieldConfig: Parameters<typeof FormBuilder>[0]['fields'][0];

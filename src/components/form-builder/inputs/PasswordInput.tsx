@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import { Box, IconButton, InputAdornment, SvgIcon, TextField } from '@mui/material';
 import { useController } from 'react-hook-form';
-import type { InputProps } from '../types/component.types';
+import type { PasswordFieldConfig } from '../types/field.types';
+import type { Control } from 'react-hook-form';
 import { FieldLabel } from './FieldLabel';
 
 function VisibilityIcon() {
@@ -20,7 +21,12 @@ function VisibilityOffIcon() {
   );
 }
 
-export const PasswordInput = React.memo(({ fieldConfig, control }: InputProps) => {
+export interface PasswordInputProps {
+  fieldConfig: PasswordFieldConfig;
+  control: Control;
+}
+
+export const PasswordInput = React.memo(({ fieldConfig, control }: PasswordInputProps) => {
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -36,6 +42,10 @@ export const PasswordInput = React.memo(({ fieldConfig, control }: InputProps) =
   const errorId = error ? `${fieldConfig.name}-error` : undefined;
 
   const toggleVisibility = useCallback(() => setShowPassword((prev) => !prev), []);
+
+  const startAdornment = fieldConfig.startAdornment ? (
+    <InputAdornment position="start">{fieldConfig.startAdornment}</InputAdornment>
+  ) : undefined;
 
   return (
     <Box>
@@ -70,6 +80,7 @@ export const PasswordInput = React.memo(({ fieldConfig, control }: InputProps) =
             'aria-describedby': errorId,
           },
           input: {
+            startAdornment,
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton

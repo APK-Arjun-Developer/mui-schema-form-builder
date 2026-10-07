@@ -1,5 +1,12 @@
 export const formWizardSx = {
-  paper: { p: 0, bgcolor: 'transparent', boxShadow: 'none' },
+  paper: {
+    p: 0,
+    bgcolor: 'transparent',
+    boxShadow: 'none',
+    '& .MuiOutlinedInput-root.Mui-error.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: 'primary.main',
+    },
+  },
   stepper: { mb: 3 },
   divider: { mb: 3 },
   actionsBox: { mt: 4, display: 'flex', gap: 2, justifyContent: 'flex-end', flexWrap: 'wrap' },

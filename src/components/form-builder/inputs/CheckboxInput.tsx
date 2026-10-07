@@ -9,11 +9,17 @@ import {
   Box,
 } from '@mui/material';
 import { useController } from 'react-hook-form';
-import type { InputProps } from '../types/component.types';
+import type { CheckboxFieldConfig } from '../types/field.types';
+import type { Control } from 'react-hook-form';
 import { FieldLabel } from './FieldLabel';
 import { checkboxInputSx, getCheckboxGroupLabelSx } from './CheckboxInput.styles';
 
-export const CheckboxInput = React.memo(({ fieldConfig, control }: InputProps) => {
+export interface CheckboxInputProps {
+  fieldConfig: CheckboxFieldConfig;
+  control: Control;
+}
+
+export const CheckboxInput = React.memo(({ fieldConfig, control }: CheckboxInputProps) => {
   const isGroup = !!fieldConfig.options;
 
   const {
@@ -27,8 +33,6 @@ export const CheckboxInput = React.memo(({ fieldConfig, control }: InputProps) =
 
   const errorId = `${fieldConfig.name}-error`;
 
-  // Depend on field.onChange (stable RHF reference) not the whole field object
-  // (which is a new reference every render), so child Checkbox memos actually hold.
   const { onChange: fieldOnChange, value: fieldValue } = field;
   const handleGroupChange = useCallback(
     (value: string | number) => {

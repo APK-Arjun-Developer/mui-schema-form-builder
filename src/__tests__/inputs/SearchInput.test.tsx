@@ -5,16 +5,19 @@ import { axe } from 'jest-axe';
 import { useForm } from 'react-hook-form';
 import { renderWithTheme } from '../helpers';
 import { SearchInput } from '../../components/form-builder/inputs/SearchInput';
-import { FIELD_TYPE, type FieldConfig } from '../../components/form-builder/types/field.types';
+import {
+  FIELD_TYPE,
+  type SearchFieldConfig,
+} from '../../components/form-builder/types/field.types';
 
-const baseField: FieldConfig = {
+const baseField: SearchFieldConfig = {
   name: 'search',
   label: 'Search',
   type: FIELD_TYPE.SEARCH,
   placeholder: 'Search…',
 };
 
-function Fixture({ fieldConfig = baseField }: { fieldConfig?: FieldConfig } = {}) {
+function Fixture({ fieldConfig = baseField }: { fieldConfig?: SearchFieldConfig } = {}) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { control } = useForm<any>({ defaultValues: { search: '' } });
   return <SearchInput fieldConfig={fieldConfig} control={control} />;

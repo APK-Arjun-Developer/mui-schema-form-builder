@@ -2,10 +2,16 @@ import React from 'react';
 import { Box, InputAdornment, TextField } from '@mui/material';
 import { useController } from 'react-hook-form';
 import { FIELD_TYPE } from '../types/field.types';
-import type { InputProps } from '../types/component.types';
+import type { TextFieldConfig, TextAreaFieldConfig, DateFieldConfig } from '../types/field.types';
+import type { Control } from 'react-hook-form';
 import { FieldLabel } from './FieldLabel';
 
-export const TextInput = React.memo(({ fieldConfig, control }: InputProps) => {
+export interface TextInputProps {
+  fieldConfig: TextFieldConfig | TextAreaFieldConfig | DateFieldConfig;
+  control: Control;
+}
+
+export const TextInput = React.memo(({ fieldConfig, control }: TextInputProps) => {
   const {
     field,
     fieldState: { error },
@@ -20,12 +26,19 @@ export const TextInput = React.memo(({ fieldConfig, control }: InputProps) => {
   const isDate = fieldConfig.type === FIELD_TYPE.DATE;
   const isTextarea = fieldConfig.type === FIELD_TYPE.TEXTAREA;
 
-  const startAdornment = fieldConfig.startAdornment ? (
-    <InputAdornment position="start">{fieldConfig.startAdornment}</InputAdornment>
-  ) : undefined;
-  const endAdornment = fieldConfig.endAdornment ? (
-    <InputAdornment position="end">{fieldConfig.endAdornment}</InputAdornment>
-  ) : undefined;
+  const startAdornmentNode =
+    fieldConfig.type !== FIELD_TYPE.DATE && fieldConfig.startAdornment ? (
+      <InputAdornment position="start">{fieldConfig.startAdornment}</InputAdornment>
+    ) : undefined;
+  const endAdornmentNode =
+    fieldConfig.type !== FIELD_TYPE.DATE && fieldConfig.endAdornment ? (
+      <InputAdornment position="end">{fieldConfig.endAdornment}</InputAdornment>
+    ) : undefined;
+
+  const rows = isTextarea ? (fieldConfig.rows ?? 4) : undefined;
+
+  // muiProps is present on text/textarea/date config types.
+  const muiProps = 'muiProps' in fieldConfig ? fieldConfig.muiProps : undefined;
 
   return (
     <Box>
@@ -46,7 +59,7 @@ export const TextInput = React.memo(({ fieldConfig, control }: InputProps) => {
             'aria-invalid': !!error,
             'aria-describedby': errorId,
           },
-          input: { startAdornment, endAdornment },
+          input: { startAdornment: startAdornmentNode, endAdornment: endAdornmentNode },
         }}
         type={isDate ? 'date' : 'text'}
         placeholder={fieldConfig.placeholder}
@@ -62,10 +75,8 @@ export const TextInput = React.memo(({ fieldConfig, control }: InputProps) => {
           ) : null
         }
         multiline={isTextarea}
-        // Only pass rows when multiline is active — MUI ignores it otherwise and
-        // passing rows={1} on a single-line input is misleading noise.
-        rows={isTextarea ? (fieldConfig.rows ?? 4) : undefined}
-        {...fieldConfig.muiProps}
+        rows={rows}
+        {...muiProps}
       />
     </Box>
   );

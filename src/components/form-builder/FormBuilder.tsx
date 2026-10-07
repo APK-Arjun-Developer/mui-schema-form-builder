@@ -25,11 +25,6 @@ const VirtualRow = React.memo(
 );
 VirtualRow.displayName = 'VirtualRow';
 
-// ---------------------------------------------------------------------------
-// FormBuilder
-// ---------------------------------------------------------------------------
-// forwardRef on a generic component requires a small cast workaround — the inner
-// function preserves the full generic signature while forwardRef erases it.
 // Group consecutive fields that share the same section label into segments.
 // Fields without a section are collected under `undefined`.
 function groupBySection(
@@ -47,6 +42,8 @@ function groupBySection(
   return segments;
 }
 
+// forwardRef on a generic component requires a small cast workaround — the inner
+// function preserves the full generic signature while forwardRef erases it.
 const FormBuilderInner = <TSchema extends import('zod').ZodType>(
   {
     fields,
@@ -72,6 +69,7 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
     titleAlign = 'left',
     titlePosition = 'inside',
     renderActions,
+    components,
   }: FormBuilderProps<TSchema>,
   ref: React.Ref<FormBuilderHandle>,
 ) => {
@@ -87,8 +85,7 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
 
   useImperativeHandle(ref, () => ({
     reset: handleFormReset,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    submit: () => void methods.handleSubmit(onSubmit as any)(),
+    submit: () => void methods.handleSubmit(onSubmit as never)(),
     setError: (name, error) => methods.setError(name, error),
     getValues: () => methods.getValues(),
   }));
@@ -96,14 +93,12 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
   const {
     handleSubmit,
     control,
+    unregister,
     formState: { isSubmitting },
   } = methods;
 
   // ---------------------------------------------------------------------------
-  // react-window lazy import — it is an optional peer dependency. The library
-  // must load correctly even when react-window is not installed.
-  // We only attempt the import when virtualize=true, preventing import failures
-  // from blocking non-virtualizing consumers.
+  // react-window lazy import — it is an optional peer dependency.
   // ---------------------------------------------------------------------------
   const [FixedSizeList, setFixedSizeList] = useState<FixedSizeListType | null>(null);
 
@@ -121,9 +116,7 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
       });
   }, [virtualize]);
 
-  // Stable data object for react-window — only recreates when fields or control changes.
   const rowData = useMemo<VirtualRowData>(() => ({ fields, control }), [fields, control]);
-
   const fieldSegments = useMemo(() => groupBySection(fields), [fields]);
 
   const resolvedLabels = useMemo<ResolvedLabels>(
@@ -136,13 +129,17 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
   );
 
   const ctxValue = useMemo(
-    () => ({ readOnly, labels: resolvedLabels }),
-    [readOnly, resolvedLabels],
+    () => ({
+      readOnly,
+      labels: resolvedLabels,
+      components: components ?? {},
+      unregister,
+    }),
+    [readOnly, resolvedLabels, components, unregister],
   );
 
   const handleSubmitAction = useCallback(
     () => void methods.handleSubmit(onSubmit as never)(),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [methods, onSubmit],
   );
 
@@ -155,19 +152,17 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
   return (
     <FormBuilderContext.Provider value={ctxValue}>
       {titlePosition === 'above' && titleNode}
-      {/* methods is typed as UseFormReturn<any> internally; the public onSubmit on
+      {/* methods is typed as UseFormReturn<FieldValues> internally; the public onSubmit on
         FormBuilderProps<TSchema> carries the correct typed signature for consumers. */}
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       <FormProvider {...(methods as any)}>
-        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        <form onSubmit={handleSubmit(onSubmit as any)} noValidate>
+        <form onSubmit={handleSubmit(onSubmit as never)} noValidate>
           <Paper
             elevation={0}
             sx={[formBuilderSx.paper, ...(Array.isArray(sx) ? sx : sx ? [sx] : [])]}
           >
             {titlePosition === 'inside' && titleNode}
             {virtualize && FixedSizeList ? (
-              // Sections are not supported in virtual mode — all fields render flat.
               <FixedSizeList
                 height={virtualizeHeight}
                 itemCount={fields.length}
@@ -254,7 +249,6 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
   );
 };
 
-// Cast preserves the generic type parameter through forwardRef.
 export const FormBuilder = React.forwardRef(FormBuilderInner) as <
   TSchema extends import('zod').ZodType,
 >(

@@ -2,6 +2,14 @@ import React from 'react';
 import { useController } from 'react-hook-form';
 import { Box, Typography, Chip, Stack } from '@mui/material';
 import { FIELD_TYPE } from '../types/field.types';
+import type {
+  FieldConfig,
+  SelectFieldConfig,
+  RadioFieldConfig,
+  CheckboxFieldConfig,
+  ArrayFieldConfig,
+  ComboFieldConfig,
+} from '../types/field.types';
 import type { ReadOnlyFieldProps } from '../types/component.types';
 import { FieldLabel } from './FieldLabel';
 import { readOnlyFieldSx } from './ReadOnlyField.styles';
@@ -40,12 +48,13 @@ export const ReadOnlyField = React.memo(({ fieldConfig, control }: ReadOnlyField
   } else {
     switch (fieldConfig.type) {
       case FIELD_TYPE.CHECKBOX: {
-        if (fieldConfig.options) {
+        const cfg = fieldConfig as CheckboxFieldConfig;
+        if (cfg.options) {
           const checked = value as (string | number)[];
-          const lbls = checked.map(
-            (v) => fieldConfig.options?.find((o) => o.value === v)?.label ?? String(v),
+          const lbs = checked.map(
+            (v) => cfg.options?.find((o) => o.value === v)?.label ?? String(v),
           );
-          display = <ChipRow labels={lbls} />;
+          display = <ChipRow labels={lbs} />;
         } else {
           display = <Typography variant="body1">{value ? 'Yes' : 'No'}</Typography>;
         }
@@ -54,13 +63,14 @@ export const ReadOnlyField = React.memo(({ fieldConfig, control }: ReadOnlyField
 
       case FIELD_TYPE.SELECT:
       case FIELD_TYPE.RADIO: {
+        const cfg = fieldConfig as SelectFieldConfig | RadioFieldConfig;
         if (Array.isArray(value)) {
-          const lbls = (value as (string | number)[]).map(
-            (v) => fieldConfig.options?.find((o) => o.value === v)?.label ?? String(v),
+          const lbs = (value as (string | number)[]).map(
+            (v) => cfg.options?.find((o) => o.value === v)?.label ?? String(v),
           );
-          display = <ChipRow labels={lbls} />;
+          display = <ChipRow labels={lbs} />;
         } else {
-          const opt = fieldConfig.options?.find((o) => o.value === value);
+          const opt = cfg.options?.find((o) => o.value === value);
           display = <Typography variant="body1">{opt?.label ?? String(value)}</Typography>;
         }
         break;
@@ -83,6 +93,7 @@ export const ReadOnlyField = React.memo(({ fieldConfig, control }: ReadOnlyField
       }
 
       case FIELD_TYPE.ARRAY: {
+        const cfg = fieldConfig as ArrayFieldConfig;
         const items = value as Record<string, unknown>[];
         if (!items.length) {
           display = (
@@ -102,13 +113,15 @@ export const ReadOnlyField = React.memo(({ fieldConfig, control }: ReadOnlyField
                   >
                     Item {idx + 1}
                   </Typography>
-                  {fieldConfig.itemFields?.map((subField) => (
+                  {cfg.itemFields?.map((subField) => (
                     <ReadOnlyField
                       key={subField.name}
-                      fieldConfig={{
-                        ...subField,
-                        name: `${fieldConfig.name}.${idx}.${subField.name}`,
-                      }}
+                      fieldConfig={
+                        {
+                          ...subField,
+                          name: `${cfg.name}.${idx}.${subField.name}`,
+                        } as FieldConfig
+                      }
                       control={control}
                     />
                   ))}
@@ -121,9 +134,10 @@ export const ReadOnlyField = React.memo(({ fieldConfig, control }: ReadOnlyField
       }
 
       case FIELD_TYPE.COMBO_INPUT: {
+        const cfg = fieldConfig as ComboFieldConfig;
         const comboVal = value as { select?: string | number; input?: string | number };
         const selectLabel =
-          fieldConfig.selectOptions?.find((o) => o.value === comboVal.select)?.label ??
+          cfg.selectOptions?.find((o) => o.value === comboVal.select)?.label ??
           String(comboVal.select ?? '');
         const inputStr = String(comboVal.input ?? '');
         if (!selectLabel && !inputStr) {
@@ -134,9 +148,7 @@ export const ReadOnlyField = React.memo(({ fieldConfig, control }: ReadOnlyField
           );
         } else {
           const parts =
-            fieldConfig.selectPosition === 'end'
-              ? [inputStr, selectLabel]
-              : [selectLabel, inputStr];
+            cfg.selectPosition === 'end' ? [inputStr, selectLabel] : [selectLabel, inputStr];
           display = <Typography variant="body1">{parts.filter(Boolean).join(' ')}</Typography>;
         }
         break;

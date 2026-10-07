@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type FieldValues } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
 import {
@@ -35,10 +35,14 @@ function buildDefaultValues(fields: FieldConfig[]): Record<string, unknown> {
     let value: unknown;
     if (field.defaultValue !== undefined) {
       value = field.defaultValue;
-    } else if (field.multiple || (field.type === FIELD_TYPE.CHECKBOX && field.options)) {
+    } else if (field.type === FIELD_TYPE.ARRAY) {
       value = [];
     } else if (field.type === FIELD_TYPE.CHECKBOX) {
-      value = false;
+      value = field.options ? [] : false;
+    } else if (field.type === FIELD_TYPE.SELECT) {
+      value = field.multiple ? [] : '';
+    } else if (field.type === FIELD_TYPE.AUTOCOMPLETE) {
+      value = field.multiple ? [] : null;
     } else if (field.type === FIELD_TYPE.COMBO_INPUT) {
       value = { select: '', input: '' };
     } else {
@@ -64,16 +68,15 @@ export const useFormBuilder = <TSchema extends z.ZodType = z.ZodType>({
   // Derive the resolver: use the caller-provided resolver if given, otherwise
   // fall back to zodResolver. Neither being provided is a consumer mistake —
   // we warn once rather than throw so the form still renders.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- zodResolver overloads don't accept ZodType directly
   const resolvedResolver = resolver ?? (schema ? zodResolver(schema as any) : undefined);
   if (!resolvedResolver) {
     console.warn('[mui-schema-form-builder] Either schema or resolver must be provided.');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const methods = useForm<any>({
+  const methods = useForm<FieldValues>({
     resolver: resolvedResolver,
-    defaultValues: defaultValues as Record<string, unknown>,
+    defaultValues: defaultValues as FieldValues,
     mode: validationMode ?? 'onTouched',
     shouldFocusError: true,
   });
@@ -81,7 +84,7 @@ export const useFormBuilder = <TSchema extends z.ZodType = z.ZodType>({
   const { reset, watch } = methods;
 
   const handleFormReset = useCallback(() => {
-    reset(defaultValues as Record<string, unknown>);
+    reset(defaultValues as FieldValues);
     onReset?.();
   }, [reset, defaultValues, onReset]);
 
