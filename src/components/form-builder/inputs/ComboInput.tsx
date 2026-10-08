@@ -54,7 +54,8 @@ export const ComboInput = React.memo(({ fieldConfig, control }: ComboInputProps)
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const raw = e.target.value;
-      const inputVal = inputType === 'number' ? (raw === '' ? '' : Number(raw)) : raw;
+      const numericInput = raw === '' ? '' : Number(raw);
+      const inputVal = inputType === 'number' ? numericInput : raw;
       field.onChange({ ...value, input: inputVal });
     },
     [field, value, inputType],

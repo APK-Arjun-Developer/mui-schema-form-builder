@@ -1,4 +1,11 @@
-import React, { useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+} from 'react';
 import {
   FormProvider,
   type SubmitHandler,
@@ -20,14 +27,15 @@ import {
 } from '@mui/material';
 import type { z } from 'zod';
 import type { FieldConfig, FormWizardActionsParams } from './types/field.types';
-import type { FormBuilderHandle, WizardStep, FormWizardProps } from './types/builder.types';
+import type { FormBuilderHandle, FormWizardProps } from './types/builder.types';
 import { FormField } from './FormField';
 import { FormBuilderContext, DEFAULT_LABELS, type ResolvedLabels } from './FormBuilderContext';
 import { useFormBuilder } from '../../hooks/useFormBuilder';
 import { formWizardSx } from './FormWizard.styles';
 import { getTitleSx } from './FormBuilder.styles';
 
-export type { WizardStep, FormWizardProps };
+export type { WizardStep } from './types/builder.types';
+export type { FormWizardProps };
 
 const FormWizardInner = <TSchema extends z.ZodType>(
   {
@@ -154,7 +162,7 @@ const FormWizardInner = <TSchema extends z.ZodType>(
   );
 
   const handleFormSubmit = useCallback(
-    (event: React.FormEvent<HTMLFormElement>) => {
+    (event: FormEvent<HTMLFormElement>) => {
       if (!isLastStep) {
         event.preventDefault();
         void handleNext();
@@ -186,6 +194,8 @@ const FormWizardInner = <TSchema extends z.ZodType>(
 
   const currentFields = steps[activeStep]?.fields ?? [];
 
+  const sxList = Array.isArray(sx) ? sx : sx ? [sx] : [];
+
   const titleNode = title ? (
     <Typography variant="h6" sx={getTitleSx(titleAlign, titlePosition === 'inside')}>
       {title}
@@ -200,16 +210,13 @@ const FormWizardInner = <TSchema extends z.ZodType>(
         {...(methods as unknown as import('react-hook-form').UseFormReturn<FieldValues>)}
       >
         <form onSubmit={handleFormSubmit} noValidate>
-          <Paper
-            elevation={0}
-            sx={[formWizardSx.paper, ...(Array.isArray(sx) ? sx : sx ? [sx] : [])]}
-          >
+          <Paper elevation={0} sx={[formWizardSx.paper, ...sxList]}>
             {titlePosition === 'inside' && titleNode}
             <Stepper activeStep={activeStep} sx={formWizardSx.stepper}>
               {steps.map((step, idx) => {
                 const isClickable = idx < activeStep || completedSteps.has(idx);
                 return (
-                  <Step key={idx} completed={completedSteps.has(idx) && idx !== activeStep}>
+                  <Step key={step.label} completed={completedSteps.has(idx) && idx !== activeStep}>
                     {isClickable ? (
                       <StepButton onClick={() => handleStepClick(idx)} optional={step.description}>
                         {step.label}

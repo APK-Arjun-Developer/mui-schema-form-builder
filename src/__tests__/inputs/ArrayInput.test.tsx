@@ -38,7 +38,7 @@ describe('ArrayInput', () => {
     renderWithTheme(<FormBuilder fields={arrayFields} schema={arraySchema} onSubmit={vi.fn()} />);
     await user.click(screen.getByRole('button', { name: 'Add item' }));
     expect(screen.getByText('Item 1')).toBeInTheDocument();
-    expect(screen.getAllByRole('textbox').length).toBe(2); // name + email
+    expect(screen.getAllByRole('textbox')).toHaveLength(2); // name + email
   });
 
   it('appends multiple items', async () => {
@@ -48,7 +48,7 @@ describe('ArrayInput', () => {
     await user.click(screen.getByRole('button', { name: 'Add item' }));
     expect(screen.getByText('Item 1')).toBeInTheDocument();
     expect(screen.getByText('Item 2')).toBeInTheDocument();
-    expect(screen.getAllByRole('textbox').length).toBe(4);
+    expect(screen.getAllByRole('textbox')).toHaveLength(4);
   });
 
   it('removes an item when Remove is clicked', async () => {
@@ -59,7 +59,7 @@ describe('ArrayInput', () => {
     const removeButtons = screen.getAllByRole('button', { name: 'Remove' });
     await user.click(removeButtons[0]);
     expect(screen.queryByText('Item 2')).not.toBeInTheDocument();
-    expect(screen.getAllByRole('textbox').length).toBe(2);
+    expect(screen.getAllByRole('textbox')).toHaveLength(2);
   });
 
   it('submits array data correctly', async () => {

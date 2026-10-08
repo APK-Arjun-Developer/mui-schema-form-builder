@@ -10,7 +10,7 @@ import { filterFormSx } from './FilterForm.styles';
 export type { FilterFormProps };
 
 // Passthrough resolver: FilterForm has no validation — fields never show errors.
-const passthroughResolver: Resolver = async (values) => ({ values, errors: {} });
+const passthroughResolver: Resolver = (values) => ({ values, errors: {} });
 
 export const FilterForm = React.memo(
   ({

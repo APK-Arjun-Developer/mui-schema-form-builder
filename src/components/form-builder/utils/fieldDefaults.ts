@@ -22,7 +22,7 @@ export function setPath(obj: Record<string, unknown>, path: string, value: unkno
     }
     cursor = cursor[key] as Record<string, unknown>;
   }
-  cursor[parts[parts.length - 1]] = value;
+  cursor[parts.at(-1)!] = value;
 }
 
 /** Returns the appropriate empty/default value for a field based on its type. */

@@ -47,7 +47,8 @@ export const SelectInput = React.memo(({ fieldConfig, control }: SelectInputProp
     }
     return (selected: unknown) => {
       if (!selected) return fieldConfig.placeholder ?? 'Select an option';
-      return fieldConfig.options?.find((o) => o.value === selected)?.label ?? String(selected);
+      const val = selected as string | number;
+      return fieldConfig.options?.find((o) => o.value === val)?.label ?? String(val);
     };
   }, [fieldConfig.multiple, fieldConfig.options, fieldConfig.placeholder]);
 
@@ -85,9 +86,7 @@ export const SelectInput = React.memo(({ fieldConfig, control }: SelectInputProp
           {fieldConfig.options?.map((option) => (
             <MenuItem key={option.value} value={option.value} disabled={option.disabled}>
               {fieldConfig.multiple && (
-                <Checkbox
-                  checked={(field.value as (string | number)[]).indexOf(option.value) > -1}
-                />
+                <Checkbox checked={(field.value as (string | number)[]).includes(option.value)} />
               )}
               <ListItemText primary={option.label} />
             </MenuItem>
