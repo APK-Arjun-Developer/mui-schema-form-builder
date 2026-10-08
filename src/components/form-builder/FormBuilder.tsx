@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import { FormProvider } from 'react-hook-form';
+import { FormProvider, type SubmitHandler, type FieldValues } from 'react-hook-form';
 import { Box, Button, Divider, Grid, Paper, Typography } from '@mui/material';
 import type { FieldConfig, FormBuilderActionsParams, FormBuilderProps } from './types/field.types';
 import type { FormBuilderHandle } from './types/builder.types';
@@ -83,9 +83,18 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
     onFieldChange,
   });
 
+  // zodResolver validates data against TSchema before calling onSubmit, so the
+  // runtime type is z.infer<TSchema>. This adapter bridges the RHF FieldValues
+  // boundary without using `as never`.
+  const typedOnSubmit: SubmitHandler<FieldValues> = useCallback(
+    (data) => onSubmit(data as import('zod').infer<TSchema>),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [onSubmit],
+  );
+
   useImperativeHandle(ref, () => ({
     reset: handleFormReset,
-    submit: () => void methods.handleSubmit(onSubmit as never)(),
+    submit: () => void methods.handleSubmit(typedOnSubmit)(),
     setError: (name, error) => methods.setError(name, error),
     getValues: () => methods.getValues(),
   }));
@@ -139,8 +148,8 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
   );
 
   const handleSubmitAction = useCallback(
-    () => void methods.handleSubmit(onSubmit as never)(),
-    [methods, onSubmit],
+    () => void methods.handleSubmit(typedOnSubmit)(),
+    [methods, typedOnSubmit],
   );
 
   const titleNode = title ? (
@@ -152,11 +161,11 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
   return (
     <FormBuilderContext.Provider value={ctxValue}>
       {titlePosition === 'above' && titleNode}
-      {/* methods is typed as UseFormReturn<FieldValues> internally; the public onSubmit on
-        FormBuilderProps<TSchema> carries the correct typed signature for consumers. */}
-      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      <FormProvider {...(methods as any)}>
-        <form onSubmit={handleSubmit(onSubmit as never)} noValidate>
+      {/* FormProvider expects UseFormReturn<FieldValues>; methods is exactly that type internally. */}
+      <FormProvider
+        {...(methods as unknown as import('react-hook-form').UseFormReturn<FieldValues>)}
+      >
+        <form onSubmit={handleSubmit(typedOnSubmit)} noValidate>
           <Paper
             elevation={0}
             sx={[formBuilderSx.paper, ...(Array.isArray(sx) ? sx : sx ? [sx] : [])]}

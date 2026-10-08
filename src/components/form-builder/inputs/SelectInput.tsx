@@ -68,6 +68,7 @@ export const SelectInput = React.memo(({ fieldConfig, control }: SelectInputProp
         disabled={fieldConfig.disabled}
       >
         <Select
+          {...fieldConfig.muiProps}
           {...fieldProps}
           inputRef={fieldRef}
           labelId={labelId}
@@ -80,7 +81,6 @@ export const SelectInput = React.memo(({ fieldConfig, control }: SelectInputProp
           multiple={fieldConfig.multiple}
           displayEmpty
           renderValue={renderValue}
-          {...fieldConfig.muiProps}
         >
           {fieldConfig.options?.map((option) => (
             <MenuItem key={option.value} value={option.value} disabled={option.disabled}>

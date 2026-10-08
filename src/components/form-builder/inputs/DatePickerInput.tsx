@@ -31,7 +31,13 @@ import type { CustomFieldProps } from '../FormField';
  * Requirements:
  * - `@mui/x-date-pickers` must be installed as a dependency.
  * - Your app must be wrapped with `<LocalizationProvider>`.
- * - Values are stored as ISO strings; use `z.string().datetime()` in your Zod schema.
+ *
+ * Value storage:
+ * - By default, Dayjs/Date values are stored as ISO strings; use `z.string().datetime()`
+ *   in your Zod schema.
+ * - Pass `toFormValue` on the field config to customise the conversion, e.g. to
+ *   keep the raw Dayjs object: `toFormValue: (v) => v`.
+ * - `null` and `undefined` are always stored as `null`.
  */
 export function createDatePickerInput(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- DatePicker component type varies by library version
@@ -51,23 +57,29 @@ export function createDatePickerInput(
 
     const errorId = error ? `${config.name}-error` : undefined;
 
+    const handleChange = (val: unknown) => {
+      if (val === null || val === undefined) {
+        field.onChange(null);
+        return;
+      }
+      if (config.toFormValue) {
+        field.onChange(config.toFormValue(val));
+        return;
+      }
+      // Default: ISO string conversion for Dayjs and native Date objects.
+      if (typeof (val as { toISOString?: () => string }).toISOString === 'function') {
+        field.onChange((val as { toISOString: () => string }).toISOString());
+      } else {
+        field.onChange(val);
+      }
+    };
+
     return (
       <Box>
         <DatePickerComponent
           label={config.label}
           value={field.value ?? null}
-          onChange={(val: unknown) => {
-            if (val === null || val === undefined) {
-              field.onChange(null);
-              return;
-            }
-            // Accept both Dayjs (.toISOString()) and native Date objects.
-            if (typeof (val as { toISOString?: () => string }).toISOString === 'function') {
-              field.onChange((val as { toISOString: () => string }).toISOString());
-            } else {
-              field.onChange(val);
-            }
-          }}
+          onChange={handleChange}
           disabled={config.disabled}
           slotProps={{
             textField: {

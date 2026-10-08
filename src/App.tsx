@@ -185,7 +185,7 @@ function tokenizeLine(line: string): SToken[] {
   while (rem.length > 0) {
     let matched = false;
     for (const [re, color] of TOKEN_PATTERNS) {
-      const m = rem.match(re);
+      const m = new RegExp(re).exec(rem);
       if (m) {
         tokens.push({ text: m[0], color });
         rem = rem.slice(m[0].length);

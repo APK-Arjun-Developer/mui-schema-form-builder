@@ -7,11 +7,11 @@ import { FIELD_TYPE } from '../components/form-builder/types/field.types';
 function SingleFieldForm({
   fieldConfig,
   schema,
-}: {
+}: Readonly<{
   fieldConfig: Parameters<typeof FormBuilder>[0]['fields'][0];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   schema: any;
-}) {
+}>) {
   return (
     <FormBuilder
       fields={[fieldConfig]}

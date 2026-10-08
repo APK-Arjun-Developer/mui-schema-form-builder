@@ -42,13 +42,18 @@ export const AutocompleteInput = React.memo(({ fieldConfig, control }: Autocompl
   const debouncedFetch = useMemo(
     () =>
       debounce(
-        async (searchValue: string, onResults: (results: Option[]) => void, onDone: () => void) => {
+        async (
+          searchValue: string,
+          signal: AbortSignal,
+          onResults: (results: Option[]) => void,
+          onDone: () => void,
+        ) => {
           if (!fetchOptions) return;
           try {
-            const results = await fetchOptions(searchValue);
+            const results = await fetchOptions(searchValue, signal);
             onResults(results);
           } catch {
-            // fetchOptions should handle its own error reporting.
+            // fetchOptions should handle its own error reporting; ignore abort errors.
           } finally {
             onDone();
           }
@@ -59,15 +64,20 @@ export const AutocompleteInput = React.memo(({ fieldConfig, control }: Autocompl
   );
 
   useEffect(() => {
-    if (!open && fetchOptions) setOptions([]);
+    if (!open && fetchOptions) {
+      setOptions([]);
+      setLoading(false);
+    }
   }, [open, fetchOptions]);
 
   useEffect(() => {
     if (!open || !fetchOptions) return;
     let cancelled = false;
+    const controller = new AbortController();
     setLoading(true);
     debouncedFetch(
       inputValue,
+      controller.signal,
       (results) => {
         if (!cancelled) setOptions(results);
       },
@@ -77,6 +87,7 @@ export const AutocompleteInput = React.memo(({ fieldConfig, control }: Autocompl
     );
     return () => {
       cancelled = true;
+      controller.abort();
       debouncedFetch.cancel();
     };
   }, [open, inputValue, debouncedFetch, fetchOptions]);
@@ -95,6 +106,7 @@ export const AutocompleteInput = React.memo(({ fieldConfig, control }: Autocompl
         error={!!error}
       />
       <Autocomplete
+        {...fieldConfig.muiProps}
         {...fieldProps}
         multiple={fieldConfig.multiple}
         open={open}
@@ -143,7 +155,6 @@ export const AutocompleteInput = React.memo(({ fieldConfig, control }: Autocompl
             }
           />
         )}
-        {...fieldConfig.muiProps}
       />
     </Box>
   );
