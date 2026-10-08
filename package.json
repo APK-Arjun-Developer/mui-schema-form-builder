@@ -61,7 +61,8 @@
     "release": "semantic-release",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "ci": "bun run format:check && bun run lint && bun run typecheck && bun run test:coverage && bun run build"
+    "ci": "bun run format:check && bun run lint && bun run typecheck && bun run test:coverage && bun run build",
+    "prepare": "husky"
   },
   "peerDependencies": {
     "@emotion/react": "^11.14.0",
@@ -80,6 +81,8 @@
     }
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@hookform/resolvers": "^5.4.0",
@@ -103,8 +106,10 @@
     "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^8.57.1",
     "eslint-plugin-react-hooks": "^4.6.2",
+    "husky": "^9.1.7",
     "jest-axe": "^10.0.0",
     "jsdom": "^26.1.0",
+    "lint-staged": "^17.6.0",
     "prettier": "^3.9.6",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
@@ -122,5 +127,14 @@
   "sideEffects": false,
   "publishConfig": {
     "access": "public"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx}": [
+      "eslint",
+      "prettier --write"
+    ],
+    "*.{ts,js,json}": [
+      "prettier --write"
+    ]
   }
 }

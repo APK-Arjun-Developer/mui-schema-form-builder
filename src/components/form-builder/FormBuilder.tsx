@@ -7,7 +7,7 @@ import type { VirtualRowData, FixedSizeListType } from './types/component.types'
 import { FormField } from './FormField';
 import { useFormBuilder } from '../../hooks/useFormBuilder';
 import { FormBuilderContext, DEFAULT_LABELS, type ResolvedLabels } from './FormBuilderContext';
-import { formBuilderSx, getTitleSx, getSectionHeaderSx } from './FormBuilder.styles';
+import { formBuilderSx, getTitleSx, getSectionHeaderSx, normalizeSx } from './FormBuilder.styles';
 
 export type { FormBuilderHandle };
 
@@ -32,7 +32,7 @@ function groupBySection(
 ): { section: string | undefined; fields: FieldConfig[] }[] {
   const segments: { section: string | undefined; fields: FieldConfig[] }[] = [];
   for (const field of fields) {
-    const last = segments[segments.length - 1];
+    const last = segments.at(-1);
     if (last && last.section === field.section) {
       last.fields.push(field);
     } else {
@@ -152,6 +152,8 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
     [methods, typedOnSubmit],
   );
 
+  const sxList = normalizeSx(sx);
+
   const titleNode = title ? (
     <Typography variant="h6" sx={getTitleSx(titleAlign, titlePosition === 'inside')}>
       {title}
@@ -166,10 +168,7 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
         {...(methods as unknown as import('react-hook-form').UseFormReturn<FieldValues>)}
       >
         <form onSubmit={handleSubmit(typedOnSubmit)} noValidate>
-          <Paper
-            elevation={0}
-            sx={[formBuilderSx.paper, ...(Array.isArray(sx) ? sx : sx ? [sx] : [])]}
-          >
+          <Paper elevation={0} sx={[formBuilderSx.paper, ...sxList]}>
             {titlePosition === 'inside' && titleNode}
             {virtualize && FixedSizeList ? (
               <FixedSizeList
@@ -184,7 +183,7 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
             ) : (
               <>
                 {fieldSegments.map((segment, segIdx) => (
-                  <Box key={segIdx}>
+                  <Box key={segment.section ?? segment.fields[0]?.name ?? ''}>
                     {segment.section && (
                       <Box sx={getSectionHeaderSx(segIdx === 0)}>
                         <Typography

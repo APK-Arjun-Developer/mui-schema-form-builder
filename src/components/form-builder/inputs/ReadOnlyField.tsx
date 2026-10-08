@@ -10,6 +10,7 @@ import type {
   ArrayFieldConfig,
   ComboFieldConfig,
 } from '../types/field.types';
+import type { Control } from 'react-hook-form';
 import type { ReadOnlyFieldProps } from '../types/component.types';
 import { FieldLabel } from './FieldLabel';
 import { readOnlyFieldSx } from './ReadOnlyField.styles';
@@ -31,132 +32,142 @@ const ChipRow = React.memo(function ChipRow({ labels }: { labels: string[] }) {
 });
 ChipRow.displayName = 'ChipRow';
 
-export const ReadOnlyField = React.memo(({ fieldConfig, control }: ReadOnlyFieldProps) => {
-  const { field } = useController({ name: fieldConfig.name, control });
-  const value = field.value;
+function renderAutocompleteValue(value: unknown): React.ReactNode {
+  if (Array.isArray(value)) {
+    const lbls = (value as ({ label?: string } | string)[]).map((v) =>
+      typeof v === 'string' ? v : (v?.label ?? JSON.stringify(v)),
+    );
+    return <ChipRow labels={lbls} />;
+  }
+  const str =
+    typeof value === 'object' && value !== null
+      ? ((value as { label?: string }).label ?? JSON.stringify(value))
+      : String(value as string | number);
+  return <Typography variant="body1">{str}</Typography>;
+}
 
-  const empty = value === null || value === undefined || value === '';
-
-  let display: React.ReactNode;
-
-  if (empty) {
-    display = (
+function renderComboValue(fieldConfig: ComboFieldConfig, value: unknown): React.ReactNode {
+  const comboVal = value as { select?: string | number; input?: string | number };
+  const selectLabel =
+    fieldConfig.selectOptions?.find((o) => o.value === comboVal.select)?.label ??
+    String(comboVal.select ?? '');
+  const inputStr = String(comboVal.input ?? '');
+  if (!selectLabel && !inputStr) {
+    return (
       <Typography variant="body1" color="text.disabled">
         —
       </Typography>
     );
-  } else {
-    switch (fieldConfig.type) {
-      case FIELD_TYPE.CHECKBOX: {
-        const cfg = fieldConfig as CheckboxFieldConfig;
-        if (cfg.options) {
-          const checked = value as (string | number)[];
-          const lbs = checked.map(
-            (v) => cfg.options?.find((o) => o.value === v)?.label ?? String(v),
-          );
-          display = <ChipRow labels={lbs} />;
-        } else {
-          display = <Typography variant="body1">{value ? 'Yes' : 'No'}</Typography>;
-        }
-        break;
-      }
+  }
+  const parts =
+    fieldConfig.selectPosition === 'end' ? [inputStr, selectLabel] : [selectLabel, inputStr];
+  return <Typography variant="body1">{parts.filter(Boolean).join(' ')}</Typography>;
+}
 
-      case FIELD_TYPE.SELECT:
-      case FIELD_TYPE.RADIO: {
-        const cfg = fieldConfig as SelectFieldConfig | RadioFieldConfig;
-        if (Array.isArray(value)) {
-          const lbs = (value as (string | number)[]).map(
-            (v) => cfg.options?.find((o) => o.value === v)?.label ?? String(v),
-          );
-          display = <ChipRow labels={lbs} />;
-        } else {
-          const opt = cfg.options?.find((o) => o.value === value);
-          display = <Typography variant="body1">{opt?.label ?? String(value)}</Typography>;
-        }
-        break;
+function renderNonArrayValue(fieldConfig: FieldConfig, value: unknown): React.ReactNode {
+  switch (fieldConfig.type) {
+    case FIELD_TYPE.CHECKBOX: {
+      const cfg = fieldConfig as CheckboxFieldConfig;
+      if (cfg.options) {
+        const checked = value as (string | number)[];
+        const lbls = checked.map(
+          (v) => cfg.options?.find((o) => o.value === v)?.label ?? String(v),
+        );
+        return <ChipRow labels={lbls} />;
       }
-
-      case FIELD_TYPE.AUTOCOMPLETE: {
-        if (Array.isArray(value)) {
-          const lbls = (value as ({ label?: string } | string)[]).map((v) =>
-            typeof v === 'string' ? v : (v?.label ?? String(v)),
-          );
-          display = <ChipRow labels={lbls} />;
-        } else {
-          const str =
-            typeof value === 'object' && value !== null
-              ? ((value as { label?: string }).label ?? JSON.stringify(value))
-              : String(value);
-          display = <Typography variant="body1">{str}</Typography>;
-        }
-        break;
-      }
-
-      case FIELD_TYPE.ARRAY: {
-        const cfg = fieldConfig as ArrayFieldConfig;
-        const items = value as Record<string, unknown>[];
-        if (!items.length) {
-          display = (
-            <Typography variant="body1" color="text.disabled">
-              —
-            </Typography>
-          );
-        } else {
-          display = (
-            <Stack spacing={1} sx={readOnlyFieldSx.arrayStack}>
-              {items.map((_, idx) => (
-                <Box key={idx} sx={readOnlyFieldSx.arrayItem}>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={readOnlyFieldSx.arrayItemCaption}
-                  >
-                    Item {idx + 1}
-                  </Typography>
-                  {cfg.itemFields?.map((subField) => (
-                    <ReadOnlyField
-                      key={subField.name}
-                      fieldConfig={
-                        {
-                          ...subField,
-                          name: `${cfg.name}.${idx}.${subField.name}`,
-                        } as FieldConfig
-                      }
-                      control={control}
-                    />
-                  ))}
-                </Box>
-              ))}
-            </Stack>
-          );
-        }
-        break;
-      }
-
-      case FIELD_TYPE.COMBO_INPUT: {
-        const cfg = fieldConfig as ComboFieldConfig;
-        const comboVal = value as { select?: string | number; input?: string | number };
-        const selectLabel =
-          cfg.selectOptions?.find((o) => o.value === comboVal.select)?.label ??
-          String(comboVal.select ?? '');
-        const inputStr = String(comboVal.input ?? '');
-        if (!selectLabel && !inputStr) {
-          display = (
-            <Typography variant="body1" color="text.disabled">
-              —
-            </Typography>
-          );
-        } else {
-          const parts =
-            cfg.selectPosition === 'end' ? [inputStr, selectLabel] : [selectLabel, inputStr];
-          display = <Typography variant="body1">{parts.filter(Boolean).join(' ')}</Typography>;
-        }
-        break;
-      }
-
-      default:
-        display = <Typography variant="body1">{String(value)}</Typography>;
+      return <Typography variant="body1">{value ? 'Yes' : 'No'}</Typography>;
     }
+
+    case FIELD_TYPE.SELECT:
+    case FIELD_TYPE.RADIO: {
+      const cfg = fieldConfig as SelectFieldConfig | RadioFieldConfig;
+      if (Array.isArray(value)) {
+        const lbls = (value as (string | number)[]).map(
+          (v) => cfg.options?.find((o) => o.value === v)?.label ?? String(v),
+        );
+        return <ChipRow labels={lbls} />;
+      }
+      const opt = cfg.options?.find((o) => o.value === value);
+      return (
+        <Typography variant="body1">{opt?.label ?? String(value as string | number)}</Typography>
+      );
+    }
+
+    case FIELD_TYPE.AUTOCOMPLETE:
+      return renderAutocompleteValue(value);
+
+    case FIELD_TYPE.COMBO_INPUT:
+      return renderComboValue(fieldConfig as ComboFieldConfig, value);
+
+    default:
+      return <Typography variant="body1">{String(value as string | number)}</Typography>;
+  }
+}
+
+function renderArrayValue(
+  fieldConfig: ArrayFieldConfig,
+  items: Record<string, unknown>[],
+  control: Control,
+): React.ReactNode {
+  if (!items.length) {
+    return (
+      <Typography variant="body1" color="text.disabled">
+        —
+      </Typography>
+    );
+  }
+  return (
+    <Stack spacing={1} sx={readOnlyFieldSx.arrayStack}>
+      {items.map((item, idx) => (
+        // JSON.stringify(item) produces a content-based key; array items have no stable ID.
+        <Box key={JSON.stringify(item)} sx={readOnlyFieldSx.arrayItem}>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={readOnlyFieldSx.arrayItemCaption}
+          >
+            Item {idx + 1}
+          </Typography>
+          {fieldConfig.itemFields?.map((subField) => (
+            <ReadOnlyField
+              key={subField.name}
+              fieldConfig={
+                {
+                  ...subField,
+                  name: `${fieldConfig.name}.${idx}.${subField.name}`,
+                } as FieldConfig
+              }
+              control={control}
+            />
+          ))}
+        </Box>
+      ))}
+    </Stack>
+  );
+}
+
+export const ReadOnlyField = React.memo(({ fieldConfig, control }: ReadOnlyFieldProps) => {
+  const { field } = useController({ name: fieldConfig.name, control });
+  const value = field.value;
+  const empty = value === null || value === undefined || value === '';
+
+  const emptyNode = (
+    <Typography variant="body1" color="text.disabled">
+      —
+    </Typography>
+  );
+
+  let display: React.ReactNode;
+  if (empty) {
+    display = emptyNode;
+  } else if (fieldConfig.type === FIELD_TYPE.ARRAY) {
+    display = renderArrayValue(
+      fieldConfig as ArrayFieldConfig,
+      value as Record<string, unknown>[],
+      control,
+    );
+  } else {
+    display = renderNonArrayValue(fieldConfig, value);
   }
 
   return (

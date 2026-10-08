@@ -307,7 +307,7 @@ describe('FormBuilder — section grouping', () => {
         onSubmit={vi.fn()}
       />,
     );
-    expect(screen.getAllByText('Name').length).toBe(1);
+    expect(screen.getAllByText('Name')).toHaveLength(1);
   });
 
   it('renders fields without a section without any header', () => {

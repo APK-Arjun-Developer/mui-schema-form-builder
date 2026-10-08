@@ -58,29 +58,15 @@ describe('FormBuilder — readOnly mode', () => {
     expect(screen.queryByRole('radio')).not.toBeInTheDocument();
   });
 
-  it('displays text field value as plain text', () => {
+  it.each([
+    ['text field value as plain text', 'Alice'],
+    ['select value as resolved option label', 'Canada'],
+    ['radio value as resolved option label', 'Admin'],
+    ['boolean checkbox as Yes/No', 'Yes'],
+    ['checkbox group selected values as chips', 'React'],
+  ])('displays %s', (_label, expectedText) => {
     renderWithTheme(<FormBuilder fields={fields} schema={schema} onSubmit={vi.fn()} readOnly />);
-    expect(screen.getByText('Alice')).toBeInTheDocument();
-  });
-
-  it('displays select value as resolved option label', () => {
-    renderWithTheme(<FormBuilder fields={fields} schema={schema} onSubmit={vi.fn()} readOnly />);
-    expect(screen.getByText('Canada')).toBeInTheDocument();
-  });
-
-  it('displays radio value as resolved option label', () => {
-    renderWithTheme(<FormBuilder fields={fields} schema={schema} onSubmit={vi.fn()} readOnly />);
-    expect(screen.getByText('Admin')).toBeInTheDocument();
-  });
-
-  it('displays boolean checkbox as Yes/No', () => {
-    renderWithTheme(<FormBuilder fields={fields} schema={schema} onSubmit={vi.fn()} readOnly />);
-    expect(screen.getByText('Yes')).toBeInTheDocument();
-  });
-
-  it('displays checkbox group selected values as chips', () => {
-    renderWithTheme(<FormBuilder fields={fields} schema={schema} onSubmit={vi.fn()} readOnly />);
-    expect(screen.getByText('React')).toBeInTheDocument();
+    expect(screen.getByText(expectedText)).toBeInTheDocument();
   });
 
   it('still renders the Submit button in readOnly mode', () => {
