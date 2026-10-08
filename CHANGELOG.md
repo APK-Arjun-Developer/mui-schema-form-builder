@@ -1,3 +1,11 @@
+## [1.10.2](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.10.1...v1.10.2) (2026-10-08)
+
+
+### Bug Fixes
+
+* resolve 5 new sonarcloud issues on pr [#31](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/issues/31) ([67e34b7](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/commit/67e34b72fbc23c3f03b6033c8e6a1a157c9e20f3))
+* resolve all 23 SonarCloud code-smell issues ([7d21a23](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/commit/7d21a2391210980bc17c3268c0919bda2060f821))
+
 ## [1.10.1](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.10.0...v1.10.1) (2026-10-08)
 
 
