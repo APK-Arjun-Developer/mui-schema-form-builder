@@ -7,7 +7,7 @@ import type { VirtualRowData, FixedSizeListType } from './types/component.types'
 import { FormField } from './FormField';
 import { useFormBuilder } from '../../hooks/useFormBuilder';
 import { FormBuilderContext, DEFAULT_LABELS, type ResolvedLabels } from './FormBuilderContext';
-import { formBuilderSx, getTitleSx, getSectionHeaderSx } from './FormBuilder.styles';
+import { formBuilderSx, getTitleSx, getSectionHeaderSx, normalizeSx } from './FormBuilder.styles';
 
 export type { FormBuilderHandle };
 
@@ -152,12 +152,7 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
     [methods, typedOnSubmit],
   );
 
-  let sxList;
-  if (Array.isArray(sx)) {
-    sxList = sx;
-  } else {
-    sxList = sx ? [sx] : [];
-  }
+  const sxList = normalizeSx(sx);
 
   const titleNode = title ? (
     <Typography variant="h6" sx={getTitleSx(titleAlign, titlePosition === 'inside')}>

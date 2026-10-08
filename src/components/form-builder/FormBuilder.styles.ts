@@ -1,3 +1,10 @@
+import type { SxProps, Theme } from '@mui/material';
+
+export function normalizeSx(sx: SxProps<Theme> | undefined) {
+  if (Array.isArray(sx)) return [...sx];
+  return sx != null ? [sx] : [];
+}
+
 export const formBuilderSx = {
   paper: {
     p: 0,

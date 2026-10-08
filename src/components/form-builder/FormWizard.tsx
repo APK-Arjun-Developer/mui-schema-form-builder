@@ -25,7 +25,7 @@ import { FormField } from './FormField';
 import { FormBuilderContext, DEFAULT_LABELS, type ResolvedLabels } from './FormBuilderContext';
 import { useFormBuilder } from '../../hooks/useFormBuilder';
 import { formWizardSx } from './FormWizard.styles';
-import { getTitleSx } from './FormBuilder.styles';
+import { getTitleSx, normalizeSx } from './FormBuilder.styles';
 
 export type { WizardStep } from './types/builder.types';
 export type { FormWizardProps };
@@ -187,12 +187,7 @@ const FormWizardInner = <TSchema extends z.ZodType>(
 
   const currentFields = steps[activeStep]?.fields ?? [];
 
-  let sxList;
-  if (Array.isArray(sx)) {
-    sxList = sx;
-  } else {
-    sxList = sx ? [sx] : [];
-  }
+  const sxList = normalizeSx(sx);
 
   const titleNode = title ? (
     <Typography variant="h6" sx={getTitleSx(titleAlign, titlePosition === 'inside')}>
