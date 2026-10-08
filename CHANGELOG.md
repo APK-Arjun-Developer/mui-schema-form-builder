@@ -1,3 +1,10 @@
+## [1.10.3](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.10.2...v1.10.3) (2026-10-08)
+
+
+### Bug Fixes
+
+* **lint:** add @eslint/js and globals as explicit dev dependencies ([12581d0](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/commit/12581d0c72d8e51c0063ac68d04553652ff4ff3e))
+
 ## [1.10.2](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.10.1...v1.10.2) (2026-10-08)
 
 
