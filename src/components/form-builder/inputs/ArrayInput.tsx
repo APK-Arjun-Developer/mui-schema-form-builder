@@ -9,6 +9,7 @@ import { useFormBuilderContext } from '../FormBuilderContext';
 // because both modules are fully initialized before any component renders.
 import { FormField } from '../FormField';
 import { arrayInputSx, getAddButtonSx } from './ArrayInput.styles';
+import { buildArrayItemDefaults } from '../utils/fieldDefaults';
 
 export const ArrayInput = React.memo(({ fieldConfig, control }: ArrayInputProps) => {
   const { labels } = useFormBuilderContext();
@@ -29,13 +30,13 @@ export const ArrayInput = React.memo(({ fieldConfig, control }: ArrayInputProps)
   const canAdd = fieldConfig.maxItems === undefined || arrayFields.length < fieldConfig.maxItems;
   const canRemove = fieldConfig.minItems === undefined || arrayFields.length > fieldConfig.minItems;
 
-  const buildDefaultItem = useCallback((): Record<string, unknown> => {
-    const item: Record<string, unknown> = {};
-    for (const sub of fieldConfig.itemFields ?? []) {
-      item[sub.name] = sub.defaultValue ?? '';
-    }
-    return item;
-  }, [fieldConfig.itemFields]);
+  // Use the shared utility so new-item defaults match the initial form defaults
+  // (correct types per field: checkbox→false, select→'', autocomplete→null, etc.)
+  // and dot-notation sub-field names produce nested objects, not flat keys.
+  const buildDefaultItem = useCallback(
+    () => buildArrayItemDefaults(fieldConfig.itemFields ?? []),
+    [fieldConfig.itemFields],
+  );
 
   const handleAppend = useCallback(() => append(buildDefaultItem()), [append, buildDefaultItem]);
 

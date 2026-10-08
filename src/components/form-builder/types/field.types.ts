@@ -1,6 +1,6 @@
 import type React from 'react';
 import type { z } from 'zod';
-import type { SxProps, TextFieldProps } from '@mui/material';
+import type { SxProps, TextFieldProps, SelectProps, AutocompleteProps } from '@mui/material';
 import type { FieldValues, ValidationMode, Resolver, Control } from 'react-hook-form';
 
 export const FIELD_TYPE = {
@@ -114,19 +114,74 @@ export interface NumberFieldConfig extends BaseFieldConfig {
   muiProps?: TextMuiProps;
 }
 
+/**
+ * MUI Select props consumers may pass through.
+ * RHF-controlled props (value, onChange, onBlur, inputRef, multiple, renderValue)
+ * are always set internally and cannot be overridden via muiProps.
+ */
+type SelectMuiProps = Partial<
+  Omit<
+    SelectProps,
+    | 'value'
+    | 'defaultValue'
+    | 'name'
+    | 'onChange'
+    | 'onBlur'
+    | 'inputRef'
+    | 'multiple'
+    | 'renderValue'
+    | 'labelId'
+    | 'displayEmpty'
+  >
+>;
+
 export interface SelectFieldConfig extends BaseFieldConfig {
   type: typeof FIELD_TYPE.SELECT;
   options?: Option[];
   multiple?: boolean;
-  muiProps?: Record<string, unknown>;
+  muiProps?: SelectMuiProps;
 }
+
+/**
+ * MUI Autocomplete props consumers may pass through.
+ * RHF-controlled and internally managed props (value, onChange, options, multiple,
+ * loading, open/onOpen/onClose, renderInput, renderOption, getOptionLabel,
+ * isOptionEqualToValue) cannot be overridden via muiProps.
+ */
+type AutocompleteMuiProps = Partial<
+  Omit<
+    AutocompleteProps<Option, boolean | undefined, boolean | undefined, false>,
+    | 'value'
+    | 'defaultValue'
+    | 'onChange'
+    | 'onBlur'
+    | 'ref'
+    | 'multiple'
+    | 'options'
+    | 'loading'
+    | 'renderInput'
+    | 'renderOption'
+    | 'getOptionLabel'
+    | 'isOptionEqualToValue'
+    | 'open'
+    | 'onOpen'
+    | 'onClose'
+    | 'onInputChange'
+    | 'inputValue'
+  >
+>;
 
 export interface AutocompleteFieldConfig extends BaseFieldConfig {
   type: typeof FIELD_TYPE.AUTOCOMPLETE;
   options?: Option[];
   multiple?: boolean;
-  fetchOptions?: (input: string) => Promise<Option[]>;
-  muiProps?: Record<string, unknown>;
+  /**
+   * Async option fetcher. Called with the current input value and an optional
+   * AbortSignal that fires when the request is superseded by a newer one or the
+   * component unmounts. The signal is optional so existing callbacks work as-is.
+   */
+  fetchOptions?: (input: string, signal?: AbortSignal) => Promise<Option[]>;
+  muiProps?: AutocompleteMuiProps;
 }
 
 export interface RadioFieldConfig extends BaseFieldConfig {
@@ -158,6 +213,21 @@ export interface SearchFieldConfig extends BaseFieldConfig {
 
 export interface DatePickerFieldConfig extends BaseFieldConfig {
   type: typeof FIELD_TYPE.DATE_PICKER;
+  /**
+   * Convert the picker's value (Dayjs/Date/etc.) to the form state value.
+   * When not provided, values with a `.toISOString()` method are stored as ISO
+   * strings; other values are stored as-is.
+   *
+   * Example — keep a Dayjs object in form state:
+   * ```ts
+   * toFormValue: (v) => v
+   * ```
+   */
+  toFormValue?: (value: unknown) => unknown;
+  /**
+   * Props passed directly to the underlying DatePicker component.
+   * Typed as unknown because @mui/x-date-pickers is an optional peer dep.
+   */
   muiProps?: Record<string, unknown>;
 }
 

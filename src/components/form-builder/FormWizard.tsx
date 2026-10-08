@@ -1,5 +1,11 @@
 import React, { useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { FormProvider } from 'react-hook-form';
+import {
+  FormProvider,
+  type SubmitHandler,
+  type SubmitErrorHandler,
+  type FieldValues,
+  type FieldErrors,
+} from 'react-hook-form';
 import {
   Box,
   Button,
@@ -71,9 +77,18 @@ const FormWizardInner = <TSchema extends z.ZodType>(
     formState: { isSubmitting },
   } = methods;
 
+  // zodResolver validates data against TSchema before calling onSubmit, so the
+  // runtime type is z.infer<TSchema>. This adapter bridges the RHF FieldValues
+  // boundary without using `as never`.
+  const typedOnSubmit: SubmitHandler<FieldValues> = useCallback(
+    (data) => onSubmit(data as z.infer<TSchema>),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [onSubmit],
+  );
+
   useImperativeHandle(ref, () => ({
     reset: handleFormReset,
-    submit: () => void methods.handleSubmit(onSubmit as never)(),
+    submit: () => void methods.handleSubmit(typedOnSubmit)(),
     setError: (name, error) => methods.setError(name, error),
     getValues: () => methods.getValues(),
   }));
@@ -112,8 +127,8 @@ const FormWizardInner = <TSchema extends z.ZodType>(
     [activeStep, completedSteps, clearErrors],
   );
 
-  const handleSubmitError = useCallback(
-    (errors: Record<string, unknown>) => {
+  const handleSubmitError = useCallback<SubmitErrorHandler<FieldValues>>(
+    (errors: FieldErrors<FieldValues>) => {
       const hasNestedError = (path: string): boolean => {
         const parts = path.split('.');
         let node: unknown = errors;
@@ -134,8 +149,8 @@ const FormWizardInner = <TSchema extends z.ZodType>(
   );
 
   const handleSubmitAction = useCallback(
-    () => void methods.handleSubmit(onSubmit as never, handleSubmitError as never)(),
-    [methods, onSubmit, handleSubmitError],
+    () => void methods.handleSubmit(typedOnSubmit, handleSubmitError)(),
+    [methods, typedOnSubmit, handleSubmitError],
   );
 
   const handleFormSubmit = useCallback(
@@ -145,9 +160,9 @@ const FormWizardInner = <TSchema extends z.ZodType>(
         void handleNext();
         return;
       }
-      void handleSubmit(onSubmit as never, handleSubmitError as never)(event);
+      void handleSubmit(typedOnSubmit, handleSubmitError)(event);
     },
-    [isLastStep, handleNext, handleSubmit, onSubmit, handleSubmitError],
+    [isLastStep, handleNext, handleSubmit, typedOnSubmit, handleSubmitError],
   );
 
   const resolvedLabels = useMemo<ResolvedLabels>(
@@ -180,8 +195,10 @@ const FormWizardInner = <TSchema extends z.ZodType>(
   return (
     <FormBuilderContext.Provider value={ctxValue}>
       {titlePosition === 'above' && titleNode}
-      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      <FormProvider {...(methods as any)}>
+      {/* FormProvider expects UseFormReturn<FieldValues>; methods is exactly that type internally. */}
+      <FormProvider
+        {...(methods as unknown as import('react-hook-form').UseFormReturn<FieldValues>)}
+      >
         <form onSubmit={handleFormSubmit} noValidate>
           <Paper
             elevation={0}

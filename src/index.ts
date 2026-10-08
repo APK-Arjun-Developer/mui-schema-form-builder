@@ -62,4 +62,12 @@ export type {
 export { useFormBuilder } from './hooks/useFormBuilder';
 export type { UseFormBuilderOptions } from './hooks/useFormBuilder';
 
+// Field-default utilities — useful for consumers building custom array or composite fields.
+export {
+  buildDefaultValues,
+  buildArrayItemDefaults,
+  getPath,
+  setPath,
+} from './components/form-builder/utils/fieldDefaults';
+
 // NOTE: debounce is intentionally NOT exported — it is an internal utility.

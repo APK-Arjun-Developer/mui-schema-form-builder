@@ -85,8 +85,8 @@ describe('AutocompleteInput — async fetchOptions', () => {
       { timeout: 2000 },
     );
 
-    // Called with the typed value
-    expect(fetchOptions).toHaveBeenCalledWith(expect.any(String));
+    // Called with (searchString, AbortSignal)
+    expect(fetchOptions).toHaveBeenCalledWith(expect.any(String), expect.any(AbortSignal));
   });
 
   it('handles fetch errors without crashing', async () => {
