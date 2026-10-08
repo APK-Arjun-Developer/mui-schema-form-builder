@@ -1,0 +1,15 @@
+#!/bin/sh
+
+branch=$(git rev-parse --abbrev-ref HEAD)
+pattern='^(feat|fix|ci|chore|docs|refactor|test|perf|hotfix)/.+'
+
+if [ "$branch" != "main" ] && ! echo "$branch" | grep -qE "$pattern"; then
+  echo ""
+  echo "  Branch name '$branch' is invalid."
+  echo "  Required format: <type>/<kebab-case-description>"
+  echo "  Valid types: feat | fix | ci | chore | docs | refactor | test | perf | hotfix"
+  echo ""
+  exit 1
+fi
+
+npm run typecheck && npm run test
