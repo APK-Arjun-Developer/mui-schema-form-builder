@@ -40,15 +40,22 @@ export interface VirtualRowData {
   control: Control;
 }
 
+type VirtualRowAriaAttributes = {
+  'aria-posinset': number;
+  'aria-setsize': number;
+  role: 'listitem';
+};
+
 export type FixedSizeListType = React.ComponentType<{
-  height: number;
-  itemCount: number;
-  itemSize: number;
-  width: string | number;
-  itemData: VirtualRowData;
-  children: React.ComponentType<{
-    index: number;
-    style: React.CSSProperties;
-    data: VirtualRowData;
-  }>;
+  rowCount: number;
+  rowHeight: number | string;
+  rowProps: VirtualRowData;
+  rowComponent: React.ComponentType<
+    {
+      index: number;
+      style: React.CSSProperties;
+      ariaAttributes: VirtualRowAriaAttributes;
+    } & VirtualRowData
+  >;
+  style?: React.CSSProperties;
 }>;

@@ -74,7 +74,6 @@ describe('CheckboxInput — group', () => {
     renderWithTheme(<GroupCheckboxFixture />);
     await user.click(screen.getByLabelText('Coding'));
     await user.click(screen.getByLabelText('Coding'));
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect(JSON.parse(screen.getByTestId('value').textContent!)).toEqual([]);
   });
 

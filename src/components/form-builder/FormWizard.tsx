@@ -83,7 +83,6 @@ const FormWizardInner = <TSchema extends z.ZodType>(
   // boundary without using `as never`.
   const typedOnSubmit: SubmitHandler<FieldValues> = useCallback(
     (data) => onSubmit(data as z.infer<TSchema>),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [onSubmit],
   );
 
@@ -232,6 +231,7 @@ const FormWizardInner = <TSchema extends z.ZodType>(
 
             <Box sx={formWizardSx.actionsBox}>
               {renderActions ? (
+                // eslint-disable-next-line react-hooks/refs
                 renderActions({
                   isSubmitting,
                   isNavigating,

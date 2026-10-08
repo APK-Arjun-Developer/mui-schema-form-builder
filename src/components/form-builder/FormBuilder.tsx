@@ -17,9 +17,19 @@ export type { FormBuilderHandle };
 // and remount every row on every render, defeating virtualization entirely.
 // ---------------------------------------------------------------------------
 const VirtualRow = React.memo(
-  ({ index, style, data }: { index: number; style: React.CSSProperties; data: VirtualRowData }) => (
-    <div style={style}>
-      <FormField fieldConfig={data.fields[index]} control={data.control} />
+  ({
+    index,
+    style,
+    ariaAttributes,
+    fields,
+    control,
+  }: {
+    index: number;
+    style: React.CSSProperties;
+    ariaAttributes: { 'aria-posinset': number; 'aria-setsize': number; role: 'listitem' };
+  } & VirtualRowData) => (
+    <div style={style} {...ariaAttributes}>
+      <FormField fieldConfig={fields[index]} control={control} />
     </div>
   ),
 );
@@ -88,7 +98,6 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
   // boundary without using `as never`.
   const typedOnSubmit: SubmitHandler<FieldValues> = useCallback(
     (data) => onSubmit(data as import('zod').infer<TSchema>),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [onSubmit],
   );
 
@@ -115,7 +124,7 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
     if (!virtualize) return;
     import('react-window')
       .then((mod) => {
-        setFixedSizeList(() => mod.FixedSizeList as unknown as FixedSizeListType);
+        setFixedSizeList(() => mod.List as unknown as FixedSizeListType);
       })
       .catch(() => {
         console.warn(
@@ -172,14 +181,12 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
             {titlePosition === 'inside' && titleNode}
             {virtualize && FixedSizeList ? (
               <FixedSizeList
-                height={virtualizeHeight}
-                itemCount={fields.length}
-                itemSize={virtualizeItemSize}
-                width="100%"
-                itemData={rowData}
-              >
-                {VirtualRow}
-              </FixedSizeList>
+                rowCount={fields.length}
+                rowHeight={virtualizeItemSize}
+                rowProps={rowData}
+                rowComponent={VirtualRow}
+                style={{ height: virtualizeHeight, width: '100%' }}
+              />
             ) : (
               <>
                 {fieldSegments.map((segment, segIdx) => (

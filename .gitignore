@@ -4,3 +4,9 @@ coverage/
 storybook-static/
 CLAUDE.md
 .vscode
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
