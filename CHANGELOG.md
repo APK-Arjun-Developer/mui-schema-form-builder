@@ -1,3 +1,10 @@
+## [1.10.1](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.10.0...v1.10.1) (2026-10-08)
+
+
+### Bug Fixes
+
+* nested onFieldChange values, ArrayInput defaults, type-safety improvements ([6a8d4ae](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/commit/6a8d4ae4164ded402ea54f7ec03b0d58865a9a10))
+
 # [1.10.0](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.9.0...v1.10.0) (2026-10-07)
 
 
