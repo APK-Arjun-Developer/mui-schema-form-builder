@@ -1,11 +1,4 @@
-import React, {
-  useCallback,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,
-  type FormEvent,
-} from 'react';
+import React, { useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import {
   FormProvider,
   type SubmitHandler,
@@ -162,7 +155,7 @@ const FormWizardInner = <TSchema extends z.ZodType>(
   );
 
   const handleFormSubmit = useCallback(
-    (event: FormEvent<HTMLFormElement>) => {
+    (event: React.BaseSyntheticEvent) => {
       if (!isLastStep) {
         event.preventDefault();
         void handleNext();
@@ -194,7 +187,12 @@ const FormWizardInner = <TSchema extends z.ZodType>(
 
   const currentFields = steps[activeStep]?.fields ?? [];
 
-  const sxList = Array.isArray(sx) ? sx : sx ? [sx] : [];
+  let sxList;
+  if (Array.isArray(sx)) {
+    sxList = sx;
+  } else {
+    sxList = sx ? [sx] : [];
+  }
 
   const titleNode = title ? (
     <Typography variant="h6" sx={getTitleSx(titleAlign, titlePosition === 'inside')}>

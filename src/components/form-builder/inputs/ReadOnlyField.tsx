@@ -32,16 +32,48 @@ const ChipRow = React.memo(function ChipRow({ labels }: { labels: string[] }) {
 });
 ChipRow.displayName = 'ChipRow';
 
-// Extracted to a standalone function to keep ReadOnlyField's cognitive complexity low.
-// The ARRAY case is handled separately in the component because it recurses into ReadOnlyField.
+function renderAutocompleteValue(value: unknown): React.ReactNode {
+  if (Array.isArray(value)) {
+    const lbls = (value as ({ label?: string } | string)[]).map((v) =>
+      typeof v === 'string' ? v : (v?.label ?? JSON.stringify(v)),
+    );
+    return <ChipRow labels={lbls} />;
+  }
+  const str =
+    typeof value === 'object' && value !== null
+      ? ((value as { label?: string }).label ?? JSON.stringify(value))
+      : String(value as string | number);
+  return <Typography variant="body1">{str}</Typography>;
+}
+
+function renderComboValue(fieldConfig: ComboFieldConfig, value: unknown): React.ReactNode {
+  const comboVal = value as { select?: string | number; input?: string | number };
+  const selectLabel =
+    fieldConfig.selectOptions?.find((o) => o.value === comboVal.select)?.label ??
+    String(comboVal.select ?? '');
+  const inputStr = String(comboVal.input ?? '');
+  if (!selectLabel && !inputStr) {
+    return (
+      <Typography variant="body1" color="text.disabled">
+        —
+      </Typography>
+    );
+  }
+  const parts =
+    fieldConfig.selectPosition === 'end' ? [inputStr, selectLabel] : [selectLabel, inputStr];
+  return <Typography variant="body1">{parts.filter(Boolean).join(' ')}</Typography>;
+}
+
 function renderNonArrayValue(fieldConfig: FieldConfig, value: unknown): React.ReactNode {
   switch (fieldConfig.type) {
     case FIELD_TYPE.CHECKBOX: {
       const cfg = fieldConfig as CheckboxFieldConfig;
       if (cfg.options) {
         const checked = value as (string | number)[];
-        const lbs = checked.map((v) => cfg.options?.find((o) => o.value === v)?.label ?? String(v));
-        return <ChipRow labels={lbs} />;
+        const lbls = checked.map(
+          (v) => cfg.options?.find((o) => o.value === v)?.label ?? String(v),
+        );
+        return <ChipRow labels={lbls} />;
       }
       return <Typography variant="body1">{value ? 'Yes' : 'No'}</Typography>;
     }
@@ -50,10 +82,10 @@ function renderNonArrayValue(fieldConfig: FieldConfig, value: unknown): React.Re
     case FIELD_TYPE.RADIO: {
       const cfg = fieldConfig as SelectFieldConfig | RadioFieldConfig;
       if (Array.isArray(value)) {
-        const lbs = (value as (string | number)[]).map(
+        const lbls = (value as (string | number)[]).map(
           (v) => cfg.options?.find((o) => o.value === v)?.label ?? String(v),
         );
-        return <ChipRow labels={lbs} />;
+        return <ChipRow labels={lbls} />;
       }
       const opt = cfg.options?.find((o) => o.value === value);
       return (
@@ -61,38 +93,11 @@ function renderNonArrayValue(fieldConfig: FieldConfig, value: unknown): React.Re
       );
     }
 
-    case FIELD_TYPE.AUTOCOMPLETE: {
-      if (Array.isArray(value)) {
-        const lbls = (value as ({ label?: string } | string)[]).map((v) =>
-          typeof v === 'string' ? v : (v?.label ?? JSON.stringify(v)),
-        );
-        return <ChipRow labels={lbls} />;
-      }
-      const str =
-        typeof value === 'object' && value !== null
-          ? ((value as { label?: string }).label ?? JSON.stringify(value))
-          : String(value as string | number);
-      return <Typography variant="body1">{str}</Typography>;
-    }
+    case FIELD_TYPE.AUTOCOMPLETE:
+      return renderAutocompleteValue(value);
 
-    case FIELD_TYPE.COMBO_INPUT: {
-      const cfg = fieldConfig as ComboFieldConfig;
-      const comboVal = value as { select?: string | number; input?: string | number };
-      const selectLabel =
-        cfg.selectOptions?.find((o) => o.value === comboVal.select)?.label ??
-        String(comboVal.select ?? '');
-      const inputStr = String(comboVal.input ?? '');
-      if (!selectLabel && !inputStr) {
-        return (
-          <Typography variant="body1" color="text.disabled">
-            —
-          </Typography>
-        );
-      }
-      const parts =
-        cfg.selectPosition === 'end' ? [inputStr, selectLabel] : [selectLabel, inputStr];
-      return <Typography variant="body1">{parts.filter(Boolean).join(' ')}</Typography>;
-    }
+    case FIELD_TYPE.COMBO_INPUT:
+      return renderComboValue(fieldConfig as ComboFieldConfig, value);
 
     default:
       return <Typography variant="body1">{String(value as string | number)}</Typography>;

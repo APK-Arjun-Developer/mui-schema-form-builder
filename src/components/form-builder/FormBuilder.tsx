@@ -152,7 +152,12 @@ const FormBuilderInner = <TSchema extends import('zod').ZodType>(
     [methods, typedOnSubmit],
   );
 
-  const sxList = Array.isArray(sx) ? sx : sx ? [sx] : [];
+  let sxList;
+  if (Array.isArray(sx)) {
+    sxList = sx;
+  } else {
+    sxList = sx ? [sx] : [];
+  }
 
   const titleNode = title ? (
     <Typography variant="h6" sx={getTitleSx(titleAlign, titlePosition === 'inside')}>
