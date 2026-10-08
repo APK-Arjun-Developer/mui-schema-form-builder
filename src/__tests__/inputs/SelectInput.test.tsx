@@ -113,7 +113,6 @@ describe('SelectInput — multiple', () => {
     const listbox = screen.getByRole('listbox');
     await user.click(within(listbox).getByText('Angular'));
     await user.keyboard('{Escape}');
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect(JSON.parse(screen.getByTestId('value').textContent!)).toEqual(['angular']);
   });
 });
