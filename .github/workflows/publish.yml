@@ -47,6 +47,20 @@ jobs:
       - name: Build
         run: bun run build
 
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium
+
+      - name: E2E tests
+        run: bun run test:e2e
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-publish
+          path: playwright-report/
+          retention-days: 14
+
       - name: Release
         # Pass repository-url explicitly so semantic-release uses the correct
         # repo regardless of what package.json says
