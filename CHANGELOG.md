@@ -1,3 +1,11 @@
+## [1.10.5](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.10.4...v1.10.5) (2026-10-19)
+
+
+### Bug Fixes
+
+* **package:** correct react-window peer dep range and readme accuracy ([3fecc28](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/commit/3fecc289d5c91d8f8d4107b808f017b4c23c6ba3))
+* **wizard:** ignore stray submit from gesture that advanced to last step ([9b31499](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/commit/9b314996da8f6304f672935513caf0aa0cbb6f4d))
+
 ## [1.10.4](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.10.3...v1.10.4) (2026-10-08)
 
 
