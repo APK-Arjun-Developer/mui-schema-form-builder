@@ -58,6 +58,17 @@ const FormWizardInner = <TSchema extends z.ZodType>(
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const isNextingRef = useRef(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  // Guards against an accidental final submit triggered by the very gesture that
+  // advanced to the last step. The default "Next" and "Submit" buttons occupy the
+  // same position; because handleNext is async, advancing to the last step can
+  // swap "Next" for the submit button under the pointer mid-gesture, so the same
+  // click lands on submit and fires the final onSubmit. We disarm on every step
+  // advance and re-arm only on a fresh pointer/keyboard interaction, so a submit
+  // must be its own deliberate gesture.
+  const submitArmedRef = useRef(true);
+  const armSubmit = useCallback(() => {
+    submitArmedRef.current = true;
+  }, []);
   const isLastStep = activeStep === steps.length - 1;
 
   const allFields = useMemo(() => steps.flatMap((s) => s.fields), [steps]);
@@ -105,6 +116,9 @@ const FormWizardInner = <TSchema extends z.ZodType>(
         clearErrors();
         setCompletedSteps((prev) => new Set(prev).add(activeStep));
         setActiveStep((prev) => prev + 1);
+        // Disarm: the pointer/key gesture that advanced must not also submit the
+        // (now visible) last step. A fresh interaction re-arms via armSubmit.
+        submitArmedRef.current = false;
       }
     } finally {
       isNextingRef.current = false;
@@ -160,6 +174,13 @@ const FormWizardInner = <TSchema extends z.ZodType>(
         void handleNext();
         return;
       }
+      // Swallow a submit that rides along on the same gesture that just advanced
+      // to this last step (see submitArmedRef). A real submit is re-armed by the
+      // user's own pointerdown/keydown on the form.
+      if (!submitArmedRef.current) {
+        event.preventDefault();
+        return;
+      }
       void handleSubmit(typedOnSubmit, handleSubmitError)(event);
     },
     [isLastStep, handleNext, handleSubmit, typedOnSubmit, handleSubmitError],
@@ -201,7 +222,12 @@ const FormWizardInner = <TSchema extends z.ZodType>(
       <FormProvider
         {...(methods as unknown as import('react-hook-form').UseFormReturn<FieldValues>)}
       >
-        <form onSubmit={handleFormSubmit} noValidate>
+        <form
+          onSubmit={handleFormSubmit}
+          onPointerDownCapture={armSubmit}
+          onKeyDownCapture={armSubmit}
+          noValidate
+        >
           <Paper elevation={0} sx={[formWizardSx.paper, ...sxList]}>
             {titlePosition === 'inside' && titleNode}
             <Stepper activeStep={activeStep} sx={formWizardSx.stepper}>

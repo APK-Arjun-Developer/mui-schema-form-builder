@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { z } from 'zod';
 import { renderWithTheme } from './helpers';
@@ -162,6 +162,66 @@ describe('FormWizard — navigation', () => {
     await user.click(screen.getByRole('button', { name: 'Next' }));
     await waitFor(() => expect(screen.getByLabelText('Email')).toBeInTheDocument());
     expect(screen.queryByText('Invalid email')).not.toBeInTheDocument();
+  });
+});
+
+describe('FormWizard — accidental submit guard', () => {
+  // The default Next and Submit buttons occupy the same position. Because
+  // handleNext is async, advancing to the LAST step can swap Next for the submit
+  // button under the pointer mid-gesture, so the same click fires the final
+  // submit — which then validates the whole schema and shows every last-step
+  // error on arrival. A submit that is not its own deliberate gesture must be
+  // ignored.
+  it('ignores a submit that rides the gesture which advanced to the last step', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    const { container } = renderWithTheme(
+      <FormWizard steps={steps} schema={schema} onSubmit={onSubmit} />,
+    );
+    await user.type(screen.getByLabelText('First Name'), 'Alice');
+    await user.type(screen.getByLabelText('Last Name'), 'Smith');
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+    await waitFor(() => expect(screen.getByLabelText('Email')).toBeInTheDocument());
+
+    // A submit event arriving with no fresh pointerdown/keydown emulates the
+    // stray submit from the advancing gesture.
+    const form = container.querySelector('form') as HTMLFormElement;
+    fireEvent.submit(form);
+
+    // Let any (unwanted) async full-schema validation settle before asserting.
+    await new Promise((r) => setTimeout(r, 120));
+
+    // The last step must stay clean: no full-schema validation, no onSubmit.
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(screen.queryByText('Invalid email')).not.toBeInTheDocument();
+    expect(screen.queryByText('City required')).not.toBeInTheDocument();
+  });
+
+  it('submits when the user deliberately submits the last step (fresh gesture re-arms)', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    renderWithTheme(<FormWizard steps={steps} schema={schema} onSubmit={onSubmit} />);
+    await user.type(screen.getByLabelText('First Name'), 'Alice');
+    await user.type(screen.getByLabelText('Last Name'), 'Smith');
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+    await waitFor(() => expect(screen.getByLabelText('Email')).toBeInTheDocument());
+    await user.type(screen.getByLabelText('Email'), 'alice@example.com');
+    await user.type(screen.getByLabelText('City'), 'Springfield');
+    // A real, separate click on Submit re-arms via its own pointerdown.
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+  });
+
+  it('still shows last-step errors when the user deliberately submits an invalid last step', async () => {
+    const user = userEvent.setup();
+    renderWithTheme(<FormWizard steps={steps} schema={schema} onSubmit={vi.fn()} />);
+    await user.type(screen.getByLabelText('First Name'), 'Alice');
+    await user.type(screen.getByLabelText('Last Name'), 'Smith');
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+    await waitFor(() => expect(screen.getByLabelText('Email')).toBeInTheDocument());
+    // Deliberate Submit click (its own gesture) on an empty last step still validates.
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+    await waitFor(() => expect(screen.getByText('Invalid email')).toBeInTheDocument());
   });
 });
 
