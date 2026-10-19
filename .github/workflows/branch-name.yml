@@ -1,0 +1,35 @@
+name: Branch Name
+
+on:
+  pull_request:
+    branches: [main, dev]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  validate:
+    name: Validate branch name
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name
+        run: |
+          branch="${{ github.head_ref }}"
+          exempt='^(main|dev)$'
+          pattern='^(feat|fix|ci|chore|docs|refactor|test|perf|hotfix)/[a-z0-9][a-z0-9-]*$'
+
+          if echo "$branch" | grep -qE "$exempt"; then
+            echo "Branch '$branch' is exempt from naming validation."
+            exit 0
+          fi
+
+          if ! echo "$branch" | grep -qE "$pattern"; then
+            echo ""
+            echo "  Invalid branch name: '$branch'"
+            echo ""
+            echo "  Required: <type>/<kebab-case-description>"
+            echo "  Types:    feat | fix | ci | chore | docs | refactor | test | perf | hotfix"
+            echo "  Example:  feat/add-slider-input"
+            echo ""
+            exit 1
+          fi
+
+          echo "Branch name '$branch' is valid."

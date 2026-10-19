@@ -1,9 +1,9 @@
 #!/bin/sh
 
 branch=$(git rev-parse --abbrev-ref HEAD)
-pattern='^(feat|fix|ci|chore|docs|refactor|test|perf|hotfix)/.+'
+pattern='^(feat|fix|ci|chore|docs|refactor|test|perf|hotfix)/[a-z0-9][a-z0-9-]*$'
 
-if [ "$branch" != "main" ] && ! echo "$branch" | grep -qE "$pattern"; then
+if [ "$branch" != "main" ] && [ "$branch" != "dev" ] && ! echo "$branch" | grep -qE "$pattern"; then
   echo ""
   echo "  Branch name '$branch' is invalid."
   echo "  Required format: <type>/<kebab-case-description>"

@@ -10,7 +10,7 @@ Generate complex, production-ready forms from a plain JSON config. No boilerplat
 
 - **Zero-config forms** — one `fields` array, one `schema`, done
 - **Type-safe submit** — `onSubmit` data is fully typed from your Zod schema
-- **MUI-native** — built on `@mui/material` v9, not bolted on
+- **MUI-native** — built on `@mui/material` v6 / v9, not bolted on
 - **Password input** — `FIELD_TYPE.PASSWORD` with a built-in show/hide toggle (no icon library needed)
 - **Combo input** — `FIELD_TYPE.COMBO_INPUT` fuses a Select dropdown with a text/number/search input into a single compound field
 - **Search input** — `FIELD_TYPE.SEARCH` is a ready-to-use search field with a magnifying-glass icon pre-wired — no `startAdornment` config needed
@@ -43,8 +43,21 @@ npm install react react-dom @mui/material @emotion/react @emotion/styled \
 **Optional** (only needed when `virtualize={true}`):
 
 ```bash
-npm install react-window
+npm install react-window@^2
 ```
+
+---
+
+## Compatibility
+
+| Dependency          | Supported versions |
+| ------------------- | ------------------ |
+| React               | 18, 19             |
+| @mui/material       | 6, 9               |
+| react-hook-form     | 7                  |
+| @hookform/resolvers | 3, 5               |
+| zod                 | 3, 4               |
+| react-window (opt.) | 2                  |
 
 ---
 

@@ -65,7 +65,7 @@
     "release": "semantic-release",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "ci": "bun run format:check && bun run lint && bun run typecheck && bun run test:coverage && bun run build && bun run test:e2e",
+    "ci": "bun run format:check && bun run lint && bun run typecheck && bun run test:coverage && bun run build && bun run build:example && bun run build-storybook && bun run test:e2e",
     "prepare": "husky"
   },
   "peerDependencies": {
@@ -76,7 +76,7 @@
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0",
     "react-hook-form": "^7.0.0",
-    "react-window": "^1.8.0",
+    "react-window": "^2.0.0",
     "zod": "^3.0.0 || ^4.0.0"
   },
   "peerDependenciesMeta": {
