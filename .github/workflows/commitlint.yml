@@ -12,7 +12,7 @@ jobs:
     # Dependabot's "bump <pkg> from x to y" headers can exceed the 72-char limit
     if: github.actor != 'dependabot[bot]'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
