@@ -92,6 +92,12 @@ jobs:
       - name: Build library
         run: bun run build
 
+      - name: Lint package
+        run: bunx publint@0.3 --strict
+
+      - name: Check package types
+        run: bunx @arethetypeswrong/cli@0.18 --pack .
+
       - name: Build example app
         run: bun run build:example
 
