@@ -131,7 +131,7 @@
     "semantic-release": "^25.0.9",
     "storybook": "^8.6.18",
     "tsup": "^8.5.1",
-    "typescript": "~6.0.3",
+    "typescript": "~7.0.2",
     "vite": "^8.3.3",
     "vitest": "^5.0.3",
     "zod": "^4.6.5"
