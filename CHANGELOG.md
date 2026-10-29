@@ -1,3 +1,10 @@
+## [1.10.6](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.10.5...v1.10.6) (2026-10-29)
+
+
+### Bug Fixes
+
+* **package:** add cjs type declarations to exports map ([8516a31](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/commit/8516a31e00c045c54dd22b471edcad96258637f0))
+
 ## [1.10.5](https://github.com/APK-Arjun-Developer/mui-schema-form-builder/compare/v1.10.4...v1.10.5) (2026-10-19)
 
 
