@@ -13,7 +13,7 @@ jobs:
       - name: Check branch name
         run: |
           branch="${{ github.head_ref }}"
-          exempt='^(main|dev)$'
+          exempt='^(main|dev|dependabot/.+)$'
           pattern='^(feat|fix|ci|chore|docs|refactor|test|perf|hotfix)/[a-z0-9][a-z0-9-]*$'
 
           if echo "$branch" | grep -qE "$exempt"; then

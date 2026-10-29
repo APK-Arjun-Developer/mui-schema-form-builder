@@ -78,7 +78,6 @@ jobs:
     name: Build & Storybook
     needs: [test]
     runs-on: ubuntu-latest
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.base_ref == 'main')
     steps:
       - uses: actions/checkout@v4
 
@@ -91,6 +90,12 @@ jobs:
 
       - name: Build library
         run: bun run build
+
+      - name: Lint package
+        run: bunx publint@0.3 --strict
+
+      - name: Check package types
+        run: bunx @arethetypeswrong/cli@0.18 --pack .
 
       - name: Build example app
         run: bun run build:example
